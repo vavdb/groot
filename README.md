@@ -4,8 +4,23 @@ A workout logger and habit tracker for lifters who also run. Web (Blazor WASM PW
 iOS from one C# codebase (.NET MAUI Blazor Hybrid, MudBlazor for UI, Dapper on SQLite,
 and a small self-hosted ASP.NET Core API for sync).
 
-**Status: design phase.** No app code yet. The design documents and mockups in this repo are the
-current deliverables.
+**Status: design + early implementation.** The design documents and mockups are the current
+visual contract; the domain engines (progression, plate math, intervals, habit contract) are
+implemented and unit-tested, and the component library (`Groot.UI`) is starting to render the
+mockups — see the screenshots below.
+
+## Screenshots
+
+Component gallery — `SetCircle` and `WeekCard` in light and dark, rendered live from
+`tools/Groot.UI.Gallery`:
+
+![Component gallery: SetCircle + WeekCard, light and dark](docs/screenshots/gallery.png)
+
+Design mockups (interactive HTML lives in [`design/`](design/), renders below):
+
+| Habit contract · season grid · year rings | Growth Rings identity (light + dark) | 0→5K interval runner |
+|---|---|---|
+| ![habit-rings mockup](docs/screenshots/mockup-habit-rings.png) | ![growth-rings mockup](docs/screenshots/mockup-growth-rings.png) | ![run-05k mockup](docs/screenshots/mockup-run-05k.png) |
 
 ## What it does (planned)
 
@@ -27,6 +42,7 @@ current deliverables.
 | `Research/` | program catalog, ads research, rejected design directions with provenance |
 | `data/programs/` | machine-readable program definitions (GZCLP rack edition, 0→5K) |
 | `data/log.csv` | training log in Strong-compatible CSV format |
+| `docs/screenshots/` | rendered previews of the gallery and the design mockups |
 
 ## Building
 

@@ -13,6 +13,19 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      # MAUI head is excluded from CI (workload-heavy); it builds locally and on release.
-      - run: dotnet build src/Groot.Core src/Groot.UI src/Groot.Data src/Groot.Web -c Release
-      - run: dotnet test tests/Groot.Core.Tests -c Release
+      # `dotnet build` accepts one project per invocation (MSB1008 otherwise),
+      # so build each project separately; project references build transitively.
+      # The MAUI head (Groot.App) stays excluded: workload-heavy, it builds
+      # locally and on release only.
+      - name: Build Core (domain engines)
+        run: dotnet build src/Groot.Core -c Release --nologo
+      - name: Build Data (SQLite + Dapper)
+        run: dotnet build src/Groot.Data -c Release --nologo
+      - name: Build UI (Razor class library)
+        run: dotnet build src/Groot.UI -c Release --nologo
+      - name: Build Web (Blazor WASM PWA)
+        run: dotnet build src/Groot.Web -c Release --nologo
+      - name: Build UI Gallery (dev tool)
+        run: dotnet build tools/Groot.UI.Gallery -c Release --nologo
+      - name: Test Core engines
+        run: dotnet test tests/Groot.Core.Tests -c Release --nologo
