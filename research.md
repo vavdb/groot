@@ -461,6 +461,15 @@ Electron is a Chromium+Node shell — the wrong tool for C#. The stack already c
 - **macOS (dev bonus)**: Mac Catalyst target exists in MAUI; useful for testing on the MacBook,
   not a shipping priority.
 
+### 13.6b .NET Aspire? No (owner asked, 2026-08-18)
+
+Aspire orchestrates multi-service systems: service discovery, container resources, dev dashboard,
+azd-style deploys. Groot's server side is one Minimal API + static WASM files + SQLite behind
+Caddy, deployed by rsync + systemd — nothing to orchestrate, and the MAUI client sits outside
+Aspire anyway. Adding it costs an AppHost + ServiceDefaults + a fast-moving SDK dependency for a
+dashboard over a single process. If Groot ever grows to several backend services with container
+dependencies, revisit. Tracing, if ever wanted, is a few lines of plain OpenTelemetry in Groot.Api.
+
 ### 13.6 Program distribution
 
 MVP: `data/programs/*.json` compiled in as embedded resources. **MVP++: downloadable program
