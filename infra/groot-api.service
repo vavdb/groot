@@ -1,0 +1,21 @@
+[Unit]
+Description=Groot API
+After=network.target
+
+[Service]
+Type=simple
+User=groot
+Group=groot
+WorkingDirectory=/opt/groot/api
+ExecStart=/opt/groot/api/Groot.Api --urls http://127.0.0.1:5000
+Environment=ASPNETCORE_ENVIRONMENT=Production
+Environment=GROOT_DATA_DIR=/opt/groot/data
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/groot/data
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

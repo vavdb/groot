@@ -1,25 +1,29 @@
-# Infra: PocketBase on the VPS
+# Infra: Groot.Api on the VPS
 
-Target: one VPS, one PocketBase binary, SQLite on disk, Caddy in front with automatic HTTPS,
-nightly backup. No containers required; a systemd unit is the whole deployment.
+Target: one VPS, one self-contained `dotnet publish` output, SQLite on disk, Caddy in front with
+automatic HTTPS, nightly backup. A systemd unit is the whole deployment.
 
-## Install (once)
+*(History: this folder originally described a PocketBase setup; replaced when the backend decision
+reversed to an own Minimal API — research.md §10, 2026-08-18.)*
+
+## Deploy (repeatable)
 
 ```bash
-# as root on the VPS
+# on the dev machine
+dotnet publish src/Groot.Api -c Release -r linux-x64 --self-contained -o out/api
+rsync -a out/api/ the VPS:/opt/groot/api/
+
+# once, as root on the VPS
 useradd --system --home /opt/groot --shell /usr/sbin/nologin groot
-mkdir -p /opt/groot && cd /opt/groot
-# check latest: https://github.com/pocketbase/pocketbase/releases
-curl -fsSL -o pb.zip https://github.com/pocketbase/pocketbase/releases/latest/download/pocketbase_linux_amd64.zip
-unzip pb.zip && rm pb.zip && chown -R groot:groot /opt/groot
-cp /path/to/repo/infra/groot-pb.service /etc/systemd/system/
-systemctl enable --now groot-pb
-/opt/groot/pocketbase superuser create admin@example.com   # prompts for password
+mkdir -p /opt/groot/{api,data,backups} && chown -R groot:groot /opt/groot
+cp /opt/groot/api/infra/groot-api.service /etc/systemd/system/   # or scp from repo
+systemctl enable --now groot-api
 ```
 
 ## Caddy
 
-Add `infra/Caddyfile.snippet` to the existing Caddyfile and reload. Caddy handles the certificate.
+Add `infra/Caddyfile.snippet` to the existing Caddyfile and reload; Caddy handles the certificate.
+The API listens on localhost only; Caddy is the front door.
 
 ## Backup
 
@@ -29,12 +33,11 @@ Add `infra/Caddyfile.snippet` to the existing Caddyfile and reload. Caddy handle
 15 3 * * * /opt/groot/backup-groot.sh
 ```
 
-PocketBase keeps SQLite in `/opt/groot/pb_data`. The script snapshots with sqlite3 `.backup`
-(safe while running) and keeps 14 days. Off-box copy: rsync target of your choice, see the
-commented line in the script.
+The API keeps SQLite in `/opt/groot/data`. The script snapshots with sqlite3 `.backup` (safe while
+running) and keeps 14 days. Off-box copy: uncomment the rsync line and point it somewhere that is
+not this VPS.
 
-## App collections (created via admin UI or migration once the app lands)
+## Secrets
 
-`users` (PocketBase built-in auth: username/password now; enable Google + Apple providers later),
-`workouts`, `sets`, `weeks`, `programs` (for MVP++ downloadable definitions), all with owner-only
-API rules: `@request.auth.id != "" && user = @request.auth.id`.
+`/opt/groot/api/appsettings.Production.json` (not in git): JWT signing key + connection string.
+Generate the key once: `openssl rand -base64 48`.

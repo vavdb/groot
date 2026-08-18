@@ -2,7 +2,7 @@
 
 A workout logger and habit tracker for lifters who also run. Web (Blazor WASM PWA), Android, and
 iOS from one C# codebase (.NET MAUI Blazor Hybrid, MudBlazor for UI, Dapper on SQLite,
-self-hosted PocketBase for sync).
+and a small self-hosted ASP.NET Core API for sync).
 
 **Status: design phase.** No app code yet. The design documents and mockups in this repo are the
 current deliverables.
@@ -14,8 +14,8 @@ current deliverables.
 - Coaches interval running (0→5K) with spoken cues and countdown notifications, screen off.
 - Tracks a weekly habit contract: 2 lifts + 2 runs + 1 rest closes the week; 2 jokers cover the
   gaps. Streaks count weeks, not days.
-- Syncs between devices through a self-hosted backend (PocketBase). Accounts are a username, no
-  personal data.
+- Syncs between devices through a small self-hosted API (`Groot.Api`, planned). Accounts are a
+  username, no personal data.
 - Writes workouts to Health Connect and reads sleep back for recovery context.
 
 ## Repo layout

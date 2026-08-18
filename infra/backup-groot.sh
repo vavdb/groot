@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
-# Nightly PocketBase backup: consistent SQLite snapshot + 14-day retention.
+# Nightly Groot backup: consistent SQLite snapshot + 14-day retention.
 set -euo pipefail
 
-DATA=/opt/groot/pb_data
+DATA=/opt/groot/data
 DEST=/opt/groot/backups
 STAMP=$(date +%Y%m%d)
 
 mkdir -p "$DEST"
-sqlite3 "$DATA/data.db" ".backup '$DEST/data-$STAMP.db'"
-[ -f "$DATA/auxiliary.db" ] && sqlite3 "$DATA/auxiliary.db" ".backup '$DEST/aux-$STAMP.db'"
-tar -czf "$DEST/pb_data-$STAMP.tar.gz" -C /opt/groot --exclude=pb_data/backups pb_data
+sqlite3 "$DATA/groot.db" ".backup '$DEST/groot-$STAMP.db'"
+gzip -f "$DEST/groot-$STAMP.db"
 
 find "$DEST" -type f -mtime +14 -delete
 
