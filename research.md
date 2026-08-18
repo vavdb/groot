@@ -287,6 +287,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - **Week start is a user setting, not ISO**: default from locale `FirstDayOfWeek` (Mon EU, Sun US), overridable; contract math/grid/`weeks` table all key off it (spec §1.1 rule 1 updated; table keyed by `week_start_date`).
 - **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP.
 - **Copy voice rule added** (habit-system.md §5b): user-facing strings pass the humanizer checklist — the first mockups didn't (negative parallelisms, aphorisms, em dashes in cues), owner caught it.
+- **Backend REVERSED (2026-08-18, post-scaffold): own `Groot.Api` instead of PocketBase.** The PB recommendation predated the local-first sync design. What the backend really does is username auth + three sync endpoints; the sync protocol (deltas, tombstones, LWW) is hand-built either way, and PB customization means JavaScript hooks while the whole stack is C#. Own API wins on: shared DTOs with Groot.Core, integration tests inside the sln, one language in an Apache-2.0 repo, same ops weight (dotnet publish + systemd). PB's OAuth advantage is deferred anyway (MVP = username-only; OpenIddict later). Shape: Minimal API, Dapper on SQLite via Groot.Data, JWT, `POST /auth/register|login`, `POST /sync/push`, `GET /sync/pull?since=`. infra/ PB files to be replaced at implementation time.
 
 ---
 
