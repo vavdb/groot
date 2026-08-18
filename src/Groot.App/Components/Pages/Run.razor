@@ -1,0 +1,59 @@
+@page "/run"
+@using Groot.Core.Intervals
+@using Groot.Core.Programs
+@using Groot.UI.Audio
+@using Groot.UI.Components
+@inject ICuePlayer Cues
+
+<PageTitle>Run</PageTitle>
+
+<div class="theme-dark run-host">
+    <h1 class="visually-hidden">0→5K run session</h1>
+
+    <div class="picker">
+        <label>
+            Week
+            <select value="@_week" @onchange="OnWeekChanged">
+                @foreach (var week in Couch.WeekNumbers)
+                {
+                    <option value="@week">Week @week</option>
+                }
+            </select>
+        </label>
+        <label>
+            Session
+            <select value="@_day" @onchange="OnDayChanged">
+                @foreach (var day in RunSession.DaysOf(Couch, _week))
+                {
+                    <option value="@day">Day @day</option>
+                }
+            </select>
+        </label>
+    </div>
+
+    <RunScreen @key="SessionKey"
+               Session="RunSession.For(Couch, _week, _day)"
+               CuePlayer="Cues"
+               SessionsInWeek="Couch.Week(_week).SessionsPerWeek" />
+</div>
+
+@code {
+    private static readonly IntervalProgram Couch = ProgramCatalog.Embedded.IntervalProgram("0-to-5k");
+
+    private int _week = 1;
+    private int _day = 1;
+
+    private string SessionKey => $"{_week}-{_day}";
+
+    private void OnWeekChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var week)) _week = week;
+        var days = RunSession.DaysOf(Couch, _week);
+        if (!days.Contains(_day)) _day = days[0];
+    }
+
+    private void OnDayChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var day)) _day = day;
+    }
+}

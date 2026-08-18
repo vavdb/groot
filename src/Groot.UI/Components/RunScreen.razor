@@ -1,0 +1,269 @@
+@* The 0→5K runner (design/run-05k.html): colour says what you do when you miss the sound.
+   Framework-free; the clock lives here, all interval maths comes from Groot.Core's RunSession. *@
+@using Groot.Core.Intervals
+@using Groot.UI.Audio
+@implements IDisposable
+
+<section class="run-screen" aria-label="@Heading">
+    <header class="run-head">
+        <h2 class="g-serif">@ProgramName <small>@SessionLabel</small></h2>
+        <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+            @for (var d = 1; d <= SessionsInWeek; d++)
+            {
+                <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+            }
+        </div>
+    </header>
+
+    <div class="flood @FloodClass">
+        <div class="st">@StateLabel</div>
+        <div class="t" aria-live="off">@Clock(_finished ? 0 : Progress.RemainingInSegment)</div>
+        <div class="nxt">@NextLine</div>
+    </div>
+
+    <p class="cue" aria-live="polite">
+        <span class="spk" aria-hidden="true">@(_cuePlayer is null or SilentCuePlayer ? "🔇" : "🔊")</span>
+        <span>@(_lastCueText ?? "Cues speak at every switch and ten seconds before it.")</span>
+    </p>
+
+    <div class="segbar" aria-hidden="true">
+        @for (var i = 0; i < Session.Segments.Count; i++)
+        {
+            var segment = Session.Segments[i];
+            <i class="@(segment.Kind == SegmentKind.Run ? "r" : "w") @SegmentStateClass(i)"
+               style="flex-grow:@segment.Seconds"></i>
+        }
+    </div>
+
+    <div class="runmeta">
+        <span>elapsed @Clock(Progress.ElapsedTotal)</span>
+        <span>segment @(Progress.SegmentIndex + 1)/@Session.Segments.Count</span>
+        <span>total @Clock(Session.TotalSeconds)</span>
+    </div>
+
+    @if (_finished)
+    {
+        <div class="summary">
+            <div class="big g-serif">Done · @Clock(Session.TotalSeconds)</div>
+            <div class="subt">@Session.RunCount run blocks · @Clock(Session.RunSeconds) running · @SessionLabel</div>
+        </div>
+    }
+
+    <div class="runbtns">
+        @if (_finished)
+        {
+            <button type="button" class="primary" @onclick="StartAsync">↻ Run it again</button>
+        }
+        else if (!_started)
+        {
+            <button type="button" class="primary" @onclick="StartAsync">Start ▶</button>
+        }
+        else
+        {
+            <button type="button" @onclick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</button>
+            <button type="button" @onclick="SkipAsync">⏭ Skip</button>
+        }
+    </div>
+</section>
+
+@code {
+    private const int TickMilliseconds = 250;
+
+    [Parameter, EditorRequired] public RunSession Session { get; set; } = null!;
+
+    /// <summary>Where cues are spoken. Null keeps the screen silent but fully usable.</summary>
+    [Parameter] public ICuePlayer? CuePlayer { get; set; }
+
+    [Parameter] public string Language { get; set; } = RunCueText.DefaultLanguage;
+
+    [Parameter] public int SessionsInWeek { get; set; } = 3;
+
+    [Parameter] public EventCallback OnFinished { get; set; }
+
+    private ICuePlayer? _cuePlayer;
+    private CancellationTokenSource? _loop;
+    private DateTimeOffset _spanStart;
+    private int _baseSeconds;
+    private int _lastCueSecond = -1;
+    private bool _started;
+    private bool _running;
+    private bool _finished;
+    private string? _lastCueText;
+
+    protected override void OnParametersSet()
+    {
+        // Segment durations are validated in RunSession's constructor; a session here is always playable.
+        _cuePlayer = CuePlayer;
+    }
+
+    private int ElapsedSeconds
+    {
+        get
+        {
+            var elapsed = _running
+                ? _baseSeconds + (int)(DateTimeOffset.UtcNow - _spanStart).TotalSeconds
+                : _baseSeconds;
+            return Math.Clamp(elapsed, 0, Session.TotalSeconds);
+        }
+    }
+
+    private RunProgress Progress => Session.ProgressAt(_started ? ElapsedSeconds : 0);
+
+    private string ProgramName => Session.Id?.ProgramName ?? "Interval session";
+
+    private int Day => Session.Id?.Day ?? 1;
+
+    private string SessionLabel => Session.Id is { } id ? $"W{id.Week} · D{id.Day}" : "session";
+
+    private string Heading => $"{ProgramName} {SessionLabel}";
+
+    private string StateLabel => _finished
+        ? "DONE"
+        : !_started ? "READY" : Progress.Segment.Kind == SegmentKind.Run ? "RUN" : "WALK";
+
+    private string FloodClass =>
+        (_finished ? "done" : Progress.Segment.Kind == SegmentKind.Run ? "run" : "walk")
+        + (_started && !_running && !_finished ? " paused" : "");
+
+    private string NextLine
+    {
+        get
+        {
+            if (_finished) return "session complete";
+            if (!_started) return $"first up · {Label(Progress.Segment)} {Clock(Progress.Segment.Seconds)}";
+            return Progress.NextSegment is { } next
+                ? $"then · {Label(next)} {Clock(next.Seconds)}"
+                : "then · finish";
+        }
+    }
+
+    private static string Label(Segment segment) => segment.Label ?? (segment.Kind == SegmentKind.Run ? "run" : "walk");
+
+    private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+
+    private string SegmentStateClass(int index) =>
+        !_started ? "" : index < Progress.SegmentIndex || _finished ? "done" : index == Progress.SegmentIndex ? "now" : "";
+
+    private async Task StartAsync()
+    {
+        StopLoop();
+        _baseSeconds = 0;
+        _lastCueSecond = -1;
+        _lastCueText = null;
+        _finished = false;
+        _started = true;
+        _running = true;
+        _spanStart = DateTimeOffset.UtcNow;
+
+        var cts = new CancellationTokenSource();
+        _loop = cts;
+        await TickAsync();
+        _ = LoopAsync(cts.Token);
+    }
+
+    private void TogglePause()
+    {
+        if (_finished) return;
+
+        if (_running)
+        {
+            _baseSeconds = ElapsedSeconds;
+            _running = false;
+        }
+        else
+        {
+            _spanStart = DateTimeOffset.UtcNow;
+            _running = true;
+        }
+    }
+
+    private async Task SkipAsync()
+    {
+        if (_finished) return;
+
+        _baseSeconds = Session.SkipTargetFrom(ElapsedSeconds);
+        _spanStart = DateTimeOffset.UtcNow;
+        _lastCueSecond = _baseSeconds - 1; // skipped cues are gone; the new segment still announces itself
+        await TickAsync();
+    }
+
+    private async Task LoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(TickMilliseconds));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                await TickAsync();
+                if (_finished) return;
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // screen disposed or session restarted
+        }
+        catch (ObjectDisposedException)
+        {
+            // StopLoop cancelled and disposed the token source while this loop was between ticks
+        }
+    }
+
+    private async Task TickAsync()
+    {
+        var elapsed = ElapsedSeconds;
+
+        // While paused nothing moves; only a skip can push elapsed past the last cue second.
+        if (!_running && elapsed <= _lastCueSecond) return;
+
+        if (_running || elapsed > _lastCueSecond)
+        {
+            foreach (var cue in Session.CuesBetween(_lastCueSecond, elapsed))
+                await PlayAsync(cue);
+            _lastCueSecond = Math.Max(_lastCueSecond, elapsed);
+        }
+
+        if (elapsed >= Session.TotalSeconds && !_finished)
+        {
+            _finished = true;
+            _running = false;
+            _baseSeconds = Session.TotalSeconds;
+            StopLoop();
+            await OnFinished.InvokeAsync();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task PlayAsync(RunCue cue)
+    {
+        _lastCueText = RunCueText.Speak(cue, Language);
+        if (_cuePlayer is null) return;
+
+        try
+        {
+            await _cuePlayer.PlayAsync(SoundFor(cue));
+            await _cuePlayer.SpeakAsync(_lastCueText);
+        }
+        catch
+        {
+            // A broken or missing cue player must never stall the session.
+        }
+    }
+
+    private static CueSound SoundFor(RunCue cue) => cue switch
+    {
+        { CueKind: RunCueKind.Finished } => CueSound.Finish,
+        { CueKind: RunCueKind.SegmentStart, Kind: SegmentKind.Run } => CueSound.RunStart,
+        { CueKind: RunCueKind.SegmentStart } => CueSound.WalkStart,
+        _ => CueSound.Warning,
+    };
+
+    private void StopLoop()
+    {
+        _loop?.Cancel();
+        _loop?.Dispose();
+        _loop = null;
+    }
+
+    public void Dispose() => StopLoop();
+}

@@ -14,6 +14,8 @@
   --g-clay: #b45f3c;
   --g-ring: #8aa385;
   --g-wither: #c9c2ae;
+  --g-run-ink: #241c08;
+  --g-walk-ink: #f2f5ec;
   --g-shadow: 0 18px 60px rgba(38, 48, 31, .14);
 }
 
@@ -30,6 +32,8 @@
   --g-clay: #d97e56;
   --g-ring: #4a5f45;
   --g-wither: #3a4234;
+  --g-run-ink: #241c08;
+  --g-walk-ink: #151a12;
   --g-shadow: 0 18px 60px rgba(0, 0, 0, .5);
 }
 

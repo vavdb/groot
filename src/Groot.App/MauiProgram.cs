@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Groot.UI.Audio;
+using Microsoft.Extensions.Logging;
 
 namespace Groot.App;
 
@@ -15,6 +16,9 @@ public static class MauiProgram
 			});
 
 		builder.Services.AddMauiBlazorWebView();
+
+		// Platform TTS + ToneGenerator/AVSpeechSynthesizer land here later; silent keeps the screen usable.
+		builder.Services.AddSingleton<ICuePlayer, SilentCuePlayer>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

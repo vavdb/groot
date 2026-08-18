@@ -1,0 +1,224 @@
+.run-screen {
+    background: var(--g-bg);
+    border: 1px solid var(--g-line);
+    border-radius: 26px;
+    padding: 16px 16px 18px;
+    max-width: 375px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.run-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.run-head h2 {
+    font-size: 19px;
+    font-weight: 900;
+    margin: 0;
+}
+
+.run-head small {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--g-dim);
+    margin-left: 6px;
+}
+
+.dots {
+    display: flex;
+    gap: 5px;
+}
+
+.dots i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    border: 1.5px solid var(--g-line);
+}
+
+.dots i.done {
+    background: var(--g-amber);
+    border-color: var(--g-amber);
+}
+
+.dots i.now {
+    border-color: var(--g-amber);
+    box-shadow: inset 0 0 0 2px var(--g-bg), 0 0 0 2px rgba(224, 170, 74, .25);
+}
+
+/* Colour is the message: amber = run, moss = walk. Sound is the nice-to-have. */
+.flood {
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+    text-align: center;
+    transition: background 200ms ease;
+}
+
+.flood.run {
+    background: var(--g-amber);
+    color: var(--g-run-ink);
+}
+
+.flood.walk {
+    background: var(--g-moss);
+    color: var(--g-walk-ink);
+}
+
+.flood.done {
+    background: var(--g-card);
+    color: var(--g-ink);
+    border: 1px solid var(--g-line);
+}
+
+.flood.paused {
+    opacity: .62;
+}
+
+.flood .st {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .38em;
+}
+
+.flood .t {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 900;
+    font-size: 72px;
+    line-height: 1.02;
+    font-variant-numeric: tabular-nums;
+}
+
+.flood .nxt {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: .8;
+}
+
+.cue {
+    margin: 0;
+    background: var(--g-card);
+    border: 1px solid var(--g-line);
+    border-left: 3px solid var(--g-amber);
+    border-radius: 10px;
+    padding: 9px 13px;
+    font-size: 12px;
+    color: var(--g-ink);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.cue .spk {
+    font-size: 15px;
+}
+
+.segbar {
+    display: flex;
+    gap: 3px;
+}
+
+.segbar i {
+    height: 7px;
+    border-radius: 3px;
+    opacity: .34;
+}
+
+.segbar .w {
+    background: var(--g-ring);
+}
+
+.segbar .r {
+    background: var(--g-amber);
+}
+
+.segbar .done {
+    opacity: .34;
+}
+
+.segbar .now {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--g-bg), 0 0 0 3px var(--g-amber);
+}
+
+.runmeta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--g-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.summary {
+    background: var(--g-card);
+    border: 1px solid var(--g-moss);
+    border-radius: 14px;
+    padding: 13px 16px;
+}
+
+.summary .big {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--g-moss);
+}
+
+.summary .subt {
+    font-size: 12px;
+    color: var(--g-dim);
+    margin-top: 2px;
+}
+
+.runbtns {
+    display: flex;
+    gap: 10px;
+}
+
+.runbtns button {
+    flex: 1;
+    padding: 13px 0;
+    border-radius: 12px;
+    border: 1px solid var(--g-line);
+    background: var(--g-card);
+    color: var(--g-ink);
+    font: inherit;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, transform 100ms ease;
+}
+
+.runbtns button:hover {
+    border-color: var(--g-amber);
+    color: var(--g-amber);
+}
+
+.runbtns button:active {
+    transform: translateY(1px);
+}
+
+.runbtns button:focus-visible {
+    outline: 2px solid var(--g-amber);
+    outline-offset: 2px;
+}
+
+.runbtns button.primary {
+    background: var(--g-amber);
+    border-color: var(--g-amber);
+    color: var(--g-run-ink);
+}
+
+.runbtns button.primary:hover {
+    color: var(--g-run-ink);
+    filter: brightness(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flood, .runbtns button {
+        transition: none;
+    }
+}
