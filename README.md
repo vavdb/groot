@@ -28,6 +28,18 @@ current deliverables.
 | `data/programs/` | machine-readable program definitions (GZCLP rack edition, 0→5K) |
 | `data/log.csv` | training log in Strong-compatible CSV format |
 
+## Building
+
+```bash
+dotnet test tests/Groot.Core.Tests            # domain engines, no workloads needed
+dotnet build src/Groot.Web                    # Blazor WASM PWA
+dotnet build src/Groot.App -f net10.0-windows10.0.19041.0   # Windows head (needs: dotnet workload install maui)
+```
+
+Android head needs the Android SDK + JDK once:
+`dotnet build src/Groot.App -f net10.0-android -t:InstallAndroidDependencies` (or install via
+Visual Studio). iOS builds on a Mac with the maui workload.
+
 ## Credits
 
 - GZCLP is based on the GZCL method by Cody Lefever.

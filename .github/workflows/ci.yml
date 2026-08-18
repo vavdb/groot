@@ -1,0 +1,18 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      # MAUI head is excluded from CI (workload-heavy); it builds locally and on release.
+      - run: dotnet build src/Groot.Core src/Groot.UI src/Groot.Data src/Groot.Web -c Release
+      - run: dotnet test tests/Groot.Core.Tests -c Release

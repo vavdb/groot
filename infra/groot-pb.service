@@ -1,0 +1,19 @@
+[Unit]
+Description=Groot PocketBase
+After=network.target
+
+[Service]
+Type=simple
+User=groot
+Group=groot
+WorkingDirectory=/opt/groot
+ExecStart=/opt/groot/pocketbase serve --http=127.0.0.1:8090
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/groot
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

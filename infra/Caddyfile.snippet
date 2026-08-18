@@ -1,0 +1,19 @@
+# Groot API + (later) the Blazor WASM PWA
+the app host {
+    encode gzip
+
+    # PocketBase API + admin UI
+    handle /api/* {
+        reverse_proxy 127.0.0.1:8090
+    }
+    handle /_/* {
+        reverse_proxy 127.0.0.1:8090
+    }
+
+    # Blazor WASM static files (publish output), once Groot.Web ships
+    handle {
+        root * /var/www/groot
+        try_files {path} /index.html
+        file_server
+    }
+}
