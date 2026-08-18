@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groot — Growth Rings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f1e8; --card:#fdfcf7; --line:#ddd6c3;
+  --ink:#26301f; --dim:#6f7a63;
+  --moss:#4a7048; --moss-deep:#2f4d2e; --bark:#6b4f35; --amber:#c98f2d; --clay:#b45f3c;
+  --ring:#8aa385;
+}
+[data-theme="dark"]{
+  --bg:#151a12; --card:#1d2419; --line:#33402c;
+  --ink:#e8ead9; --dim:#93a087;
+  --moss:#7fb47a; --moss-deep:#a5cf9f; --bark:#c49a6c; --amber:#e0aa4a; --clay:#d97e56;
+  --ring:#4a5f45;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Public Sans",sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:36px 16px 64px}
+.serif{font-family:"Fraunces",serif}
+header{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+header h1{font-family:"Fraunces",serif;font-weight:900;font-size:34px;letter-spacing:-.01em}
+header h1 span{color:var(--moss)}
+.toggle{background:none;border:1px solid var(--line);color:var(--dim);border-radius:999px;
+  padding:8px 18px;font-family:"Public Sans";font-weight:600;font-size:12px;cursor:pointer}
+.toggle:hover{border-color:var(--moss);color:var(--moss)}
+.sub{width:100%;max-width:960px;font-size:13px;color:var(--dim);margin-bottom:30px}
+.sub b{color:var(--moss);font-weight:600}
+.stage{display:flex;gap:44px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+
+.phone{width:375px;background:var(--card);border:1px solid var(--line);border-radius:36px;padding:13px;
+  box-shadow:0 18px 60px rgba(38,48,31,.16)}
+.screen{border-radius:26px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.statusbar{display:flex;justify-content:space-between;padding:12px 20px 4px;font-size:11px;font-weight:600;color:var(--dim)}
+.appbar{padding:12px 20px 0;display:flex;justify-content:space-between;align-items:baseline}
+.appbar .prog{font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--bark);text-transform:uppercase}
+.appbar .day{font-size:12px;color:var(--dim)}
+.exname{padding:6px 20px 0;font-family:"Fraunces",serif;font-weight:900;font-size:38px;letter-spacing:-.015em}
+.exmeta{padding:2px 20px 14px;font-size:13px;color:var(--dim)}
+.exmeta b{color:var(--ink);font-weight:700}
+.gif{margin:0 20px;height:116px;border:1px solid var(--line);border-radius:14px;background:var(--card);
+  display:flex;align-items:center;justify-content:center;color:var(--dim);font-size:12px;letter-spacing:.12em;text-transform:uppercase}
+.sets{display:flex;gap:12px;justify-content:center;padding:22px 20px 6px}
+.set{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:16px;border:1.5px solid var(--line);color:var(--dim);background:var(--card)}
+.set.done{border-color:var(--moss);background:var(--moss);color:var(--card)}
+.set.active{border:2px solid var(--amber);color:var(--amber);position:relative}
+.set.active::after{content:"";position:absolute;inset:-7px;border:1.5px solid var(--amber);border-radius:50%;opacity:.4;animation:grow 1.8s infinite}
+@keyframes grow{0%{transform:scale(.85);opacity:.55}100%{transform:scale(1.12);opacity:0}}
+.setlabel{text-align:center;font-size:11px;color:var(--dim);letter-spacing:.16em;text-transform:uppercase;padding-bottom:14px}
+.timer{margin:0 20px;border-radius:14px;background:var(--card);border:1px solid var(--line);
+  padding:12px 18px;display:flex;align-items:center;justify-content:space-between}
+.timer .t{font-family:"Fraunces",serif;font-weight:700;font-size:36px;font-variant-numeric:tabular-nums;color:var(--moss-deep)}
+.timer .lbl{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+.plus{background:none;border:1px solid var(--line);border-radius:999px;color:var(--ink);
+  padding:8px 16px;font-weight:700;font-size:13px;cursor:pointer}
+.plates{margin:13px 20px;font-size:12px;color:var(--dim)}
+.plates b{color:var(--ink);font-weight:700}
+.nav{display:flex;border-top:1px solid var(--line);margin-top:12px;background:var(--card)}
+.nav div{flex:1;text-align:center;padding:14px 0 16px;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.nav .on{color:var(--moss);box-shadow:inset 0 -3px 0 var(--moss)}
+
+.aside{width:340px;display:flex;flex-direction:column;gap:24px}
+.label{font-size:11px;font-weight:700;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;margin-bottom:10px}
+.notif{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 17px;
+  box-shadow:0 10px 30px rgba(38,48,31,.12)}
+.notif .app{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.notif .big{font-family:"Fraunces",serif;font-weight:700;font-size:30px;color:var(--moss-deep)}
+.notif .sub{font-size:12px;color:var(--dim);margin-top:2px}
+.actions{display:flex;gap:16px;margin-top:12px}
+.actions button{background:none;border:none;color:var(--clay);font-weight:700;font-size:13px;cursor:pointer;padding:0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;text-align:center}
+.stat h3{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:4px}
+.rings{margin:6px auto 2px}
+.stat .cap{font-size:12px;color:var(--dim);line-height:1.5}
+.stat .cap b{color:var(--ink)}
+.note{font-size:12.5px;color:var(--dim);line-height:1.65}
+</style>
+</head>
+<body>
+<header>
+  <h1>Groot<span>.</span> <small style="font-size:15px;font-weight:500;color:var(--dim)">— growth rings</small></h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">licht / donker</button>
+</header>
+<div class="sub">§03 · Every session adds a ring. <b>Groot</b> = big. Trees don't rush; they never stop.</div>
+
+<div class="stage">
+  <div class="phone"><div class="screen">
+    <div class="statusbar"><span>21:47</span><span>87%</span></div>
+    <div class="appbar"><span class="prog">GZCLP · T1</span><span class="day">week 3 · dag 2</span></div>
+    <div class="exname">Squat</div>
+    <div class="exmeta"><b>5 × 3 · 100,0 kg</b> · vorige keer 5×3 @ 97,5 ✓</div>
+    <div class="gif">oefening · animatie</div>
+    <div class="sets">
+      <div class="set done">3</div>
+      <div class="set done">3</div>
+      <div class="set active">3</div>
+      <div class="set">·</div>
+      <div class="set">·</div>
+    </div>
+    <div class="setlabel">tik = klaar · houd vast = wijzig</div>
+    <div class="timer">
+      <div><div class="lbl">rust</div><div class="t">1:47</div></div>
+      <button class="plus">+30 s</button>
+    </div>
+    <div class="plates">per kant · <b>20 + 20 + 5 + 2,5 + 2,5</b> · stang 20</div>
+    <div class="nav"><div class="on">Sessie</div><div>Schema's</div><div>Groei</div><div>Profiel</div></div>
+  </div></div>
+
+  <div class="aside">
+    <div>
+      <div class="label">Android · melding</div>
+      <div class="notif">
+        <div class="app">Groot · rusttimer</div>
+        <div class="big">1:47</div>
+        <div class="sub">daarna: Squat · set 4 van 5 · 100 kg</div>
+        <div class="actions"><button>✓ Set klaar</button><button>+30 s</button><button>Sla over</button></div>
+      </div>
+    </div>
+    <div class="stat">
+      <h3>Groei · levenslang</h3>
+      <svg class="rings" width="190" height="190" viewBox="0 0 190 190">
+        <g fill="none" stroke="var(--ring)" stroke-width="2">
+          <circle cx="95" cy="95" r="14"/>
+          <circle cx="95" cy="95" r="24" stroke-width="3"/>
+          <circle cx="95" cy="95" r="33"/>
+          <circle cx="95" cy="95" r="45" stroke-width="4"/>
+          <circle cx="95" cy="95" r="56" stroke-width="2.5"/>
+          <circle cx="95" cy="95" r="68" stroke-width="5"/>
+        </g>
+        <circle cx="95" cy="95" r="80" fill="none" stroke="var(--amber)" stroke-width="3"
+          stroke-dasharray="502" stroke-dashoffset="140" transform="rotate(-90 95 95)"/>
+        <circle cx="95" cy="95" r="4" fill="var(--bark)"/>
+        <text x="95" y="99" text-anchor="middle" font-family="Fraunces,serif" font-size="0"> </text>
+      </svg>
+      <div class="cap"><b>312,4 ton</b> getild sinds nov 2020<br>buitenste ring = dit jaar, 72% vol · PR's laten een tak groeien</div>
+    </div>
+    <p class="note">Zwitserse lay-out onder een organisch thema: mos, schors, amber. Rustig, leesbaar,
+    en één signatuur-visualisatie die niemand anders heeft: jaarringen van tonnage.</p>
+  </div>
+</div>
+</body>
+</html>

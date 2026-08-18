@@ -1,0 +1,67 @@
+{
+  "id": "gzclp-rack",
+  "version": 1,
+  "name": "GZCLP (rack edition)",
+  "type": "sets_reps",
+  "credit": {
+    "method": "GZCL method by Cody Lefever",
+    "url": "http://swoleateveryheight.blogspot.com",
+    "note": "Substitutions for a home rack without machines: chin-ups and dumbbell rows replace lat pulldowns."
+  },
+  "equipmentAssumptions": ["barbell", "power-rack", "bench", "pullup-bar", "dumbbells"],
+  "restSeconds": { "1": 180, "2": 120, "3": 60 },
+  "rotation": ["A1", "B1", "A2", "B2"],
+  "sessionsPerWeek": 3,
+  "intro": {
+    "allowed": true,
+    "note": "A free-form first session counts as session 0. It credits the week contract as a lift day and seeds starting weights, without advancing the rotation."
+  },
+  "progression": {
+    "T1": {
+      "scheme": "5x3+",
+      "amrapLastSet": true,
+      "incrementKg": { "default": 2.5, "deadlift": 5.0 },
+      "failLadder": ["6x2+", "10x1+"],
+      "afterLadderReset": { "toPctOfLast5x3": 0.9, "restartScheme": "5x3+" }
+    },
+    "T2": {
+      "scheme": "3x10",
+      "incrementKg": { "default": 2.5 },
+      "failLadder": ["3x8", "3x6"],
+      "afterLadderReset": { "bumpKg": 2.5, "restartScheme": "3x10" }
+    },
+    "T3": {
+      "scheme": "3x15+",
+      "amrapLastSet": true,
+      "progressAtTotalReps": 25,
+      "incrementKg": { "default": 2.5 },
+      "bodyweightVariant": { "progressAtTotalReps": 25, "then": "add-weight" }
+    }
+  },
+  "startingWeights": {
+    "fromImport": { "continuity": 0.85, "reentry": 0.5, "basis": "last-known-5x3-work-weight" },
+    "manualAllowed": true
+  },
+  "days": {
+    "A1": [
+      { "exercise": "squat", "tier": 1 },
+      { "exercise": "bench-press", "tier": 2 },
+      { "exercise": "chin-up", "tier": 3, "loading": "bodyweight+" }
+    ],
+    "B1": [
+      { "exercise": "overhead-press", "tier": 1 },
+      { "exercise": "deadlift", "tier": 2 },
+      { "exercise": "dumbbell-row", "tier": 3 }
+    ],
+    "A2": [
+      { "exercise": "bench-press", "tier": 1 },
+      { "exercise": "squat", "tier": 2 },
+      { "exercise": "dumbbell-curl", "tier": 3 }
+    ],
+    "B2": [
+      { "exercise": "deadlift", "tier": 1 },
+      { "exercise": "overhead-press", "tier": 2 },
+      { "exercise": "dumbbell-lateral-raise", "tier": 3 }
+    ]
+  }
+}

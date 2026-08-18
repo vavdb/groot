@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SYS // GROOT — Command Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;600;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#060a14; --bg2:#0a101f; --card:#0e1526; --line:#1c2740;
+  --ink:#dfe6f5; --dim:#7b87a8;
+  --gold:#d8a93a; --gold-soft:#a8842e; --teal:#2ea9a0; --red:#c8543a;
+}
+[data-theme="light"]{
+  --bg:#eef0ea; --bg2:#f7f8f4; --card:#ffffff; --line:#d4d7cc;
+  --ink:#171d2b; --dim:#5d6577; --gold:#8a6a14; --gold-soft:#b08d2f; --teal:#177f78; --red:#b04226;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Archivo",sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px}
+.mono{font-family:"IBM Plex Mono",monospace}
+header{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:6px;border-bottom:1px solid var(--line);padding-bottom:14px}
+header h1{font-family:"IBM Plex Mono",monospace;font-size:14px;font-weight:500;letter-spacing:.2em;color:var(--dim)}
+header h1 b{color:var(--gold);font-weight:600}
+.toggle{background:none;border:1px solid var(--line);color:var(--dim);padding:7px 14px;
+  font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.15em;cursor:pointer}
+.toggle:hover{border-color:var(--gold);color:var(--gold)}
+.sub{width:100%;max-width:960px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);
+  letter-spacing:.08em;padding:10px 0 26px}
+.sub b{color:var(--teal);font-weight:500}
+.stage{display:flex;gap:44px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+
+.phone{width:375px;background:var(--bg2);border:1px solid var(--line);border-radius:26px;padding:12px;
+  box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.screen{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
+.statusbar{display:flex;justify-content:space-between;padding:10px 16px 6px;font-size:10px;color:var(--dim);font-family:"IBM Plex Mono",monospace}
+.appbar{padding:10px 16px 2px;font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.18em;color:var(--dim)}
+.appbar b{color:var(--gold);font-weight:600}
+.exname{padding:6px 16px 0;font-size:30px;font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.exmeta{padding:2px 16px 12px;font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--dim)}
+.exmeta b{color:var(--ink);font-weight:500}
+.gif{margin:0 16px;height:118px;border:1px solid var(--line);background:
+  linear-gradient(135deg, transparent 48%, var(--line) 48%, var(--line) 52%, transparent 52%),
+  linear-gradient(45deg, transparent 48%, var(--line) 48%, var(--line) 52%, transparent 52%);
+  display:flex;align-items:center;justify-content:center}
+.gif span{background:var(--bg);padding:4px 12px;font-family:"IBM Plex Mono",monospace;font-size:10px;
+  letter-spacing:.25em;color:var(--dim);border:1px solid var(--line)}
+.sets{display:flex;gap:10px;justify-content:center;padding:20px 16px 6px}
+.set{width:54px;height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  font-family:"IBM Plex Mono",monospace;font-size:16px;border:1px solid var(--line);color:var(--dim);gap:3px}
+.set i{width:26px;height:3px;background:var(--line)}
+.set.done{border-color:var(--gold-soft);color:var(--gold)}
+.set.done i{background:var(--gold)}
+.set.active{border-color:var(--teal);color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+.set.active i{background:var(--teal);animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.setlabel{text-align:center;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.3em;color:var(--dim);padding-bottom:14px}
+.timer{margin:0 16px;border:1px solid var(--gold-soft);padding:10px 16px;display:flex;align-items:baseline;justify-content:space-between;position:relative}
+.timer::before{content:"REST // AUTO";position:absolute;top:-7px;left:10px;background:var(--bg);
+  padding:0 8px;font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.25em;color:var(--gold)}
+.timer .t{font-family:"IBM Plex Mono",monospace;font-size:38px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums}
+.timer .plus{border:1px solid var(--line);background:none;color:var(--ink);padding:8px 12px;
+  font-family:"IBM Plex Mono",monospace;font-size:12px;cursor:pointer}
+.plates{margin:12px 16px;font-family:"IBM Plex Mono",monospace;font-size:11px;color:var(--dim);letter-spacing:.06em}
+.plates b{color:var(--ink);font-weight:500}
+.nav{display:flex;border-top:1px solid var(--line);margin-top:12px}
+.nav div{flex:1;text-align:center;padding:13px 0 15px;font-family:"IBM Plex Mono",monospace;
+  font-size:9px;letter-spacing:.28em;color:var(--dim);border-right:1px solid var(--line)}
+.nav div:last-child{border-right:none}
+.nav .on{color:var(--gold);box-shadow:inset 0 2px 0 var(--gold)}
+
+.aside{width:340px;display:flex;flex-direction:column;gap:24px}
+.label{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.3em;color:var(--dim);margin-bottom:10px}
+.notif{background:var(--card);border:1px solid var(--line);padding:14px 16px}
+.notif .app{font-family:"IBM Plex Mono",monospace;font-size:9px;letter-spacing:.2em;color:var(--dim);margin-bottom:8px}
+.notif .app b{color:var(--gold);font-weight:500}
+.notif .big{font-family:"IBM Plex Mono",monospace;font-size:28px;font-weight:600;color:var(--gold);font-variant-numeric:tabular-nums}
+.notif .sub{font-size:12px;color:var(--dim);margin-top:2px}
+.actions{display:flex;gap:18px;margin-top:12px}
+.actions button{background:none;border:none;color:var(--teal);font-family:"IBM Plex Mono",monospace;
+  font-size:11px;letter-spacing:.12em;cursor:pointer}
+.stat{background:var(--card);border:1px solid var(--line);padding:16px}
+.stat h3{font-family:"IBM Plex Mono",monospace;font-size:10px;letter-spacing:.25em;color:var(--dim);font-weight:400;margin-bottom:10px}
+table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",monospace;font-size:12px}
+td{padding:6px 0;border-bottom:1px solid var(--line);color:var(--dim)}
+td.r{text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
+td .up{color:var(--teal)} td .pr{color:var(--gold)}
+.note{font-size:12px;color:var(--dim);line-height:1.65}
+</style>
+</head>
+<body>
+<header>
+  <h1>SYS // <b>GROOT</b> · COMMAND CONSOLE</h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">THEME</button>
+</header>
+<div class="sub">SESSION 087 · OPERATOR VIN · <b>LINK OK</b> · LAST SYNC 21:31 · The bar is loaded. Lift anyway.</div>
+
+<div class="stage">
+  <div class="phone"><div class="screen">
+    <div class="statusbar"><span>21:47</span><span>SYNC ▲ · 87%</span></div>
+    <div class="appbar">PRG // <b>GZCLP</b> · T1 · W3.D2</div>
+    <div class="exname">Squat</div>
+    <div class="exmeta">TARGET <b>5×3 @ 100.0 KG</b> · PREV 5×3 @ 97.5 ✓</div>
+    <div class="gif"><span>MEDIA // SQUAT.GIF</span></div>
+    <div class="sets">
+      <div class="set done">3<i></i></div>
+      <div class="set done">3<i></i></div>
+      <div class="set active">3<i></i></div>
+      <div class="set">—<i></i></div>
+      <div class="set">—<i></i></div>
+    </div>
+    <div class="setlabel">TAP LOG · HOLD EDIT</div>
+    <div class="timer">
+      <div class="t">01:47</div>
+      <button class="plus">+30</button>
+    </div>
+    <div class="plates">LOAD/SIDE ▸ <b>20 · 20 · 5 · 2.5 · 2.5</b> — BAR 20</div>
+    <div class="nav"><div class="on">LOG</div><div>PRG</div><div>DATA</div><div>SYS</div></div>
+  </div></div>
+
+  <div class="aside">
+    <div>
+      <div class="label">ANDROID // SHADE</div>
+      <div class="notif">
+        <div class="app"><b>GROOT</b> · REST · FOREGROUND SVC</div>
+        <div class="big">01:47</div>
+        <div class="sub">NEXT ▸ SQUAT · SET 4/5 · 100 KG</div>
+        <div class="actions"><button>[✓ DONE SET]</button><button>[+30S]</button><button>[SKIP]</button></div>
+      </div>
+    </div>
+    <div class="stat">
+      <h3>DATA // LIFETIME</h3>
+      <table>
+        <tr><td>SQUAT e1RM</td><td class="r">190.0 <span class="pr">▲PR</span></td></tr>
+        <tr><td>BENCH e1RM</td><td class="r">87.5 <span class="up">▲</span></td></tr>
+        <tr><td>DEADLIFT e1RM</td><td class="r">110.0</td></tr>
+        <tr><td>OHP e1RM</td><td class="r">57.5 <span class="up">▲</span></td></tr>
+        <tr><td>SESSIONS</td><td class="r">86</td></tr>
+        <tr><td>TONNAGE</td><td class="r">312.4 T</td></tr>
+      </table>
+    </div>
+    <p class="note">The Vindicator derivative: navy/black ground, gold instrumentation, tabular numerals,
+    status-line copy. Cockpit for lifting — closest to the vincability DNA.</p>
+  </div>
+</div>
+</body>
+</html>

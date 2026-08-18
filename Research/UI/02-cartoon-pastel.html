@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groot · Cartoon Pastel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#fdf6ec; --card:#ffffff; --ink:#3d3358; --ink-dim:#8b82a8;
+  --mint:#b8ecd7; --mint-deep:#2fbf8f; --peach:#ffd8c2; --peach-deep:#ff8a5c;
+  --lav:#e3dcff; --lav-deep:#8c7ae6; --butter:#ffedb8; --butter-deep:#e8a90c;
+  --shadow:0 6px 0 rgba(61,51,88,.12); --border:3px solid #3d3358;
+}
+[data-theme="dark"]{
+  --bg:#241f38; --card:#2f2a4a; --ink:#f3efff; --ink-dim:#a79fc9;
+  --mint:#1f5c48; --mint-deep:#4fe0ac; --peach:#6b3a26; --peach-deep:#ff9d73;
+  --lav:#3d3564; --lav-deep:#a99bf5; --butter:#5c4a12; --butter-deep:#ffcf4d;
+  --shadow:0 6px 0 rgba(0,0,0,.35); --border:3px solid #14102a;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Nunito",sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px;
+  background-image:radial-gradient(var(--lav) 2.5px, transparent 2.5px);background-size:34px 34px}
+h1,h2,.disp{font-family:"Baloo 2",cursive}
+header{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+header h1{font-size:30px;font-weight:800}
+header h1 span{color:var(--mint-deep)}
+.toggle{font-family:"Baloo 2";font-weight:700;font-size:14px;background:var(--butter);color:var(--ink);
+  border:var(--border);border-radius:999px;padding:10px 20px;box-shadow:var(--shadow);cursor:pointer}
+.toggle:active{transform:translateY(4px);box-shadow:none}
+.stage{display:flex;gap:44px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+
+.phone{width:375px;background:var(--card);border:var(--border);border-radius:44px;padding:14px;box-shadow:var(--shadow)}
+.screen{border-radius:32px;overflow:hidden;background:var(--bg)}
+.statusbar{display:flex;justify-content:space-between;padding:12px 22px 4px;font-size:12px;font-weight:900;color:var(--ink-dim)}
+.appbar{padding:10px 22px 0;display:flex;justify-content:space-between;align-items:center}
+.chip{background:var(--lav);color:var(--ink);border:var(--border);border-radius:999px;
+  padding:4px 14px;font-family:"Baloo 2";font-weight:700;font-size:13px}
+.day{font-weight:900;font-size:13px;color:var(--ink-dim)}
+.exname{padding:12px 22px 0;font-size:34px;font-weight:800;font-family:"Baloo 2"}
+.exmeta{padding:0 22px 12px;font-size:14px;font-weight:700;color:var(--ink-dim)}
+.gif{margin:0 22px;height:120px;background:var(--mint);border:var(--border);border-radius:20px;
+  display:flex;align-items:center;justify-content:center;font-family:"Baloo 2";font-weight:700;
+  color:var(--ink);box-shadow:var(--shadow);position:relative;overflow:hidden}
+.gif .tree{font-size:44px;position:absolute;left:16px;bottom:-6px;transform:rotate(-8deg)}
+.sets{display:flex;gap:12px;justify-content:center;padding:22px 22px 8px}
+.set{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:"Baloo 2";font-weight:800;font-size:19px;border:var(--border);background:var(--card);
+  color:var(--ink-dim);box-shadow:var(--shadow)}
+.set.done{background:var(--mint);color:var(--ink)}
+.set.done::after{content:"✓";position:absolute;margin-top:-42px;margin-left:40px;font-size:14px;color:var(--mint-deep)}
+.set.active{background:var(--peach);color:var(--ink);animation:boing 1.4s infinite}
+@keyframes boing{0%,100%{transform:scale(1)}40%{transform:scale(1.12) rotate(-3deg)}}
+.setlabel{text-align:center;font-size:12px;font-weight:900;color:var(--ink-dim);padding-bottom:14px}
+.timer{margin:0 22px;background:var(--butter);border:var(--border);border-radius:20px;
+  padding:12px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow)}
+.timer .t{font-family:"Baloo 2";font-weight:800;font-size:36px}
+.timer .lbl{font-size:11px;font-weight:900;letter-spacing:.1em;color:var(--ink-dim);text-transform:uppercase}
+.plus{font-family:"Baloo 2";font-weight:700;background:var(--card);border:var(--border);
+  border-radius:14px;padding:8px 14px;box-shadow:var(--shadow);cursor:pointer;color:var(--ink)}
+.plus:active{transform:translateY(4px);box-shadow:none}
+.plates{margin:14px 22px 4px;display:flex;gap:8px;align-items:center;font-size:13px;font-weight:900;color:var(--ink-dim)}
+.plate{border:var(--border);border-radius:8px;padding:2px 9px;font-family:"Baloo 2";font-weight:700;background:var(--card);color:var(--ink)}
+.plate.p20{background:var(--peach)} .plate.p5{background:var(--lav)} .plate.p25{background:var(--mint)}
+.nav{display:flex;gap:8px;padding:14px 16px 16px}
+.nav div{flex:1;text-align:center;padding:10px 0;font-family:"Baloo 2";font-weight:700;font-size:13px;
+  border:var(--border);border-radius:16px;background:var(--card);color:var(--ink-dim);box-shadow:var(--shadow)}
+.nav .on{background:var(--peach);color:var(--ink)}
+
+.aside{width:340px;display:flex;flex-direction:column;gap:24px}
+.label{font-family:"Baloo 2";font-weight:700;font-size:14px;color:var(--ink-dim);margin-bottom:10px}
+.notif{background:var(--card);border:var(--border);border-radius:22px;padding:16px 18px;box-shadow:var(--shadow)}
+.notif .app{font-size:11px;font-weight:900;color:var(--ink-dim);letter-spacing:.06em;margin-bottom:6px}
+.notif .big{font-family:"Baloo 2";font-weight:800;font-size:30px}
+.notif .sub{font-size:13px;font-weight:700;color:var(--ink-dim)}
+.actions{display:flex;gap:10px;margin-top:12px}
+.actions button{font-family:"Baloo 2";font-weight:700;font-size:13px;border:var(--border);border-radius:12px;
+  padding:7px 12px;cursor:pointer;box-shadow:var(--shadow);color:var(--ink)}
+.actions .a1{background:var(--mint)} .actions .a2{background:var(--butter)} .actions .a3{background:var(--card)}
+.stat{background:var(--card);border:var(--border);border-radius:22px;padding:18px;box-shadow:var(--shadow)}
+.stat h3{font-family:"Baloo 2";font-weight:700;font-size:15px;margin-bottom:4px}
+.stat .val{font-family:"Baloo 2";font-weight:800;font-size:34px;color:var(--peach-deep)}
+.bars{display:flex;gap:7px;align-items:flex-end;height:60px;margin-top:12px}
+.bars i{flex:1;background:var(--lav-deep);border:var(--border);border-radius:8px 8px 0 0;display:block}
+.bars i:nth-child(odd){background:var(--mint-deep)}
+.note{font-size:13px;font-weight:700;color:var(--ink-dim);line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <h1>groot<span>!</span> · cartoon pastel</h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">☀ / ☾</button>
+</header>
+
+<div class="stage">
+  <div class="phone"><div class="screen">
+    <div class="statusbar"><span>21:47</span><span>87%</span></div>
+    <div class="appbar"><span class="chip">GZCLP</span><span class="day">week 3 · day 2</span></div>
+    <div class="exname">Squat</div>
+    <div class="exmeta">5 sets × 3 reps · 100 kg · last time you crushed 97.5 ✓</div>
+    <div class="gif"><span class="tree">🌱</span>exercise animation</div>
+    <div class="sets">
+      <div class="set done">3</div>
+      <div class="set done">3</div>
+      <div class="set active">3</div>
+      <div class="set">–</div>
+      <div class="set">–</div>
+    </div>
+    <div class="setlabel">tap when done · hold to tweak</div>
+    <div class="timer">
+      <div><div class="lbl">rest up!</div><div class="t disp">1:47</div></div>
+      <button class="plus">+30s</button>
+    </div>
+    <div class="plates">each side:
+      <span class="plate p20">20</span><span class="plate p20">20</span>
+      <span class="plate p5">5</span><span class="plate p25">2.5</span><span class="plate">2.5</span>
+    </div>
+    <div class="nav"><div class="on">Lift</div><div>Plans</div><div>Stats</div><div>Me</div></div>
+  </div></div>
+
+  <div class="aside">
+    <div>
+      <div class="label">Android notification</div>
+      <div class="notif">
+        <div class="app">🌳 GROOT · rest timer</div>
+        <div class="big">1:47</div>
+        <div class="sub">then: Squat · set 4 of 5 · 100 kg</div>
+        <div class="actions"><button class="a1">✓ done!</button><button class="a2">+30s</button><button class="a3">skip</button></div>
+      </div>
+    </div>
+    <div class="stat">
+      <h3>Squat is growing 🌿</h3>
+      <div class="val">190 kg</div>
+      <div class="bars"><i style="height:30%"></i><i style="height:42%"></i><i style="height:38%"></i><i style="height:55%"></i><i style="height:62%"></i><i style="height:74%"></i><i style="height:100%"></i></div>
+    </div>
+    <p class="note">Friendly without being childish: thick outlines, candy palette, springy micro-animations.
+    The sprout mascot grows as lifetime tonnage grows.</p>
+  </div>
+</div>
+</body>
+</html>

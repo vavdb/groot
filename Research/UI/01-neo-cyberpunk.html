@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GROOT // Neo Cyberpunk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070f; --bg2:#0d0d1c; --panel:#11112400; --card:#131328;
+  --ink:#e8ecff; --ink-dim:#7d84b0; --line:#26264a;
+  --neon:#00f0ff; --neon2:#ff2fb3; --lime:#c8ff00;
+  --glow:0 0 12px rgba(0,240,255,.55), 0 0 42px rgba(0,240,255,.18);
+  --glow2:0 0 12px rgba(255,47,179,.5);
+}
+[data-theme="light"]{
+  --bg:#e9ecf6; --bg2:#f4f6fd; --card:#ffffff;
+  --ink:#14142b; --ink-dim:#5a6088; --line:#c9cfe8;
+  --neon:#0077b6; --neon2:#d61f8d; --lime:#5a9e00;
+  --glow:0 0 0 rgba(0,0,0,0); --glow2:0 0 0 rgba(0,0,0,0);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg); color:var(--ink);
+  font-family:"Chakra Petch",sans-serif; min-height:100vh;
+  background-image:
+    linear-gradient(rgba(0,240,255,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,240,255,.04) 1px, transparent 1px);
+  background-size:44px 44px;
+  display:flex; flex-direction:column; align-items:center; padding:32px 16px 64px;
+}
+.mono{font-family:"Share Tech Mono",monospace}
+header{width:100%;max-width:960px;display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+header h1{font-size:15px;letter-spacing:.35em;color:var(--neon);text-shadow:var(--glow)}
+header h1 span{color:var(--neon2);text-shadow:var(--glow2)}
+.toggle{background:none;border:1px solid var(--line);color:var(--ink-dim);padding:8px 16px;
+  font-family:"Share Tech Mono",monospace;font-size:12px;cursor:pointer;letter-spacing:.15em}
+.toggle:hover{border-color:var(--neon);color:var(--neon)}
+.stage{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;align-items:flex-start}
+
+/* phone */
+.phone{width:375px;background:var(--bg2);border:1px solid var(--line);border-radius:32px;
+  padding:14px 14px 10px;box-shadow:0 30px 80px rgba(0,0,0,.55), inset 0 0 0 1px rgba(0,240,255,.08)}
+.screen{border-radius:22px;overflow:hidden;border:1px solid var(--line);background:
+  radial-gradient(120% 60% at 50% -10%, rgba(255,47,179,.12), transparent 55%), var(--bg)}
+.statusbar{display:flex;justify-content:space-between;padding:10px 18px 6px;font-size:11px;color:var(--ink-dim)}
+.appbar{padding:10px 18px 4px;display:flex;justify-content:space-between;align-items:baseline}
+.appbar .prog{font-size:11px;letter-spacing:.3em;color:var(--neon2);text-shadow:var(--glow2)}
+.appbar .day{font-size:11px;color:var(--ink-dim)}
+.exname{padding:2px 18px 0;font-size:26px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.exname em{font-style:normal;color:var(--neon);text-shadow:var(--glow)}
+.exmeta{padding:2px 18px 12px;font-size:12px;color:var(--ink-dim)}
+.gif{margin:0 18px;height:120px;border:1px dashed var(--line);border-radius:8px;display:flex;
+  align-items:center;justify-content:center;color:var(--ink-dim);font-size:11px;letter-spacing:.2em;
+  background:repeating-linear-gradient(-45deg, transparent 0 10px, rgba(0,240,255,.03) 10px 20px)}
+.sets{display:flex;gap:12px;justify-content:center;padding:20px 18px 6px}
+.set{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  font-family:"Share Tech Mono",monospace;font-size:17px;border:2px solid var(--line);color:var(--ink-dim);position:relative}
+.set.done{border-color:var(--neon);color:var(--neon);box-shadow:var(--glow), inset 0 0 12px rgba(0,240,255,.25)}
+.set.active{border-color:var(--neon2);color:var(--neon2);box-shadow:var(--glow2);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+.setlabel{text-align:center;font-size:10px;color:var(--ink-dim);letter-spacing:.25em;padding-bottom:14px}
+.timer{margin:0 18px;border:1px solid var(--neon);border-radius:10px;padding:12px 16px;
+  display:flex;align-items:center;justify-content:space-between;box-shadow:var(--glow)}
+.timer .t{font-family:"Share Tech Mono",monospace;font-size:34px;color:var(--neon);text-shadow:var(--glow)}
+.timer .lbl{font-size:10px;letter-spacing:.3em;color:var(--ink-dim)}
+.timer .plus{border:1px solid var(--line);background:none;color:var(--ink);padding:8px 12px;
+  font-family:"Share Tech Mono",monospace;cursor:pointer}
+.plates{margin:12px 18px;font-size:12px;color:var(--ink-dim);display:flex;gap:8px;align-items:center}
+.plate{padding:2px 8px;border:1px solid var(--line);border-radius:3px;font-family:"Share Tech Mono",monospace;font-size:11px}
+.plate.p20{border-color:var(--neon);color:var(--neon)} .plate.p5{border-color:var(--neon2);color:var(--neon2)}
+.plate.p25{border-color:var(--lime);color:var(--lime)}
+.nav{display:flex;border-top:1px solid var(--line);margin-top:14px}
+.nav div{flex:1;text-align:center;padding:14px 0 16px;font-size:10px;letter-spacing:.2em;color:var(--ink-dim)}
+.nav .on{color:var(--neon);text-shadow:var(--glow)}
+
+/* side column */
+.aside{width:340px;display:flex;flex-direction:column;gap:22px}
+.label{font-size:11px;letter-spacing:.35em;color:var(--ink-dim);margin-bottom:10px}
+.notif{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--neon);
+  border-radius:12px;padding:14px 16px;box-shadow:0 12px 40px rgba(0,0,0,.4)}
+.notif .app{font-size:10px;color:var(--ink-dim);letter-spacing:.15em;margin-bottom:6px}
+.notif .row{display:flex;justify-content:space-between;align-items:center}
+.notif .big{font-family:"Share Tech Mono",monospace;font-size:26px;color:var(--neon)}
+.notif .sub{font-size:12px;color:var(--ink-dim);margin-top:2px}
+.actions{display:flex;gap:14px;margin-top:12px}
+.actions button{background:none;border:none;color:var(--neon2);font-family:"Chakra Petch";font-weight:600;
+  font-size:12px;letter-spacing:.1em;cursor:pointer}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.stat h3{font-size:12px;letter-spacing:.2em;color:var(--ink-dim);font-weight:400;margin-bottom:8px}
+.stat .val{font-family:"Share Tech Mono",monospace;font-size:30px;color:var(--lime)}
+.spark{margin-top:10px;height:44px}
+.note{font-size:11px;color:var(--ink-dim);line-height:1.6}
+</style>
+</head>
+<body>
+<header>
+  <h1>GROOT<span>_</span>// NEO CYBERPUNK</h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">LIGHT / DARK</button>
+</header>
+
+<div class="stage">
+  <div class="phone"><div class="screen">
+    <div class="statusbar mono"><span>21:47</span><span>▲ ▼ ▮ 87%</span></div>
+    <div class="appbar"><span class="prog">GZCLP // T1</span><span class="day mono">W3 · D2</span></div>
+    <div class="exname"><em>SQUAT</em></div>
+    <div class="exmeta">5 × 3 @ <span class="mono">100.0 kg</span> · last: 5×3 @ 97.5 ✓</div>
+    <div class="gif">EXERCISE.GIF ▸ 1324 LOADED</div>
+    <div class="sets">
+      <div class="set done">3</div>
+      <div class="set done">3</div>
+      <div class="set active">3</div>
+      <div class="set">·</div>
+      <div class="set">·</div>
+    </div>
+    <div class="setlabel">TAP = LOGGED · HOLD = EDIT</div>
+    <div class="timer">
+      <div><div class="lbl">REST</div><div class="t">01:47</div></div>
+      <button class="plus">+30s</button>
+    </div>
+    <div class="plates">PER SIDE ▸
+      <span class="plate p20">20</span><span class="plate p20">20</span>
+      <span class="plate p5">5</span><span class="plate p25">2.5</span>
+      <span class="plate">2.5</span>
+    </div>
+    <div class="nav"><div class="on">LOG</div><div>PROGRAMS</div><div>STATS</div><div>SYS</div></div>
+  </div></div>
+
+  <div class="aside">
+    <div>
+      <div class="label">ANDROID // NOTIFICATION SHADE</div>
+      <div class="notif">
+        <div class="app">GROOT · REST TIMER · ONGOING</div>
+        <div class="row">
+          <div>
+            <div class="big">01:47</div>
+            <div class="sub">Next: Squat · set 4/5 · 100 kg</div>
+          </div>
+        </div>
+        <div class="actions"><button>✓ DONE SET</button><button>+30S</button><button>SKIP</button></div>
+      </div>
+    </div>
+    <div class="stat">
+      <h3>e1RM // SQUAT</h3>
+      <div class="val">190 kg</div>
+      <svg class="spark" viewBox="0 0 300 44" preserveAspectRatio="none">
+        <polyline fill="none" stroke="#00f0ff" stroke-width="2"
+          points="0,40 30,38 60,34 90,35 120,30 150,26 180,27 210,20 240,14 270,10 300,4"/>
+        <circle cx="300" cy="4" r="3" fill="#ff2fb3"/>
+      </svg>
+    </div>
+    <p class="note">Neon reserved for accents; body text stays high-contrast for readability under gym
+    lighting. Chronometer countdown renders natively in the shade — zero notification spam.</p>
+  </div>
+</div>
+</body>
+</html>

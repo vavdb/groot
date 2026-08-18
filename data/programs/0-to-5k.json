@@ -1,0 +1,152 @@
+{
+  "id": "0-to-5k",
+  "version": 1,
+  "name": "0→5K",
+  "type": "intervals",
+  "credit": { "note": "Generic couch-to-5K style interval progression, written from scratch. Time-based; no GPS required." },
+  "cueDefaults": {
+    "segmentStartCue": true,
+    "endingSoonCueAtSeconds": -10,
+    "note": "The engine speaks every segment start and a -10s warning automatically. Only extra cues are declared per segment."
+  },
+  "weeks": [
+    {
+      "week": 1, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 60 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 2, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 120 },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 3, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 180 }, { "kind": "walk", "seconds": 180 },
+        { "kind": "run", "seconds": 90 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 180 }, { "kind": "walk", "seconds": 180 },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 4, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 180 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 300 }, { "kind": "walk", "seconds": 150 },
+        { "kind": "run", "seconds": 180 }, { "kind": "walk", "seconds": 90 },
+        { "kind": "run", "seconds": 300 },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 5, "sessionsPerWeek": 3,
+      "days": [
+        {
+          "day": 1,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 300 }, { "kind": "walk", "seconds": 180 },
+            { "kind": "run", "seconds": 300 }, { "kind": "walk", "seconds": 180 },
+            { "kind": "run", "seconds": 300 },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        },
+        {
+          "day": 2,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 480 }, { "kind": "walk", "seconds": 300 },
+            { "kind": "run", "seconds": 480 },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        },
+        {
+          "day": 3,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 1200, "cues": [ { "at": 600, "key": "cue.halfway" } ] },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        }
+      ]
+    },
+    {
+      "week": 6, "sessionsPerWeek": 3,
+      "days": [
+        {
+          "day": 1,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 300 }, { "kind": "walk", "seconds": 180 },
+            { "kind": "run", "seconds": 480 }, { "kind": "walk", "seconds": 180 },
+            { "kind": "run", "seconds": 300 },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        },
+        {
+          "day": 2,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 600 }, { "kind": "walk", "seconds": 180 },
+            { "kind": "run", "seconds": 600 },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        },
+        {
+          "day": 3,
+          "plan": [
+            { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+            { "kind": "run", "seconds": 1320, "cues": [ { "at": 660, "key": "cue.halfway" } ] },
+            { "kind": "walk", "seconds": 300, "label": "cooldown" }
+          ]
+        }
+      ]
+    },
+    {
+      "week": 7, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 1500, "cues": [ { "at": 750, "key": "cue.halfway" } ] },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 8, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 1680, "cues": [ { "at": 840, "key": "cue.halfway" } ] },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    },
+    {
+      "week": 9, "sessionsPerWeek": 3,
+      "plan": [
+        { "kind": "walk", "seconds": 300, "label": "warmup", "cues": [ { "at": -15, "key": "cue.warmupEnding" } ] },
+        { "kind": "run", "seconds": 1800, "cues": [ { "at": 900, "key": "cue.halfway" }, { "at": -60, "key": "cue.finalMinute" } ] },
+        { "kind": "walk", "seconds": 300, "label": "cooldown" }
+      ]
+    }
+  ]
+}

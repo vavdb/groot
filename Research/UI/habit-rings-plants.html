@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groot — Habit System (plant variant)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"]{
+  --bg:#f4f1e8; --card:#fdfcf7; --line:#ddd6c3;
+  --ink:#26301f; --dim:#6f7a63;
+  --moss:#4a7048; --moss-deep:#2f4d2e; --bark:#6b4f35; --amber:#c98f2d; --clay:#b45f3c;
+  --ring:#8aa385; --wither:#c9c2ae; --shadow:0 18px 60px rgba(38,48,31,.14);
+}
+[data-theme="dark"]{
+  --bg:#151a12; --card:#1d2419; --line:#33402c;
+  --ink:#e8ead9; --dim:#93a087;
+  --moss:#7fb47a; --moss-deep:#a5cf9f; --bark:#c49a6c; --amber:#e0aa4a; --clay:#d97e56;
+  --ring:#4a5f45; --wither:#3a4234; --shadow:0 18px 60px rgba(0,0,0,.5);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Public Sans",sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:36px 16px 72px;transition:background .3s}
+.serif{font-family:"Fraunces",serif}
+header{width:100%;max-width:1180px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+header h1{font-family:"Fraunces",serif;font-weight:900;font-size:32px}
+header h1 span{color:var(--moss)}
+.toggle{background:none;border:1px solid var(--line);color:var(--dim);border-radius:999px;
+  padding:8px 18px;font-weight:600;font-size:12px;cursor:pointer}
+.toggle:hover{border-color:var(--moss);color:var(--moss)}
+.sub{width:100%;max-width:1180px;font-size:13px;color:var(--dim);margin-bottom:30px}
+.sub b{color:var(--moss)}
+.stage{display:flex;gap:40px;flex-wrap:wrap;justify-content:center;align-items:flex-start;max-width:1180px}
+.col{display:flex;flex-direction:column;gap:24px;width:375px}
+.label{font-size:11px;font-weight:700;letter-spacing:.24em;color:var(--dim);text-transform:uppercase}
+
+/* ============ phone ============ */
+.phone{background:var(--card);border:1px solid var(--line);border-radius:36px;padding:13px;box-shadow:var(--shadow)}
+.screen{border-radius:26px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.statusbar{display:flex;justify-content:space-between;padding:12px 20px 4px;font-size:11px;font-weight:600;color:var(--dim)}
+.htitle{padding:10px 20px 0;font-family:"Fraunces",serif;font-weight:900;font-size:26px}
+.hsub{padding:0 20px 12px;font-size:12px;color:var(--dim)}
+.hsub b{color:var(--amber);font-weight:700}
+
+/* contract card */
+.contract{margin:0 16px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px}
+.contract h4{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:10px;display:flex;justify-content:space-between}
+.contract h4 .jokers{letter-spacing:0}
+.days{display:flex;gap:6px}
+.day{flex:1;text-align:center}
+.day .dn{font-size:9px;font-weight:700;color:var(--dim);letter-spacing:.08em;margin-bottom:5px}
+.slot{height:46px;border-radius:11px;border:1.5px solid var(--line);display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:1px;font-size:8.5px;font-weight:700;letter-spacing:.04em;color:var(--dim)}
+.slot .ic{font-size:15px;line-height:1}
+.slot.wl{background:var(--moss);border-color:var(--moss);color:var(--card)}
+.slot.run{background:var(--amber);border-color:var(--amber);color:var(--card)}
+.slot.joker{border-color:var(--clay);color:var(--clay);border-style:dashed}
+.slot.today{border:2px solid var(--amber);color:var(--amber);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 5px rgba(224,170,74,.15)}}
+.slot.rest{border-style:dotted}
+.meter{display:flex;gap:14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--line);
+  font-size:11px;font-weight:700;color:var(--dim);justify-content:space-between}
+.meter b{color:var(--ink)}
+.meter .ok{color:var(--moss)}
+.meter .warn{color:var(--clay)}
+
+/* streak + grid */
+.streak{margin:14px 16px 0;display:flex;align-items:baseline;justify-content:space-between}
+.streak .n{font-family:"Fraunces",serif;font-weight:900;font-size:30px;color:var(--moss-deep)}
+.streak .n small{font-size:13px;color:var(--dim);font-weight:600}
+.streak .age{font-size:11px;color:var(--dim)}
+.grid{margin:10px 16px 6px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 12px 8px}
+.gridrows{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;justify-content:start}
+.cell{width:11px;height:11px;border-radius:3px 5px 3px 5px;background:var(--wither);opacity:0;animation:sprout .3s forwards}
+@keyframes sprout{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+.cell.wl{background:var(--moss)} .cell.run{background:var(--amber)}
+.cell.both{background:linear-gradient(135deg,var(--moss) 49%,var(--amber) 51%)}
+.cell.rest{background:transparent;border:1.5px solid var(--bark)}
+.cell.joker{background:transparent;border:1.5px dashed var(--clay)}
+.cell.dead{background:var(--wither);opacity:.45 !important}
+.vine{display:grid;grid-auto-flow:column;gap:3px;margin-top:4px;justify-content:start}
+.vine i{width:11px;height:3px;border-radius:2px;background:var(--moss);display:block}
+.vine i.gap{background:transparent;border-top:2px dotted var(--clay);height:0;margin-top:1px}
+.gridcap{font-size:10px;color:var(--dim);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap}
+.gridcap i{display:inline-block;width:9px;height:9px;border-radius:2px 4px 2px 4px;margin-right:3px;vertical-align:-1px}
+.nav{display:flex;border-top:1px solid var(--line);margin-top:14px;background:var(--card)}
+.nav div{flex:1;text-align:center;padding:14px 0 16px;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.nav .on{color:var(--moss);box-shadow:inset 0 -3px 0 var(--moss)}
+
+/* ============ run screen ============ */
+.runstate{margin:8px 16px 0;border-radius:16px;background:var(--amber);color:#241c08;padding:18px;text-align:center}
+.runstate .st{font-size:12px;font-weight:700;letter-spacing:.34em}
+.runstate .t{font-family:"Fraunces",serif;font-weight:900;font-size:64px;line-height:1.05;font-variant-numeric:tabular-nums}
+.runstate .nxt{font-size:12px;font-weight:700;opacity:.75}
+.segbar{display:flex;gap:3px;margin:12px 16px 0}
+.segbar i{height:6px;border-radius:3px;flex-grow:1}
+.segbar .w{background:var(--ring)} .segbar .r{background:var(--amber)}
+.segbar .done{opacity:.35}
+.runmeta{margin:10px 16px;display:flex;justify-content:space-between;font-size:12px;color:var(--dim);font-weight:600}
+.runbtns{display:flex;gap:10px;margin:4px 16px 16px}
+.runbtns button{flex:1;padding:12px 0;border-radius:12px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink);font-weight:700;font-size:13px;cursor:pointer}
+
+/* ============ side widgets ============ */
+.widget{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.widget h4{font-size:10px;font-weight:700;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-bottom:12px}
+.modes{display:flex;gap:6px;margin-bottom:14px}
+.modes span{flex:1;text-align:center;font-size:11px;font-weight:700;padding:7px 0;border-radius:999px;border:1px solid var(--line);color:var(--dim)}
+.modes .on{background:var(--moss);border-color:var(--moss);color:var(--card)}
+.entry{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}
+.chip{border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--bg)}
+.chip b{font-variant-numeric:tabular-nums}
+.chip.sel{border-color:var(--amber)}
+.eq{color:var(--dim)}
+.total{font-family:"Fraunces",serif;font-weight:900;font-size:26px;color:var(--moss-deep)}
+.hint{font-size:11px;color:var(--dim);margin-top:10px}
+.hint b{color:var(--ink)}
+.notif .app{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.notif .big{font-family:"Fraunces",serif;font-weight:700;font-size:26px;color:var(--moss-deep)}
+.notif .sub{font-size:12px;color:var(--dim);margin-top:2px}
+.actions{display:flex;gap:16px;margin-top:10px}
+.actions button{background:none;border:none;color:var(--clay);font-weight:700;font-size:13px;cursor:pointer;padding:0}
+.ringcard{text-align:center}
+.ringcap{font-size:11.5px;color:var(--dim);line-height:1.55;margin-top:4px}
+.ringcap b{color:var(--ink)}
+.legend{font-size:10.5px;color:var(--dim);margin-top:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Groot<span>.</span> <small style="font-size:14px;font-weight:600;color:var(--dim)">— habit system · plant variant</small></h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">light / dark</button>
+</header>
+<div class="sub">§design/02 · Template ≠ contract. <b>2× lift + 2× run + 1× rest</b> closes the ring · 2 jokers patch the gaps · grid for weeks, rings for life.</div>
+
+<div class="stage">
+
+  <!-- COLUMN 1: home / this week -->
+  <div class="col">
+    <div class="label">Home · this week</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>07:12</span><span>Fri · 87%</span></div>
+      <div class="htitle">Week 14</div>
+      <div class="hsub">Today: <b>Run · 0→5K W3·D2 · 28 min</b> · ring closes Sunday</div>
+
+      <div class="contract">
+        <h4><span>Contract · 2 lift · 2 run · 1 rest</span><span class="jokers">💧💧→💧</span></h4>
+        <div class="days">
+          <div class="day"><div class="dn">MO</div><div class="slot run"><span class="ic">🍂</span>RUN</div></div>
+          <div class="day"><div class="dn">TU</div><div class="slot wl"><span class="ic">🌿</span>LIFT</div></div>
+          <div class="day"><div class="dn">WE</div><div class="slot run"><span class="ic">🍂</span>RUN</div></div>
+          <div class="day"><div class="dn">TH</div><div class="slot joker"><span class="ic">💧</span>JOKER</div></div>
+          <div class="day"><div class="dn">FR</div><div class="slot today"><span class="ic">▶</span>RUN</div></div>
+          <div class="day"><div class="dn">SA</div><div class="slot"><span class="ic">·</span>LIFT</div></div>
+          <div class="day"><div class="dn">SU</div><div class="slot rest"><span class="ic">☾</span>REST</div></div>
+        </div>
+        <div class="meter">
+          <span>LIFT <b class="ok">1+💧/2</b></span>
+          <span>RUN <b class="ok">2/2</b></span>
+          <span>REST <b>auto ✓</b></span>
+          <span class="warn">💧 1 left</span>
+        </div>
+      </div>
+
+      <div class="streak">
+        <div class="n">13 <small>weeks kept</small></div>
+        <div class="age">tree age · 87 weeks</div>
+      </div>
+
+      <div class="grid">
+        <div class="gridrows" id="grid"></div>
+        <div class="vine" id="vine"></div>
+        <div class="gridcap">
+          <span><i style="background:var(--moss)"></i>lift</span>
+          <span><i style="background:var(--amber)"></i>run</span>
+          <span><i style="background:linear-gradient(135deg,var(--moss) 49%,var(--amber) 51%)"></i>both</span><!-- geometric legend, no leaf shapes -->
+          <span><i style="border:1.5px solid var(--bark)"></i>rest</span>
+          <span><i style="border:1.5px dashed var(--clay)"></i>joker</span>
+          <span>— vine = weeks kept</span>
+        </div>
+      </div>
+
+      <div class="nav"><div class="on">Week</div><div>Session</div><div>Growth</div><div>Profile</div></div>
+    </div></div>
+  </div>
+
+  <!-- COLUMN 2: run screen -->
+  <div class="col">
+    <div class="label">Run · 0→5K interval coach</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>07:31</span><span>GPS off · 87%</span></div>
+      <div class="htitle" style="font-size:20px">0→5K <span style="color:var(--dim);font-weight:600;font-size:13px">W3 · D2</span></div>
+      <div class="runstate">
+        <div class="st">RUN</div>
+        <div class="t">1:23</div>
+        <div class="nxt">next · walk 3:00 · ♪ beep + voice at switch</div>
+      </div>
+      <div class="segbar">
+        <i class="w done"></i><i class="r done"></i><i class="w done"></i><i class="r" style="flex-grow:2"></i><i class="w" style="flex-grow:2"></i><i class="r"></i><i class="w"></i><i class="w done" style="flex-grow:1.6"></i>
+      </div>
+      <div class="runmeta"><span>elapsed 11:37</span><span>segment 4/8</span><span>total 28:00</span></div>
+      <div class="runbtns"><button>⏸ pause</button><button>⏭ skip</button></div>
+      <div style="margin:0 16px 16px;font-size:11px;color:var(--dim);line-height:1.5">
+        Screen-off design: chronometer notification + audio cues (music ducks, voice speaks, music returns).
+        Counts as <b style="color:var(--amber)">RUN</b> credit on the week contract.
+      </div>
+      <div class="nav"><div>Week</div><div class="on">Session</div><div>Growth</div><div>Profile</div></div>
+    </div></div>
+
+    <div class="widget notif">
+      <div class="app">Android shade · during run</div>
+      <div class="big">RUN · 1:23</div>
+      <div class="sub">next: walk 3:00 · segment 4/8 · 0→5K W3·D2</div>
+      <div class="actions"><button>⏸ Pause</button><button>⏭ Skip</button></div>
+    </div>
+  </div>
+
+  <!-- COLUMN 3: weight entry + rings -->
+  <div class="col">
+    <div class="label">Weight entry · per-side first-class</div>
+    <div class="widget">
+      <h4>Squat · set 1</h4>
+      <div class="modes" style="margin-bottom:8px"><span class="on">ATX bar · kg</span><span>PowerBlock · lb</span><span>+</span></div>
+      <div class="modes"><span class="on">Per side</span><span>Total</span><span>Per hand</span></div>
+      <div class="entry">
+        <span class="chip">bar <b>20</b></span>
+        <span>+</span>
+        <span class="chip sel"><b>25</b> /side</span>
+        <span class="eq">=</span>
+        <span class="total">70.0 kg</span>
+      </div>
+      <div class="hint">Total mode: type <b>90</b> → shows /side: <b>25 + 10</b> · mode + bar sticky per exercise</div>
+    </div>
+
+    <div class="label" style="margin-top:2px">Growth tab · lifetime rings</div>
+    <div class="widget ringcard">
+      <svg width="190" height="190" viewBox="0 0 190 190">
+        <g fill="none" stroke="var(--ring)" stroke-width="2">
+          <circle cx="95" cy="95" r="12"/><circle cx="95" cy="95" r="20" stroke-width="3"/>
+          <circle cx="95" cy="95" r="28"/><circle cx="95" cy="95" r="38" stroke-width="4"/>
+          <circle cx="95" cy="95" r="47" stroke-width="2.5"/><circle cx="95" cy="95" r="57" stroke-width="5"/>
+          <circle cx="95" cy="95" r="66" stroke-width="2"/>
+        </g>
+        <!-- knot = joker week, gap = scar -->
+        <circle cx="95" cy="95" r="47" fill="none" stroke="var(--clay)" stroke-width="2.5" stroke-dasharray="8 287" transform="rotate(40 95 95)"/>
+        <circle cx="95" cy="95" r="66" fill="none" stroke="var(--bg)" stroke-width="4" stroke-dasharray="5 410" transform="rotate(200 95 95)"/>
+        <circle cx="95" cy="95" r="78" fill="none" stroke="var(--amber)" stroke-width="3"
+          stroke-dasharray="490" stroke-dashoffset="150" transform="rotate(-90 95 95)"/>
+        <circle cx="95" cy="95" r="4" fill="var(--bark)"/>
+      </svg>
+      <div class="ringcap"><b>One ring per week kept.</b> Thickness = volume · hue = lift/run mix<br>
+      knot <span style="color:var(--clay)">●</span> = joker week · hairline scar = broken week · outer arc = this week 72%</div>
+      <div class="legend">Sunday 23:59 = ring close: new ring grows outward + week recap</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// season grid: 26 weeks × 7 days, botanical github-style
+const weeks = 26, grid = document.getElementById('grid'), vine = document.getElementById('vine');
+// deterministic pattern: mostly kept weeks, one dead stretch, jokers sprinkled
+const deadWeeks = [7,8]; const jokerDays = {3:4,11:2,15:5,20:3,24:3};
+const plan = ['run','wl','run','wl','run','wl','rest']; // Mon..Sun template
+let d = 0;
+for (let w = 0; w < weeks; w++) {
+  for (let day = 0; day < 7; day++) {
+    const c = document.createElement('i');
+    let cls = 'cell';
+    if (deadWeeks.includes(w)) { cls += (day%3==0) ? ' dead' : ''; }
+    else if (jokerDays[w] === day) cls += ' joker';
+    else if (plan[day] === 'rest') cls += ' rest';
+    else if (w % 9 === 4 && day === 5) cls += ' both';
+    else cls += ' ' + plan[day];
+    c.className = cls;
+    c.style.animationDelay = (d++ * 6) + 'ms';
+    grid.appendChild(c);
+  }
+  const v = document.createElement('i');
+  if (deadWeeks.includes(w)) v.className = 'gap';
+  vine.appendChild(v);
+}
+</script>
+</body>
+</html>

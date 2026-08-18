@@ -1,0 +1,30 @@
+# .NET / Visual Studio
+bin/
+obj/
+.vs/
+*.user
+*.suo
+artifacts/
+TestResults/
+
+# Rider / VS Code
+.idea/
+.vscode/
+
+# MAUI / mobile
+*.apk
+*.aab
+*.ipa
+AppPackages/
+
+# local secrets
+appsettings.local.json
+*.secrets.json
+.env
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# empty legacy folder
+mockups/

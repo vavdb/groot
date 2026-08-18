@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Groot — 0→5K mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root, [data-theme="light"]{
+  --bg:#f4f1e8; --card:#fdfcf7; --line:#ddd6c3;
+  --ink:#26301f; --dim:#6f7a63;
+  --moss:#4a7048; --moss-deep:#2f4d2e; --bark:#6b4f35; --amber:#c98f2d; --clay:#b45f3c;
+  --ring:#8aa385; --shadow:0 18px 60px rgba(38,48,31,.14);
+  --run:#c98f2d; --run-ink:#241c08; --walk:#4a7048; --walk-ink:#f2f5ec;
+}
+[data-theme="dark"]{
+  --bg:#151a12; --card:#1d2419; --line:#33402c;
+  --ink:#e8ead9; --dim:#93a087;
+  --moss:#7fb47a; --moss-deep:#a5cf9f; --bark:#c49a6c; --amber:#e0aa4a; --clay:#d97e56;
+  --ring:#4a5f45; --shadow:0 18px 60px rgba(0,0,0,.5);
+  --run:#e0aa4a; --run-ink:#241c08; --walk:#2f4d2e; --walk-ink:#e8ead9;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:"Public Sans",sans-serif;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;padding:36px 16px 72px}
+header{width:100%;max-width:1240px;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+header h1{font-family:"Fraunces",serif;font-weight:900;font-size:32px}
+header h1 span{color:var(--amber)}
+.toggle{background:none;border:1px solid var(--line);color:var(--dim);border-radius:999px;
+  padding:8px 18px;font-weight:600;font-size:12px;cursor:pointer}
+.toggle:hover{border-color:var(--amber);color:var(--amber)}
+.sub{width:100%;max-width:1240px;font-size:13px;color:var(--dim);margin-bottom:30px}
+.sub b{color:var(--amber)}
+.stage{display:flex;gap:36px;flex-wrap:wrap;justify-content:center;align-items:flex-start;max-width:1240px}
+.col{display:flex;flex-direction:column;gap:20px;width:360px}
+.label{font-size:11px;font-weight:700;letter-spacing:.24em;color:var(--dim);text-transform:uppercase}
+
+.phone{background:var(--card);border:1px solid var(--line);border-radius:36px;padding:13px;box-shadow:var(--shadow)}
+.screen{border-radius:26px;overflow:hidden;background:var(--bg);border:1px solid var(--line)}
+.statusbar{display:flex;justify-content:space-between;padding:12px 20px 4px;font-size:11px;font-weight:600;color:var(--dim)}
+.htitle{padding:8px 20px 0;font-family:"Fraunces",serif;font-weight:900;font-size:26px}
+.htitle small{font-size:13px;font-weight:600;color:var(--dim)}
+.hsub{padding:0 20px 12px;font-size:12px;color:var(--dim)}
+.hsub b{color:var(--ink)}
+
+/* overview */
+.progressband{margin:0 20px 12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px}
+.progressband .row{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-bottom:8px}
+.progressband .row b{color:var(--amber)}
+.pbar{height:8px;border-radius:4px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:26%;background:var(--amber);border-radius:4px}
+.weeks{margin:0 20px;display:flex;flex-direction:column;gap:7px}
+.wk{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
+  border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:600}
+.wk .n{font-family:"Fraunces",serif;font-weight:900;font-size:15px;width:38px;color:var(--dim)}
+.wk .what{flex:1;color:var(--dim)}
+.wk .dots{display:flex;gap:5px}
+.wk .dots i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--line)}
+.wk .dots i.d{background:var(--amber);border-color:var(--amber)}
+.wk.done{opacity:.75}
+.wk.done .n,.wk.done .what{color:var(--ink)}
+.wk.cur{border-color:var(--amber);box-shadow:inset 0 0 0 1px var(--amber)}
+.wk.cur .n{color:var(--amber)}
+.wk.cur .what{color:var(--ink)}
+.nextcard{margin:12px 20px 16px;background:var(--card);border:1px solid var(--amber);border-radius:14px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center}
+.nextcard .t{font-size:13px;font-weight:700}
+.nextcard .t small{display:block;font-size:11px;color:var(--dim);font-weight:600;margin-top:2px}
+.gobtn{background:var(--amber);color:var(--run-ink);border:none;border-radius:999px;padding:10px 20px;
+  font-weight:700;font-size:13px;cursor:pointer}
+.nav{display:flex;border-top:1px solid var(--line);background:var(--card)}
+.nav div{flex:1;text-align:center;padding:14px 0 16px;font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.nav .on{color:var(--moss);box-shadow:inset 0 -3px 0 var(--moss)}
+
+/* runner */
+.flood{margin:8px 16px 0;border-radius:18px;padding:22px 18px 18px;text-align:center}
+.flood.runmode{background:var(--run);color:var(--run-ink)}
+.flood.walkmode{background:var(--walk);color:var(--walk-ink)}
+.flood .st{font-size:13px;font-weight:700;letter-spacing:.38em}
+.flood .t{font-family:"Fraunces",serif;font-weight:900;font-size:72px;line-height:1.02;font-variant-numeric:tabular-nums}
+.flood .nxt{font-size:12px;font-weight:700;opacity:.8}
+.cue{margin:10px 16px 0;background:var(--card);border:1px solid var(--line);border-left:3px solid var(--amber);
+  border-radius:10px;padding:9px 13px;font-size:12px;color:var(--ink);display:flex;gap:8px;align-items:center}
+.cue b{color:var(--amber)}
+.cue .spk{font-size:15px}
+.segbar{display:flex;gap:3px;margin:12px 16px 0}
+.segbar i{height:7px;border-radius:3px}
+.segbar .w{background:var(--ring)} .segbar .r{background:var(--amber)}
+.segbar .done{opacity:.32}
+.seglist{margin:10px 16px;display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--dim)}
+.seglist div{display:flex;justify-content:space-between;padding:5px 10px;border-radius:8px}
+.seglist .cur{background:var(--card);border:1px solid var(--line);color:var(--ink);font-weight:700}
+.runmeta{margin:6px 16px;display:flex;justify-content:space-between;font-size:12px;color:var(--dim);font-weight:600}
+.runbtns{display:flex;gap:10px;margin:4px 16px 16px}
+.runbtns button{flex:1;padding:12px 0;border-radius:12px;border:1px solid var(--line);background:var(--card);
+  color:var(--ink);font-weight:700;font-size:13px;cursor:pointer}
+
+.notif{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 17px;box-shadow:var(--shadow)}
+.notif .app{font-size:10px;font-weight:700;letter-spacing:.14em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+.notif .big{font-family:"Fraunces",serif;font-weight:700;font-size:26px;color:var(--amber)}
+.notif .subt{font-size:12px;color:var(--dim);margin-top:2px}
+.actions{display:flex;gap:16px;margin-top:10px}
+.actions button{background:none;border:none;color:var(--clay);font-weight:700;font-size:13px;cursor:pointer;padding:0}
+.note{font-size:12px;color:var(--dim);line-height:1.6}
+.note b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <h1>0→5K<span>.</span> <small style="font-size:14px;font-weight:600;color:var(--dim)">— interval coach</small></h1>
+  <button class="toggle" onclick="document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark'">licht / donker</button>
+</header>
+<div class="sub">§design/03 · 9 weken · 3 sessies/week · tijd-gebaseerd, geen GPS · piep + stem bij elke wissel · telt als <b>RUN</b>-credit op het weekcontract.</div>
+
+<div class="stage">
+
+  <!-- overview -->
+  <div class="col">
+    <div class="label">Programma-overzicht</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>18:02</span><span>87%</span></div>
+      <div class="htitle">0→5K <small>wk 3 van 9</small></div>
+      <div class="hsub">Volgende: <b>W3 · D2</b> · 28 min · vandaag gepland</div>
+      <div class="progressband">
+        <div class="row"><span>7 van 27 sessies</span><b>26%</b></div>
+        <div class="pbar"><i></i></div>
+      </div>
+      <div class="weeks">
+        <div class="wk done"><span class="n">W1</span><span class="what">8× (ren 1:00 · wandel 1:30)</span><span class="dots"><i class="d"></i><i class="d"></i><i class="d"></i></span></div>
+        <div class="wk done"><span class="n">W2</span><span class="what">6× (ren 1:30 · wandel 2:00)</span><span class="dots"><i class="d"></i><i class="d"></i><i class="d"></i></span></div>
+        <div class="wk cur"><span class="n">W3</span><span class="what">2× (1:30 · 3:00 blokken)</span><span class="dots"><i class="d"></i><i></i><i></i></span></div>
+        <div class="wk"><span class="n">W4</span><span class="what">ren 3 · 5 · 3 · 5 min</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="wk"><span class="n">W5</span><span class="what">opbouw → ren 20 min</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="wk"><span class="n">W6</span><span class="what">opbouw → ren 22 min</span><span class="dots"><i></i><i></i><i></i></span></div>
+        <div class="wk"><span class="n">W7–9</span><span class="what">ren 25 → 28 → 30 min · 5K</span><span class="dots"><i></i><i></i><i></i></span></div>
+      </div>
+      <div class="nextcard">
+        <div class="t">W3 · D2 — 28 min<small>warming-up 5:00 → 2 blokken → cooling-down</small></div>
+        <button class="gobtn">Start ▶</button>
+      </div>
+      <div class="nav"><div>Week</div><div class="on">Sessie</div><div>Progressie</div><div>Profiel</div></div>
+    </div></div>
+  </div>
+
+  <!-- runner: RUN state -->
+  <div class="col">
+    <div class="label">Runner · REN-segment</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>18:14</span><span>scherm-uit OK · 87%</span></div>
+      <div class="htitle" style="font-size:19px">0→5K <small>W3 · D2</small></div>
+      <div class="flood runmode">
+        <div class="st">REN</div>
+        <div class="t">1:23</div>
+        <div class="nxt">daarna · wandel 3:00</div>
+      </div>
+      <div class="cue"><span class="spk">🔊</span><span><b>−10s cue:</b> "Nog tien seconden, dan rustig wandelen."</span></div>
+      <div class="segbar">
+        <i class="w done" style="flex-grow:3.3"></i><i class="r done"></i><i class="w done"></i>
+        <i class="r" style="flex-grow:2"></i><i class="w" style="flex-grow:2"></i>
+        <i class="r"></i><i class="w"></i><i class="r" style="flex-grow:2"></i><i class="w" style="flex-grow:2"></i>
+        <i class="w done" style="flex-grow:3.3"></i>
+      </div>
+      <div class="runmeta"><span>verstreken 11:37</span><span>segment 4/10</span><span>totaal 28:00</span></div>
+      <div class="runbtns"><button>⏸ pauze</button><button>⏭ sla over</button></div>
+      <div class="nav"><div>Week</div><div class="on">Sessie</div><div>Progressie</div><div>Profiel</div></div>
+    </div></div>
+    <div class="notif">
+      <div class="app">Android · meldingenbalk · foreground service</div>
+      <div class="big">REN · 1:23</div>
+      <div class="subt">daarna: wandel 3:00 · segment 4/10 · 0→5K W3·D2</div>
+      <div class="actions"><button>⏸ Pauze</button><button>⏭ Overslaan</button></div>
+    </div>
+  </div>
+
+  <!-- runner: WALK state -->
+  <div class="col">
+    <div class="label">Runner · WANDEL-segment</div>
+    <div class="phone"><div class="screen">
+      <div class="statusbar"><span>18:19</span><span>🎧 muziek dimt bij cue</span></div>
+      <div class="htitle" style="font-size:19px">0→5K <small>W3 · D2</small></div>
+      <div class="flood walkmode">
+        <div class="st">WANDEL</div>
+        <div class="t">2:41</div>
+        <div class="nxt">daarna · ren 1:30</div>
+      </div>
+      <div class="cue"><span class="spk">🔊</span><span><b>start-cue:</b> "Wandelen, drie minuten. Adem rustig."</span></div>
+      <div class="seglist">
+        <div><span>✓ warming-up wandelen</span><span>5:00</span></div>
+        <div><span>✓ ren · wandel · ren · wandel</span><span>blok 1</span></div>
+        <div class="cur"><span>▶ wandel</span><span>2:41 / 3:00</span></div>
+        <div><span>ren 1:30 · wandel 1:30 · ren 3:00</span><span>blok 2</span></div>
+        <div><span>cooling-down wandelen</span><span>5:00</span></div>
+      </div>
+      <div class="runbtns"><button>⏸ pauze</button><button>⏭ sla over</button></div>
+      <div class="nav"><div>Week</div><div class="on">Sessie</div><div>Progressie</div><div>Profiel</div></div>
+    </div></div>
+    <p class="note"><b>Cue-momenten</b> (uit de JSON): segment-start ("Ren, negentig seconden"),
+    −10s waarschuwing, warming-up-einde ("Bijna klaar met de warming-up. Maak je klaar voor je eerste
+    ren-blok"). Piep vóór stem, muziek dimt (audio ducking), alles offline via platform-TTS in de
+    app-taal. Kleurcode: <b style="color:var(--amber)">amber = ren</b> · <b style="color:var(--moss)">groen = wandel</b>, dus de kleur zegt wat je doet als je het geluid mist.</p>
+  </div>
+</div>
+</body>
+</html>
