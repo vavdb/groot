@@ -1,0 +1,45 @@
+/* Groot design tokens — single source, mirrored from design/habit-rings.html.
+   Scope a subtree with .theme-light / .theme-dark; components only use var(). */
+
+.theme-light {
+  --g-bg: #f4f1e8;
+  --g-card: #fdfcf7;
+  --g-line: #ddd6c3;
+  --g-ink: #26301f;
+  --g-dim: #6f7a63;
+  --g-moss: #4a7048;
+  --g-moss-deep: #2f4d2e;
+  --g-bark: #6b4f35;
+  --g-amber: #c98f2d;
+  --g-clay: #b45f3c;
+  --g-ring: #8aa385;
+  --g-wither: #c9c2ae;
+  --g-shadow: 0 18px 60px rgba(38, 48, 31, .14);
+}
+
+.theme-dark {
+  --g-bg: #151a12;
+  --g-card: #1d2419;
+  --g-line: #33402c;
+  --g-ink: #e8ead9;
+  --g-dim: #93a087;
+  --g-moss: #7fb47a;
+  --g-moss-deep: #a5cf9f;
+  --g-bark: #c49a6c;
+  --g-amber: #e0aa4a;
+  --g-clay: #d97e56;
+  --g-ring: #4a5f45;
+  --g-wither: #3a4234;
+  --g-shadow: 0 18px 60px rgba(0, 0, 0, .5);
+}
+
+.theme-light, .theme-dark {
+  background: var(--g-bg);
+  color: var(--g-ink);
+  /* Fraunces/Public Sans arrive via the host page (self-hosted in production); these are fallbacks */
+  font-family: "Public Sans", system-ui, sans-serif;
+}
+
+.g-serif {
+  font-family: "Fraunces", Georgia, serif;
+}

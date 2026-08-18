@@ -6,6 +6,12 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": ["run", "--project", "src/Groot.Web", "--launch-profile", "http"],
       "port": 5063
+    },
+    {
+      "name": "groot-gallery",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "tools/Groot.UI.Gallery", "--launch-profile", "http"],
+      "port": 5200
     }
   ]
 }

@@ -1,0 +1,47 @@
+.set-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+    font-family: inherit;
+    border: 1.5px solid var(--g-line);
+    color: var(--g-dim);
+    background: var(--g-card);
+    cursor: pointer;
+    padding: 0;
+}
+
+.set-circle.done {
+    border-color: var(--g-moss);
+    background: var(--g-moss);
+    color: var(--g-card);
+}
+
+.set-circle.active {
+    border: 2px solid var(--g-amber);
+    color: var(--g-amber);
+    position: relative;
+}
+
+.set-circle.active::after {
+    content: "";
+    position: absolute;
+    inset: -7px;
+    border: 1.5px solid var(--g-amber);
+    border-radius: 50%;
+    opacity: .4;
+    animation: set-circle-pulse 1.8s infinite;
+}
+
+@keyframes set-circle-pulse {
+    0% { transform: scale(.85); opacity: .55; }
+    100% { transform: scale(1.12); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .set-circle.active::after { animation: none; }
+}

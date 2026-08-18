@@ -1,0 +1,34 @@
+@* One set on the session screen: tap = logged at target reps.
+   Framework-free by design (research.md 13.1): identity components never depend on MudBlazor. *@
+
+<button type="button"
+        class="set-circle @StateClass"
+        aria-label="@AriaLabel"
+        @onclick="OnTap">
+    @Display
+</button>
+
+@code {
+    [Parameter, EditorRequired] public SetCircleState State { get; set; }
+
+    /// <summary>Reps to show: logged reps when done, target reps when active, null renders a dot.</summary>
+    [Parameter] public int? Reps { get; set; }
+
+    [Parameter] public EventCallback OnTap { get; set; }
+
+    private string StateClass => State switch
+    {
+        SetCircleState.Done => "done",
+        SetCircleState.Active => "active",
+        _ => "pending",
+    };
+
+    private string Display => Reps?.ToString() ?? "·";
+
+    private string AriaLabel => State switch
+    {
+        SetCircleState.Done => $"Set done, {Reps} reps",
+        SetCircleState.Active => $"Current set, target {Reps} reps",
+        _ => "Upcoming set",
+    };
+}

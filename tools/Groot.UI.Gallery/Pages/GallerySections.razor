@@ -1,0 +1,91 @@
+@* Rendered once per theme column. All example data lives here, not in the components. *@
+
+<section class="section">
+    <h2>SetCircle</h2>
+    <div class="caption">session in progress · tap = logged</div>
+    <div class="row">
+        <SetCircle State="SetCircleState.Done" Reps="3" />
+        <SetCircle State="SetCircleState.Done" Reps="3" />
+        <SetCircle State="SetCircleState.Active" Reps="3" />
+        <SetCircle State="SetCircleState.Pending" />
+        <SetCircle State="SetCircleState.Pending" />
+    </div>
+    <div class="caption">single states: done (logged reps) · active (target) · pending · done with AMRAP overshoot</div>
+    <div class="row">
+        <SetCircle State="SetCircleState.Done" Reps="10" />
+        <SetCircle State="SetCircleState.Active" Reps="5" />
+        <SetCircle State="SetCircleState.Pending" />
+        <SetCircle State="SetCircleState.Done" Reps="14" />
+    </div>
+</section>
+
+<section class="section">
+    <h2>WeekCard</h2>
+    <div class="stack">
+        <div>
+            <div class="caption">on track · Friday morning, run planned today</div>
+            <WeekCard Days="OnTrackDays" Evaluation="OnTrackEval" />
+        </div>
+        <div>
+            <div class="caption">joker week · Thursday lift missed, joker spent</div>
+            <WeekCard Days="JokerDays" Evaluation="JokerEval" />
+        </div>
+        <div>
+            <div class="caption">broken week · one run only, jokers cannot cover</div>
+            <WeekCard Days="BrokenDays" Evaluation="BrokenEval" />
+        </div>
+    </div>
+</section>
+
+@code {
+    private static readonly DateOnly Monday = new(2026, 8, 17);
+    private static readonly WeekContract Contract = new();
+
+    private static ContractSession Lift(int d) => new(Monday.AddDays(d), SessionKind.Lift);
+    private static ContractSession Run(int d) => new(Monday.AddDays(d), SessionKind.Run);
+
+    // on track: Mon run, Tue lift, Wed run done; Fri = today
+    private static readonly WeekEvaluation OnTrackEval =
+        ContractEvaluator.Evaluate(Monday, new[] { Run(0), Lift(1), Run(2), Lift(3) }, Contract);
+
+    private static readonly DaySlot[] OnTrackDays =
+    [
+        new("MO", "●", "RUN", DaySlotVisual.RunDone),
+        new("TU", "▲", "LIFT", DaySlotVisual.LiftDone),
+        new("WE", "●", "RUN", DaySlotVisual.RunDone),
+        new("TH", "▲", "LIFT", DaySlotVisual.LiftDone),
+        new("FR", "▶", "RUN", DaySlotVisual.Today),
+        new("SA", "·", "LIFT", DaySlotVisual.Pending),
+        new("SU", "☾", "REST", DaySlotVisual.Rest),
+    ];
+
+    // joker week: Thursday lift missed
+    private static readonly WeekEvaluation JokerEval =
+        ContractEvaluator.Evaluate(Monday, new[] { Run(0), Lift(1), Run(2) }, Contract);
+
+    private static readonly DaySlot[] JokerDays =
+    [
+        new("MO", "●", "RUN", DaySlotVisual.RunDone),
+        new("TU", "▲", "LIFT", DaySlotVisual.LiftDone),
+        new("WE", "●", "RUN", DaySlotVisual.RunDone),
+        new("TH", "◆", "JOKER", DaySlotVisual.Joker),
+        new("FR", "·", "RUN", DaySlotVisual.Pending),
+        new("SA", "·", "LIFT", DaySlotVisual.Pending),
+        new("SU", "☾", "REST", DaySlotVisual.Rest),
+    ];
+
+    // broken: one run, three credits missing, two jokers cannot cover
+    private static readonly WeekEvaluation BrokenEval =
+        ContractEvaluator.Evaluate(Monday, new[] { Run(0) }, Contract);
+
+    private static readonly DaySlot[] BrokenDays =
+    [
+        new("MO", "●", "RUN", DaySlotVisual.RunDone),
+        new("TU", "·", "", DaySlotVisual.Pending),
+        new("WE", "·", "", DaySlotVisual.Pending),
+        new("TH", "·", "", DaySlotVisual.Pending),
+        new("FR", "·", "", DaySlotVisual.Pending),
+        new("SA", "·", "", DaySlotVisual.Pending),
+        new("SU", "☾", "REST", DaySlotVisual.Rest),
+    ];
+}

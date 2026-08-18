@@ -1,0 +1,55 @@
+@* The weekly contract card: seven day slots, contract meter, jokers.
+   Framework-free; the meter values come straight from Core's ContractEvaluator. *@
+@using Groot.Core.Contract
+
+<div class="week-card">
+    <div class="week-card-head">
+        <span>@Title</span>
+        <span class="jokers">@JokerDisplay</span>
+    </div>
+
+    <div class="days">
+        @foreach (var day in Days)
+        {
+            <div class="day">
+                <div class="day-name">@day.DayLabel</div>
+                <div class="slot @SlotClass(day.Visual)">
+                    <span class="slot-icon">@day.Icon</span>@day.Caption
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (Evaluation is { } eval)
+    {
+        <div class="meter">
+            <span>LIFT <b class="@(eval.LiftCredits + eval.JokersSpent >= Contract.Lifts ? "ok" : "")">@eval.LiftCredits/@Contract.Lifts</b></span>
+            <span>RUN <b class="@(eval.RunCredits >= Contract.Runs ? "ok" : "")">@eval.RunCredits/@Contract.Runs</b></span>
+            <span>REST <b>@(eval.RestKept ? "✓" : "—")</b></span>
+            <span class="@(JokersLeft == 0 ? "warn" : "")">◆ @JokersLeft left</span>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];
+    [Parameter] public WeekEvaluation? Evaluation { get; set; }
+    [Parameter] public WeekContract Contract { get; set; } = new();
+    [Parameter] public string Title { get; set; } = "Contract · 2 lift · 2 run · 1 rest";
+
+    private int JokersLeft => Contract.Jokers - (Evaluation?.JokersSpent ?? 0);
+
+    private string JokerDisplay =>
+        string.Concat(Enumerable.Repeat("◆", Math.Max(0, JokersLeft)))
+        + string.Concat(Enumerable.Repeat("◇", Evaluation?.JokersSpent ?? 0));
+
+    private static string SlotClass(DaySlotVisual visual) => visual switch
+    {
+        DaySlotVisual.LiftDone => "lift",
+        DaySlotVisual.RunDone => "run",
+        DaySlotVisual.Joker => "joker",
+        DaySlotVisual.Today => "today",
+        DaySlotVisual.Rest => "rest",
+        _ => "",
+    };
+}
