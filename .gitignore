@@ -7,9 +7,8 @@ obj/
 artifacts/
 TestResults/
 
-# Rider / VS Code
+# Rider
 .idea/
-.vscode/
 
 # MAUI / mobile
 *.apk
