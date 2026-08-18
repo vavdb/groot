@@ -330,14 +330,54 @@ House rules: attribution screen in-app ("Programs" → "About these methods") wi
 
 ## 13. Stack details (owner questions, 2026-08-18)
 
-### 13.1 MudBlazor?
+### 13.1 MudBlazor — DECIDED (owner overruled, 2026-08-18): framework for the screens
 
-Works fine inside `BlazorWebView`, but it's a Material Design kit and Groot has its own design
-language (the mockup CSS is effectively the design system already). Fighting MudBlazor's Material
-look with theme overrides costs more than writing the handful of components Groot needs: set
-circles, week card, timer, entry widget are all custom anyway — they ARE the app. Verdict: **core
-screens = custom Razor components with our own CSS; MudBlazor optional later** for low-identity
-surfaces (settings forms, dialogs, data grid in stats) if hand-rolling those gets tedious.
+First take here said "custom core screens"; owner ruled otherwise: main screens are built with a
+UI framework, hand-rolling is out. Analysis of where MudBlazor will bite (v9.8.0, Aug 2026,
+actively released; works in `BlazorWebView`):
+
+**Expected friction, ranked:**
+1. **No bottom navigation component** — proposal [#2206] open for years. Groot's primary nav is
+   4 bottom tabs. Options: `MudTabs Position="Bottom"` (tab semantics, workable) or a 10-line
+   `MudPaper` + icon buttons strip. Small, but it's the first thing we build.
+2. **No long-press gesture** — tap=done / hold=edit on set circles needs own pointer-event JS
+   interop regardless of framework.
+3. **Identity visuals stay custom** — season grid, year rings (SVG), set circles. MudChart covers
+   the e1RM line chart, not heatmaps/radials. This was always going to be custom; it's the
+   identity, not the chrome.
+4. **De-Materializing the theme** — moss/bark/amber via `PaletteLight`/`PaletteDark`,
+   Fraunces/Public Sans via `Typography`, ripple off, elevation down, radii via `LayoutProperties`.
+   Budget 1–2 days; Material leaks through in focus states and density defaults.
+5. **WASM payload** on the web head grows (lib + icon font); PWA caching absorbs it after first
+   load. Measure, don't guess.
+6. **iOS Hybrid details**: safe-area insets are ours; test dialogs + keyboard on device. No known
+   AOT blockers (managed components, no dynamic codegen — unlike EF Core).
+7. **Release cadence**: v7→v8→v9 in about two years, breaking changes each major. Pin the major,
+   upgrade deliberately.
+
+**What it buys for free:** program-editor forms + validation, dialogs, snackbar (PR toasts),
+history table/DataGrid, pickers, drawer/appbar, dark/light theme switching, localization plumbing.
+
+**Docs tooling:** no MudBlazor skill/MCP in this environment or the org registry, but
+[MudMCP](https://github.com/mcbodge/MudMCP) exists — an unofficial MCP server (Roslyn-parsed docs
+for ~85 components, 12 tools, stdio transport). Add it when scaffolding starts:
+`claude mcp add` with the stdio command from its README. Not affiliated with the MudBlazor team;
+treat output as docs lookup, verify against mudblazor.com.
+
+**Alternatives weighed (owner widened the question to "any framework, just not homegrown"):**
+Fluent UI Blazor (Windows design language — wrong feel on Android), Radzen (neutral look, good
+CSS-var theming, smaller community — the runner-up if Material must go), Syncfusion (heavy,
+community-license revenue terms to check against an Apache-2.0 repo), Blazorise (extra provider
+abstraction + commercial tier), Ant Design Blazor (fine, adds nothing over Mud).
+
+**Confirmed: MudBlazor — with a reframe that shrinks friction #4.** Material was framed as the
+enemy; wrong frame. Material is Android's native design language and Groot is Android-first:
+adopt Material structure (touch targets, motion, elevation logic), express identity through
+palette + Fraunces + the three custom visuals. Accent theming instead of a fight; the 1–2 day
+estimate drops to roughly half. Radzen noted as fallback; component APIs are close enough that an
+early switch is cheap while identity visuals stay custom.
+
+[#2206]: https://github.com/MudBlazor/MudBlazor/issues/2206
 
 ### 13.2 CUPID instead of SOLID — what it means for Groot concretely
 

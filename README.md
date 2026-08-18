@@ -1,7 +1,8 @@
 # Groot
 
 A workout logger and habit tracker for lifters who also run. Web (Blazor WASM PWA), Android, and
-iOS from one C# codebase (.NET MAUI Blazor Hybrid).
+iOS from one C# codebase (.NET MAUI Blazor Hybrid, MudBlazor for UI, Dapper on SQLite,
+self-hosted PocketBase for sync).
 
 **Status: design phase.** No app code yet. The design documents and mockups in this repo are the
 current deliverables.
