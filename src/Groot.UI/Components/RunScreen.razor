@@ -1,5 +1,6 @@
 @* The 0→5K runner (design/run-05k.html): colour says what you do when you miss the sound.
    Framework-free; the clock lives here, all interval maths comes from Groot.Core's RunSession. *@
+@using System.Diagnostics
 @using Groot.Core.Intervals
 @using Groot.UI.Audio
 @implements IDisposable
@@ -69,6 +70,11 @@
 @code {
     private const int TickMilliseconds = 250;
 
+    /// <summary>
+    /// The session being run. Replacing the instance (a new program/week/day) requires an
+    /// <c>@key</c> on this component so Blazor tears down and rebuilds the timer state instead
+    /// of reusing it against the new session's segments — both heads already key it.
+    /// </summary>
     [Parameter, EditorRequired] public RunSession Session { get; set; } = null!;
 
     /// <summary>Where cues are spoken. Null keeps the screen silent but fully usable.</summary>
@@ -82,8 +88,13 @@
 
     private ICuePlayer? _cuePlayer;
     private CancellationTokenSource? _loop;
-    private DateTimeOffset _spanStart;
-    private int _baseSeconds;
+
+    // Monotonic clock (Stopwatch.GetTimestamp), not DateTimeOffset.UtcNow — the wall clock can
+    // jump backwards (NTP adjustment) and truncating to whole seconds at every pause loses up
+    // to ~1s per pause/resume. We accumulate milliseconds continuously and only round to a
+    // second at the display/cue boundary.
+    private long _elapsedMs;
+    private long _resumeTimestamp;
     private int _lastCueSecond = -1;
     private bool _started;
     private bool _running;
@@ -96,16 +107,12 @@
         _cuePlayer = CuePlayer;
     }
 
-    private int ElapsedSeconds
-    {
-        get
-        {
-            var elapsed = _running
-                ? _baseSeconds + (int)(DateTimeOffset.UtcNow - _spanStart).TotalSeconds
-                : _baseSeconds;
-            return Math.Clamp(elapsed, 0, Session.TotalSeconds);
-        }
-    }
+    private long CurrentElapsedMs => _running ? _elapsedMs + MsSince(_resumeTimestamp) : _elapsedMs;
+
+    private static long MsSince(long stopwatchTimestamp) =>
+        (long)((Stopwatch.GetTimestamp() - stopwatchTimestamp) * 1000.0 / Stopwatch.Frequency);
+
+    private int ElapsedSeconds => Math.Clamp((int)(CurrentElapsedMs / 1000), 0, Session.TotalSeconds);
 
     private RunProgress Progress => Session.ProgressAt(_started ? ElapsedSeconds : 0);
 
@@ -147,18 +154,20 @@
     private async Task StartAsync()
     {
         StopLoop();
-        _baseSeconds = 0;
+        _elapsedMs = 0;
         _lastCueSecond = -1;
         _lastCueText = null;
         _finished = false;
         _started = true;
         _running = true;
-        _spanStart = DateTimeOffset.UtcNow;
+        _resumeTimestamp = Stopwatch.GetTimestamp();
 
         var cts = new CancellationTokenSource();
         _loop = cts;
+        var token = cts.Token; // captured before the await — cts may be disposed by a concurrent StopLoop while we're suspended
         await TickAsync();
-        _ = LoopAsync(cts.Token);
+        if (ReferenceEquals(_loop, cts)) // still the current session (not disposed/replaced during the await)
+            _ = LoopAsync(token);
     }
 
     private void TogglePause()
@@ -167,12 +176,12 @@
 
         if (_running)
         {
-            _baseSeconds = ElapsedSeconds;
+            _elapsedMs += MsSince(_resumeTimestamp);
             _running = false;
         }
         else
         {
-            _spanStart = DateTimeOffset.UtcNow;
+            _resumeTimestamp = Stopwatch.GetTimestamp();
             _running = true;
         }
     }
@@ -181,9 +190,10 @@
     {
         if (_finished) return;
 
-        _baseSeconds = Session.SkipTargetFrom(ElapsedSeconds);
-        _spanStart = DateTimeOffset.UtcNow;
-        _lastCueSecond = _baseSeconds - 1; // skipped cues are gone; the new segment still announces itself
+        var targetSeconds = Session.SkipTargetFrom(ElapsedSeconds);
+        _elapsedMs = targetSeconds * 1000L;
+        _resumeTimestamp = Stopwatch.GetTimestamp();
+        _lastCueSecond = targetSeconds - 1; // skipped cues are gone; the new segment still announces itself
         await TickAsync();
     }
 
@@ -226,7 +236,7 @@
         {
             _finished = true;
             _running = false;
-            _baseSeconds = Session.TotalSeconds;
+            _elapsedMs = Session.TotalSeconds * 1000L;
             StopLoop();
             await OnFinished.InvokeAsync();
         }

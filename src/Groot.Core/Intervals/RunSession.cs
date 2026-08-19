@@ -37,15 +37,21 @@ public sealed class RunSession
         if (segments.Count == 0) throw new ArgumentException("Session needs at least one segment.", nameof(segments));
         if (segments.Any(s => s.Seconds <= 0)) throw new ArgumentException("Every segment needs a positive duration.", nameof(segments));
 
-        Segments = segments;
+        // Defensive copy: the caller's list (and each segment's cue list) must not be mutable
+        // out from under us after construction — copy both levels and hide the arrays behind
+        // read-only wrappers so a cast back to the concrete array can't recover write access.
+        var snapshot = segments.Select(s => s with { Cues = s.Cues?.ToArray() }).ToArray();
+
+        Segments = Array.AsReadOnly(snapshot);
         CueDefaults = cueDefaults ?? new CueDefaults();
         Id = id;
-        _engine = new IntervalEngine(segments);
-        _segmentStarts = SegmentStarts(segments);
-        TotalSeconds = _segmentStarts[^1] + segments[^1].Seconds;
-        RunCount = segments.Count(s => s.Kind == SegmentKind.Run);
-        RunSeconds = segments.Where(s => s.Kind == SegmentKind.Run).Sum(s => s.Seconds);
+        _engine = new IntervalEngine(snapshot);
+        _segmentStarts = SegmentStarts(snapshot);
+        TotalSeconds = _segmentStarts[^1] + snapshot[^1].Seconds;
+        RunCount = snapshot.Count(s => s.Kind == SegmentKind.Run);
+        RunSeconds = snapshot.Where(s => s.Kind == SegmentKind.Run).Sum(s => s.Seconds);
         _cues = BuildCues();
+        Cues = Array.AsReadOnly(_cues);
     }
 
     public static RunSession For(IntervalProgram program, int week, int day) =>
@@ -69,7 +75,7 @@ public sealed class RunSession
     public int RunSeconds { get; }
 
     /// <summary>The whole cue schedule, ordered by second. Handy for tests and for a session preview.</summary>
-    public IReadOnlyList<RunCue> Cues => _cues;
+    public IReadOnlyList<RunCue> Cues { get; }
 
     public int SegmentStartSecond(int segmentIndex) => _segmentStarts[segmentIndex];
 
@@ -129,7 +135,8 @@ public sealed class RunSession
     private RunCue[] BuildCues()
     {
         var cues = new List<RunCue>();
-        var endingSoonLead = Math.Abs(CueDefaults.EndingSoonCueAtSeconds);
+        // int.MinValue has no positive counterpart (Math.Abs would overflow) — clamp it away first.
+        var endingSoonLead = Math.Abs(Math.Max(CueDefaults.EndingSoonCueAtSeconds, int.MinValue + 1));
 
         for (var i = 0; i < Segments.Count; i++)
         {

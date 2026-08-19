@@ -191,6 +191,46 @@ public class RunSessionTests
     }
 
     [Fact]
+    public void Mutating_the_caller_list_after_construction_does_not_change_the_session()
+    {
+        var segments = new List<Segment>
+        {
+            new(SegmentKind.Run, 60),
+            new(SegmentKind.Walk, 60),
+        };
+        var session = new RunSession(segments);
+
+        segments.Add(new Segment(SegmentKind.Run, 999));
+        segments[0] = new Segment(SegmentKind.Walk, 5);
+
+        Assert.Equal(120, session.TotalSeconds);
+        Assert.Equal(2, session.Segments.Count);
+        Assert.Equal(SegmentKind.Run, session.Segments[0].Kind);
+        Assert.Equal(60, session.Segments[0].Seconds);
+    }
+
+    [Fact]
+    public void Mutating_the_caller_cue_list_after_construction_does_not_change_the_session()
+    {
+        var cues = new List<CuePoint> { new(30, "cue.original") };
+        var segments = new List<Segment> { new(SegmentKind.Run, 60, Cues: cues) };
+        var session = new RunSession(segments);
+
+        cues.Add(new CuePoint(45, "cue.injected"));
+
+        Assert.DoesNotContain(session.Cues, c => c.Key == "cue.injected");
+    }
+
+    [Fact]
+    public void Segments_and_cues_cannot_be_cast_back_to_a_mutable_array()
+    {
+        var session = Short();
+
+        Assert.False(session.Segments is Segment[]);
+        Assert.False(session.Cues is RunCue[]);
+    }
+
+    [Fact]
     public void Cue_text_speaks_english_by_default_and_dutch_when_asked()
     {
         var session = RunSession.For(Couch, week: 3, day: 1);

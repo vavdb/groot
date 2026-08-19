@@ -124,4 +124,82 @@ public class ProgramCatalogTests
         var error = Assert.Throws<KeyNotFoundException>(() => ProgramCatalog.Embedded.IntervalProgram("nope"));
         Assert.Contains("nope", error.Message);
     }
+
+    [Fact]
+    public void Duplicate_week_number_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [
+            { "week": 1, "plan": [ { "kind": "run", "seconds": 60 } ] },
+            { "week": 1, "plan": [ { "kind": "walk", "seconds": 60 } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("week 1 more than once", error.Message);
+    }
+
+    [Fact]
+    public void Nonpositive_week_number_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [ { "week": 0, "plan": [ { "kind": "run", "seconds": 60 } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("must be positive", error.Message);
+    }
+
+    [Fact]
+    public void Nonpositive_sessions_per_week_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [ { "week": 1, "sessionsPerWeek": 0, "plan": [ { "kind": "run", "seconds": 60 } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("sessionsPerWeek", error.Message);
+    }
+
+    [Fact]
+    public void Duplicate_day_number_in_an_override_week_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [ { "week": 1, "sessionsPerWeek": 2, "days": [
+            { "day": 1, "plan": [ { "kind": "run", "seconds": 60 } ] },
+            { "day": 1, "plan": [ { "kind": "walk", "seconds": 60 } ] } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("day 1 more than once", error.Message);
+    }
+
+    [Fact]
+    public void Day_number_outside_sessions_per_week_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [ { "week": 1, "sessionsPerWeek": 2, "days": [
+            { "day": 3, "plan": [ { "kind": "run", "seconds": 60 } ] } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("must be within 1..2", error.Message);
+    }
+
+    [Fact]
+    public void Nonpositive_day_number_in_an_override_week_is_rejected()
+    {
+        const string json = """
+        { "id": "bad", "version": 1, "name": "Bad", "type": "intervals",
+          "weeks": [ { "week": 1, "sessionsPerWeek": 2, "days": [
+            { "day": 0, "plan": [ { "kind": "run", "seconds": 60 } ] } ] } ] }
+        """;
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+        Assert.Contains("must be within 1..2", error.Message);
+    }
 }

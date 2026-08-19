@@ -94,6 +94,10 @@ public sealed class ProgramCatalog
         if (weeks.Length == 0)
             throw new InvalidOperationException($"Interval program '{id}' has no weeks.");
 
+        var duplicateWeek = weeks.GroupBy(w => w.Week).FirstOrDefault(g => g.Count() > 1);
+        if (duplicateWeek is not null)
+            throw new InvalidOperationException($"Interval program '{id}' declares week {duplicateWeek.Key} more than once.");
+
         return new IntervalProgram(id, name, version, defaults, weeks);
     }
 
@@ -110,7 +114,12 @@ public sealed class ProgramCatalog
     private static IntervalWeek ParseWeek(JsonElement element, string id)
     {
         var week = element.GetProperty("week").GetInt32();
+        if (week <= 0)
+            throw new InvalidOperationException($"Program '{id}' has a week number of {week}; weeks must be positive.");
+
         var sessions = element.TryGetProperty("sessionsPerWeek", out var s) ? s.GetInt32() : 3;
+        if (sessions <= 0)
+            throw new InvalidOperationException($"Program '{id}' week {week} has {sessions} sessionsPerWeek; must be positive.");
 
         var hasPlan = element.TryGetProperty("plan", out var planElement);
         var hasDays = element.TryGetProperty("days", out var daysElement);
@@ -128,6 +137,15 @@ public sealed class ProgramCatalog
 
         if (days.Length == 0)
             throw new InvalidOperationException($"Program '{id}' week {week} has an empty days array.");
+
+        var badDay = days.FirstOrDefault(d => d.Day <= 0 || d.Day > sessions);
+        if (badDay is not null)
+            throw new InvalidOperationException(
+                $"Program '{id}' week {week} has a day number of {badDay.Day}; must be within 1..{sessions}.");
+
+        var duplicateDay = days.GroupBy(d => d.Day).FirstOrDefault(g => g.Count() > 1);
+        if (duplicateDay is not null)
+            throw new InvalidOperationException($"Program '{id}' week {week} declares day {duplicateDay.Key} more than once.");
 
         return new IntervalWeek(week, sessions, Plan: null, days);
     }
