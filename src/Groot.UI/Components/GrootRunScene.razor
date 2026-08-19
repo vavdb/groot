@@ -1,0 +1,64 @@
+@* The complete run screen surface: the program/week/session picker, optional voice/sound
+   controls, a segment summary, and the embedded run screen. Both heads embed this; the only
+   head-specific inputs are Programs, ShowProgram, the cue player, and the audio callbacks. *@
+@using Groot.Core.Programs
+@using Groot.UI.Audio
+
+<MudStack Row="true" Wrap="Wrap.Wrap" Spacing="6" AlignItems="AlignItems.Start" Class="run-scene">
+    <MudPaper Elevation="1" Class="picker">
+        <MudStack Spacing="3">
+            <GrootProgramPicker Programs="Programs"
+                                ShowProgram="ShowProgram"
+                                SelectionChanged="OnSelectionChanged" />
+
+            @if (ShowAudioControls)
+            {
+                <GrootAudioControls @bind-Language="Language"
+                                    @bind-Sound="SoundEnabled"
+                                    ValuesChanged="OnAudioChanged" />
+            }
+
+            @if (_selection is { } sel)
+            {
+                <MudText Typo="Typo.caption">
+                    @sel.Session.Segments.Count segments · @Format(sel.Session.TotalSeconds) total ·
+                    @sel.Session.RunCount run blocks · @Format(sel.Session.RunSeconds) running
+                </MudText>
+            }
+        </MudStack>
+    </MudPaper>
+
+    @if (_selection is { } selected)
+    {
+        <GrootRunPage Session="selected.Session"
+                      CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
+                      Language="Language"
+                      SessionsInWeek="selected.SessionsInWeek" />
+    }
+</MudStack>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<IntervalProgram> Programs { get; set; } = [];
+
+    /// <summary>Where cues are spoken. Null keeps the screen silent but usable.</summary>
+    [Parameter] public ICuePlayer? CuePlayer { get; set; }
+
+    /// <summary>Show the program selector (false for a single fixed program).</summary>
+    [Parameter] public bool ShowProgram { get; set; } = true;
+
+    /// <summary>Show the voice/sound controls (web) or omit them (phone heads).</summary>
+    [Parameter] public bool ShowAudioControls { get; set; } = true;
+
+    /// <summary>Raised when the voice language or sound toggle changes. Web maps this onto its cue player.</summary>
+    [Parameter] public EventCallback<GrootAudioState> AudioChanged { get; set; }
+
+    private GrootProgramSelection? _selection;
+    private string Language { get; set; } = "en";
+    private bool SoundEnabled { get; set; } = true;
+
+    private static string Format(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+
+    private void OnSelectionChanged(GrootProgramSelection selection) => _selection = selection;
+
+    private async void OnAudioChanged() => await AudioChanged.InvokeAsync(new GrootAudioState(Language, SoundEnabled));
+}

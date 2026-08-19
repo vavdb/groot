@@ -18,49 +18,10 @@ h1:focus {
 .home {
     padding: 24px 16px;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
 }
 
-.home h1 {
-    font-size: 44px;
-    font-weight: 900;
-    margin: 0;
-    color: var(--g-ink);
-}
-
-.home h1 span {
-    color: var(--g-amber);
-}
-
-.home .sub {
-    margin: 0 0 20px;
-    font-size: 15px;
-    color: var(--g-dim);
-}
-
-.home .cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--g-amber);
-    color: var(--g-run-ink);
+.cta {
     border-radius: 999px;
-    padding: 12px 24px;
-    font-weight: 700;
-    font-size: 14px;
-    text-decoration: none;
-    align-self: flex-start;
-}
-
-.home .cta:hover {
-    filter: brightness(1.06);
-    color: var(--g-run-ink);
-}
-
-.home .cta-icon {
-    font-size: 11px;
 }
 
 #blazor-error-ui {

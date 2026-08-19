@@ -1,0 +1,24 @@
+@* Voice-language and sound-cue switches for the run screen. The head feeds the current
+   values back and reacts via callbacks (Web drives Web Speech; phone heads omit this). *@
+
+<MudStack Spacing="3">
+    <MudSelect T="string" Label="Voice" Variant="Variant.Outlined"
+               @bind-Value="Language" @bind-Value:after="RaiseChanged">
+        <MudSelectItem T="string" Value="@English">English</MudSelectItem>
+        <MudSelectItem T="string" Value="@Dutch">Nederlands</MudSelectItem>
+    </MudSelect>
+
+    <MudSwitch T="bool" Label="Sound cues" Color="Color.Primary" @bind-Value="Sound"
+               @bind-Value:after="RaiseChanged" />
+</MudStack>
+
+@code {
+    private const string English = "en";
+    private const string Dutch = "nl";
+
+    [Parameter] public string Language { get; set; } = English;
+    [Parameter] public bool Sound { get; set; } = true;
+    [Parameter] public EventCallback ValuesChanged { get; set; }
+
+    private async void RaiseChanged() => await ValuesChanged.InvokeAsync();
+}

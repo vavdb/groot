@@ -1,0 +1,10 @@
+.run-scene {
+    min-height: 100vh;
+    padding: 28px 16px 64px;
+    align-items: flex-start;
+}
+
+.picker {
+    width: 300px;
+    padding: 16px;
+}

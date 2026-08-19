@@ -1,0 +1,33 @@
+@* The run screen surface: a title, one-line subtitle, and the embedded run screen.
+   Receives a ready RunSession by parameter — it owns no selection state or pickers. *@
+@using Groot.Core.Intervals
+@using Groot.UI.Audio
+
+<MudStack Spacing="4" Class="groot-run-page">
+    <MudText Typo="Typo.h4" Class="g-serif">0→5K<span class="accent">.</span> <MudText Typo="Typo.caption" Inline="true">interval coach</MudText></MudText>
+
+    <MudText Typo="Typo.body2" Class="sub">
+        Time-based, no GPS. Beep plus voice at every switch and ten seconds before it —
+        pocket the phone, the colour tells you the rest.
+    </MudText>
+
+    <RunScreen @key="SessionKey"
+               Session="Session"
+               CuePlayer="CuePlayer"
+               Language="Language"
+               SessionsInWeek="SessionsInWeek" />
+</MudStack>
+
+@code {
+    /// <summary>The session to run, ready to play.</summary>
+    [Parameter, EditorRequired] public RunSession Session { get; set; } = null!;
+
+    /// <summary>Where cues are spoken. Null keeps the screen silent but usable.</summary>
+    [Parameter] public ICuePlayer? CuePlayer { get; set; }
+
+    [Parameter] public string Language { get; set; } = RunCueText.DefaultLanguage;
+
+    [Parameter] public int SessionsInWeek { get; set; } = 3;
+
+    private string SessionKey => $"{Session.Id?.ProgramName}-{Session.Id?.Week}-{Session.Id?.Day}";
+}

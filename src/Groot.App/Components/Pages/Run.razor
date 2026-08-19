@@ -1,5 +1,4 @@
 @page "/run"
-@using Groot.Core.Intervals
 @using Groot.Core.Programs
 @using Groot.UI.Audio
 @using Groot.UI.Components
@@ -7,74 +6,12 @@
 
 <PageTitle>Run</PageTitle>
 
-<div class="run-host">
-    <h1 class="visually-hidden">0→5K run session</h1>
-
-    @if (Couch.WeekNumbers.Count == 0)
-    {
-        <p class="empty">No interval program is available yet.</p>
-    }
-    else
-    {
-        <div class="picker">
-            <label>
-                Week
-                <select value="@_week" @onchange="OnWeekChanged">
-                    @foreach (var week in Couch.WeekNumbers)
-                    {
-                        <option value="@week">Week @week</option>
-                    }
-                </select>
-            </label>
-            <label>
-                Session
-                <select value="@_day" @onchange="OnDayChanged">
-                    @foreach (var day in RunSession.DaysOf(Couch, _week))
-                    {
-                        <option value="@day">Day @day</option>
-                    }
-                </select>
-            </label>
-        </div>
-
-        <RunScreen @key="SessionKey"
-                   Session="Session"
-                   CuePlayer="Cues"
-                   SessionsInWeek="Couch.Week(_week).SessionsPerWeek" />
-    }
-</div>
+<GrootRunScene Programs="CouchPrograms"
+               CuePlayer="Cues"
+               ShowProgram="false"
+               ShowAudioControls="false" />
 
 @code {
-    private static readonly IntervalProgram Couch = ProgramCatalog.Embedded.IntervalProgram("0-to-5k");
-
-    private int _week;
-    private int _day;
-    private RunSession? _session;
-
-    // Cached so unrelated renders don't rebuild the cue schedule; invalidated on selection change.
-    private RunSession Session => _session ??= RunSession.For(Couch, _week, _day);
-
-    private string SessionKey => $"{_week}-{_day}";
-
-    protected override void OnInitialized()
-    {
-        if (Couch.WeekNumbers.Count == 0) return;
-
-        _week = Couch.WeekNumbers[0];
-        _day = RunSession.DaysOf(Couch, _week)[0];
-    }
-
-    private void OnWeekChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var week)) _week = week;
-        var days = RunSession.DaysOf(Couch, _week);
-        if (!days.Contains(_day)) _day = days[0];
-        _session = null;
-    }
-
-    private void OnDayChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var day)) _day = day;
-        _session = null;
-    }
+    private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
+        [ ProgramCatalog.Embedded.IntervalProgram("0-to-5k") ];
 }

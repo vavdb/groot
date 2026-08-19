@@ -1,0 +1,84 @@
+@* The interval-program selector: program, week, and session. Owns the selection state and
+   raises SessionChanged with the resolved RunSession whenever a value changes. *@
+@using Groot.Core.Intervals
+@using Groot.Core.Programs
+
+<MudPaper Elevation="1" Class="picker">
+    <MudStack Spacing="3">
+        @if (ShowProgram)
+        {
+            <MudSelect T="string" Label="Program" Variant="Variant.Outlined"
+                       @bind-Value="_programId" @bind-Value:after="Notify">
+                @foreach (var program in Programs)
+                {
+                    <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
+                }
+            </MudSelect>
+        }
+
+        <MudSelect T="int" Label="Week" Variant="Variant.Outlined"
+                   @bind-Value="_week" @bind-Value:after="OnWeekChanged">
+            @foreach (var week in SelectedProgram.WeekNumbers)
+            {
+                <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
+            }
+        </MudSelect>
+
+        <MudSelect T="int" Label="Session" Variant="Variant.Outlined"
+                   @bind-Value="_day" @bind-Value:after="Notify">
+            @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
+            {
+                <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
+            }
+        </MudSelect>
+    </MudStack>
+</MudPaper>
+
+@code {
+    /// <summary>Interval programs to offer (empty hides the control).</summary>
+    [Parameter, EditorRequired] public IReadOnlyList<IntervalProgram> Programs { get; set; } = [];
+
+    /// <summary>Show the program selector (false for a single fixed program).</summary>
+    [Parameter] public bool ShowProgram { get; set; } = true;
+
+    /// <summary>Raised with the resolved session and week size whenever the selection changes.</summary>
+    [Parameter] public EventCallback<GrootProgramSelection> SelectionChanged { get; set; }
+
+    [Parameter] public EventCallback OnInitialSelection { get; set; }
+
+    private string _programId = "";
+    private int _week;
+    private int _day;
+
+    private IntervalProgram SelectedProgram =>
+        Programs.FirstOrDefault(p => p.Id == _programId) ?? Programs[0];
+
+    protected override void OnInitialized()
+    {
+        if (Programs.Count == 0) return;
+        _programId = Programs[0].Id;
+        _week = SelectedProgram.WeekNumbers[0];
+        _day = RunSession.DaysOf(SelectedProgram, _week)[0];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Programs.Count > 0)
+        {
+            await OnInitialSelection.InvokeAsync();
+            await Notify();
+        }
+    }
+
+    private async void OnWeekChanged()
+    {
+        var days = RunSession.DaysOf(SelectedProgram, _week);
+        if (days.Count > 0 && !days.Contains(_day)) _day = days[0];
+        await Notify();
+    }
+
+    private async Task Notify() =>
+        await SelectionChanged.InvokeAsync(new GrootProgramSelection(
+            RunSession.For(SelectedProgram, _week, _day),
+            SelectedProgram.Week(_week).SessionsPerWeek));
+}

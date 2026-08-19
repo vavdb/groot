@@ -1,147 +1,18 @@
 @page "/run"
-@using Groot.Core.Intervals
 @using Groot.Core.Programs
-@using Groot.UI.Audio
 @using Groot.UI.Components
 @using Groot.Web.Audio
 @inject WebCuePlayer Cues
 
 <PageTitle>Run · Groot</PageTitle>
 
-<div class="run-page">
-    <header class="page-head">
-        <h1 class="g-serif">0→5K<span>.</span> <small>interval coach</small></h1>
-    </header>
-
-    <p class="sub">
-        Time-based, no GPS. Beep plus voice at every switch and ten seconds before it —
-        pocket the phone, the colour tells you the rest.
-    </p>
-
-    @if (Catalog.IntervalPrograms.Count == 0)
-    {
-        <p class="empty">No interval programs are available yet.</p>
-    }
-    else
-    {
-        <div class="stage">
-            <div class="picker">
-                <label>
-                    <span>Program</span>
-                    <select value="@_programId" @onchange="OnProgramChanged">
-                        @foreach (var program in Catalog.IntervalPrograms)
-                        {
-                            <option value="@program.Id">@program.Name</option>
-                        }
-                    </select>
-                </label>
-
-                <label>
-                    <span>Week</span>
-                    <select value="@_week" @onchange="OnWeekChanged">
-                        @foreach (var week in SelectedProgram.WeekNumbers)
-                        {
-                            <option value="@week">Week @week</option>
-                        }
-                    </select>
-                </label>
-
-                <label>
-                    <span>Session</span>
-                    <select value="@_day" @onchange="OnDayChanged">
-                        @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
-                        {
-                            <option value="@day">Day @day</option>
-                        }
-                    </select>
-                </label>
-
-                <label>
-                    <span>Voice</span>
-                    <select value="@_language" @onchange="OnLanguageChanged">
-                        <option value="en">English</option>
-                        <option value="nl">Nederlands</option>
-                    </select>
-                </label>
-
-                <label class="switch">
-                    <input type="checkbox" checked="@_sound" @onchange="OnSoundChanged" />
-                    <span>Sound cues</span>
-                </label>
-
-                <p class="shape">
-                    @Session.Segments.Count segments · @Format(Session.TotalSeconds) total ·
-                    @Session.RunCount run blocks · @Format(Session.RunSeconds) running
-                </p>
-            </div>
-
-            <RunScreen @key="SessionKey"
-                       Session="Session"
-                       CuePlayer="@(_sound ? Cues : null)"
-                       Language="_language"
-                       SessionsInWeek="SelectedProgram.Week(_week).SessionsPerWeek" />
-        </div>
-    }
-</div>
+<GrootRunScene Programs="ProgramCatalog.Embedded.IntervalPrograms"
+               CuePlayer="Cues"
+               ShowProgram="true"
+               ShowAudioControls="true"
+               AudioChanged="OnAudioChanged" />
 
 @code {
-    private static readonly ProgramCatalog Catalog = ProgramCatalog.Embedded;
-
-    private string _programId = Catalog.IntervalPrograms.Count > 0 ? Catalog.IntervalPrograms[0].Id : "";
-    private int _week;
-    private int _day;
-    private string _language = "en";
-    private bool _sound = true;
-    private RunSession? _session;
-
-    private IntervalProgram SelectedProgram => Catalog.IntervalProgram(_programId);
-
-    // Cached so renders unrelated to program/week/day (e.g. the sound toggle) don't rebuild the
-    // cue schedule; invalidated whenever the selection changes.
-    private RunSession Session => _session ??= RunSession.For(SelectedProgram, _week, _day);
-
-    private string SessionKey => $"{_programId}-{_week}-{_day}";
-
-    private static string Format(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
-
-    protected override void OnInitialized()
-    {
-        ApplyLanguage();
-        if (Catalog.IntervalPrograms.Count == 0) return;
-
-        _week = SelectedProgram.WeekNumbers[0];
-        _day = RunSession.DaysOf(SelectedProgram, _week)[0];
-    }
-
-    private void OnProgramChanged(ChangeEventArgs e)
-    {
-        _programId = e.Value?.ToString() ?? _programId;
-        _week = SelectedProgram.WeekNumbers[0];
-        _day = RunSession.DaysOf(SelectedProgram, _week)[0];
-        _session = null;
-    }
-
-    private void OnWeekChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var week)) _week = week;
-        var days = RunSession.DaysOf(SelectedProgram, _week);
-        if (!days.Contains(_day)) _day = days[0];
-        _session = null;
-    }
-
-    private void OnDayChanged(ChangeEventArgs e)
-    {
-        if (int.TryParse(e.Value?.ToString(), out var day)) _day = day;
-        _session = null;
-    }
-
-    private void OnLanguageChanged(ChangeEventArgs e)
-    {
-        _language = e.Value?.ToString() ?? "en";
-        ApplyLanguage();
-    }
-
-    private void OnSoundChanged(ChangeEventArgs e) => _sound = e.Value is true;
-
-    private void ApplyLanguage() => Cues.Language = _language == "nl" ? "nl-NL" : "en-GB";
+    private void OnAudioChanged(GrootAudioState state) =>
+        Cues.Language = state.Language == "nl" ? "nl-NL" : "en-GB";
 }
