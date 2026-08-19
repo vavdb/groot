@@ -3,8 +3,9 @@ using MudBlazor;
 namespace Groot.UI.Theme;
 
 /// <summary>
-/// MudBlazor theme for the chrome layer. Signature components ignore this and use
-/// the CSS tokens in wwwroot/tokens.css; both are generated from the same palette.
+/// The MudBlazor theme that skins Groot's chrome (forms, buttons, cards, dialogs, tables).
+/// Colours resolve from <see cref="GrootPalette"/>: amber = Primary, moss = Secondary,
+/// bark = Tertiary, clay = Error, with surfaces/text/lines from the bg/card/ink/dim/line tokens.
 /// </summary>
 public static class GrootTheme
 {
@@ -12,31 +13,31 @@ public static class GrootTheme
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#4a7048",
-            Secondary = "#c98f2d",
-            Tertiary = "#6b4f35",
-            Error = "#b45f3c",
-            Background = "#f4f1e8",
-            Surface = "#fdfcf7",
-            AppbarBackground = "#fdfcf7",
-            AppbarText = "#26301f",
-            TextPrimary = "#26301f",
-            TextSecondary = "#6f7a63",
-            LinesDefault = "#ddd6c3",
+            Primary = GrootPalette.Light("amber"),
+            Secondary = GrootPalette.Light("moss"),
+            Tertiary = GrootPalette.Light("bark"),
+            Error = GrootPalette.Light("clay"),
+            Background = GrootPalette.Light("bg"),
+            Surface = GrootPalette.Light("card"),
+            AppbarBackground = GrootPalette.Light("card"),
+            AppbarText = GrootPalette.Light("ink"),
+            TextPrimary = GrootPalette.Light("ink"),
+            TextSecondary = GrootPalette.Light("dim"),
+            LinesDefault = GrootPalette.Light("line"),
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#7fb47a",
-            Secondary = "#e0aa4a",
-            Tertiary = "#c49a6c",
-            Error = "#d97e56",
-            Background = "#151a12",
-            Surface = "#1d2419",
-            AppbarBackground = "#1d2419",
-            AppbarText = "#e8ead9",
-            TextPrimary = "#e8ead9",
-            TextSecondary = "#93a087",
-            LinesDefault = "#33402c",
+            Primary = GrootPalette.Dark("amber"),
+            Secondary = GrootPalette.Dark("moss"),
+            Tertiary = GrootPalette.Dark("bark"),
+            Error = GrootPalette.Dark("clay"),
+            Background = GrootPalette.Dark("bg"),
+            Surface = GrootPalette.Dark("card"),
+            AppbarBackground = GrootPalette.Dark("card"),
+            AppbarText = GrootPalette.Dark("ink"),
+            TextPrimary = GrootPalette.Dark("ink"),
+            TextSecondary = GrootPalette.Dark("dim"),
+            LinesDefault = GrootPalette.Dark("line"),
         },
         LayoutProperties = new LayoutProperties
         {

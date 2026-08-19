@@ -1,4 +1,5 @@
-/* Groot design tokens — single source, mirrored from design/habit-rings.html.
+/* Groot design tokens - GENERATED from GrootPalette.cs by tools/Groot.Palette.Generator.
+   Do not edit by hand; edit GrootPalette.All instead and rebuild.
    Scope a subtree with .theme-light / .theme-dark; components only use var(). */
 
 .theme-light {
@@ -47,3 +48,4 @@
 .g-serif {
   font-family: "Fraunces", Georgia, serif;
 }
+

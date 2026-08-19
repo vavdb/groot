@@ -18,4 +18,18 @@
     <ProjectReference Include="..\Groot.Core\Groot.Core.csproj" />
   </ItemGroup>
 
+  <!-- Builds tools/Groot.Palette.Generator and runs it to write wwwroot/tokens.css from GrootPalette.cs. -->
+  <Target Name="GenerateTokensCss"
+          BeforeTargets="CoreCompile"
+          Inputs="$(MSBuildProjectDirectory)/Theme/GrootPalette.cs"
+          Outputs="$(MSBuildProjectDirectory)/wwwroot/tokens.css">
+    <MSBuild Projects="$(MSBuildProjectDirectory)/../../tools/Groot.Palette.Generator/Groot.Palette.Generator.csproj"
+             Targets="Build"
+             Properties="Configuration=$(Configuration)" />
+    <PropertyGroup>
+      <_Generator>$(MSBuildProjectDirectory)/../../tools/Groot.Palette.Generator/bin/$(Configuration)/net10.0/Groot.Palette.Generator.dll</_Generator>
+    </PropertyGroup>
+    <Exec Command="dotnet &quot;$(_Generator)&quot; &quot;$(MSBuildProjectDirectory)/Theme/GrootPalette.cs&quot; &quot;$(MSBuildProjectDirectory)/wwwroot/tokens.css&quot;" />
+  </Target>
+
 </Project>
