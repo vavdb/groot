@@ -77,3 +77,145 @@ body {
     padding: 8px 16px;
     z-index: 10;
 }
+
+/* ---- Design-system page chrome (Home.razor) ---- */
+.ds {
+    padding: 8px 32px 56px;
+}
+
+.ds-head {
+    padding: 8px 0 24px;
+}
+
+.ds-head h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 900;
+    font-size: 40px;
+    margin: 0;
+}
+
+.ds-head h1 span {
+    color: var(--g-amber);
+}
+
+.ds-head p {
+    font-size: 13px;
+    color: var(--g-dim);
+    margin-top: 6px;
+    max-width: 640px;
+}
+
+.ds-section {
+    margin-bottom: 40px;
+}
+
+.ds-section > h2 {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--g-dim);
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--g-line);
+    padding-bottom: 8px;
+}
+
+.theme-col {
+    padding: 18px 20px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.theme-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .24em;
+    text-transform: uppercase;
+    color: var(--g-dim);
+    margin-bottom: 4px;
+}
+
+.swatch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.swatch-chip {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid var(--g-line);
+    flex: none;
+}
+
+.swatch-meta {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+    font-size: 12px;
+}
+
+.swatch-name {
+    font-weight: 700;
+    color: var(--g-ink);
+    min-width: 72px;
+}
+
+.swatch-hex {
+    color: var(--g-dim);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 11.5px;
+}
+
+.type-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+.type-big {
+    font-size: 42px;
+    font-weight: 900;
+    color: var(--g-ink);
+    line-height: 1.05;
+    margin-top: 4px;
+}
+
+.type-sub {
+    font-size: 15px;
+    color: var(--g-dim);
+    margin-top: 4px;
+}
+
+.mud-row {
+    margin-bottom: 22px;
+}
+
+.btn-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.input-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    align-items: center;
+    margin-top: 6px;
+}
+
+.input-row .mud-input-control {
+    min-width: 180px;
+}
+
+.sample-panel {
+    padding: 18px 20px;
+    max-width: 420px;
+    margin-top: 6px;
+}

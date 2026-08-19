@@ -1,0 +1,14 @@
+@* One color swatch: chip + name + hex. Colors come from the theme columns. *@
+
+<div class="swatch">
+    <div class="swatch-chip" style="background:@Value"></div>
+    <div class="swatch-meta">
+        <span class="swatch-name">@Name</span>
+        <span class="swatch-hex">@Value</span>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+}
