@@ -1,0 +1,53 @@
+/* Colour is the message: amber = run, moss = walk. Sound is the nice-to-have. */
+.flood {
+    border-radius: 18px;
+    padding: 22px 18px 18px;
+    text-align: center;
+    transition: background 200ms ease;
+}
+
+.flood.run {
+    background: var(--g-amber);
+    color: var(--g-run-ink);
+}
+
+.flood.walk {
+    background: var(--g-moss);
+    color: var(--g-walk-ink);
+}
+
+.flood.done {
+    background: var(--g-card);
+    color: var(--g-ink);
+    border: 1px solid var(--g-line);
+}
+
+.flood.paused {
+    opacity: .62;
+}
+
+.flood .st {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .38em;
+}
+
+.flood .t {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 900;
+    font-size: 72px;
+    line-height: 1.02;
+    font-variant-numeric: tabular-nums;
+}
+
+.flood .nxt {
+    font-size: 12px;
+    font-weight: 700;
+    opacity: .8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .flood {
+        transition: none;
+    }
+}

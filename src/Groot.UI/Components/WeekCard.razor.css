@@ -1,112 +1,14 @@
 .week-card {
-    background: var(--g-card);
-    border: 1px solid var(--g-line);
-    border-radius: 16px;
-    padding: 14px;
     max-width: 375px;
 }
 
-.week-card-head {
-    display: flex;
-    justify-content: space-between;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .2em;
-    color: var(--g-dim);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-}
-
-.week-card-head .jokers {
+.jokers {
     letter-spacing: .1em;
     color: var(--g-clay);
 }
 
-.days {
-    display: flex;
-    gap: 6px;
-}
-
-.day {
-    flex: 1;
-    text-align: center;
-}
-
-.day-name {
-    font-size: 9px;
-    font-weight: 700;
-    color: var(--g-dim);
-    letter-spacing: .08em;
-    margin-bottom: 5px;
-}
-
-.slot {
-    height: 46px;
-    border-radius: 11px;
-    border: 1.5px solid var(--g-line);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
-    font-size: 8.5px;
-    font-weight: 700;
-    letter-spacing: .04em;
-    color: var(--g-dim);
-}
-
-.slot-icon {
-    font-size: 14px;
-    line-height: 1;
-}
-
-.slot.lift {
-    background: var(--g-moss);
-    border-color: var(--g-moss);
-    color: var(--g-card);
-}
-
-.slot.run {
-    background: var(--g-amber);
-    border-color: var(--g-amber);
-    color: var(--g-card);
-}
-
-.slot.joker {
-    border-color: var(--g-clay);
-    color: var(--g-clay);
-    border-style: dashed;
-}
-
-.slot.today {
-    border: 2px solid var(--g-amber);
-    color: var(--g-amber);
-    animation: slot-pulse 1.8s infinite;
-}
-
-.slot.rest {
-    border-style: dotted;
-}
-
-@keyframes slot-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 transparent; }
-    50% { box-shadow: 0 0 0 5px rgba(224, 170, 74, .15); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .slot.today { animation: none; }
-}
-
 .meter {
-    display: flex;
-    gap: 14px;
-    margin-top: 12px;
-    padding-top: 10px;
-    border-top: 1px solid var(--g-line);
-    font-size: 11px;
-    font-weight: 700;
     color: var(--g-dim);
-    justify-content: space-between;
 }
 
 .meter b {

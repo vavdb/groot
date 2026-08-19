@@ -1,0 +1,28 @@
+@* The seven day-slot cells across the week card. Custom: MudBlazor has no day-slot visual. *@
+@using Groot.Core.Contract
+
+<div class="days">
+    @foreach (var day in Days)
+    {
+        <div class="day">
+            <div class="day-name">@day.DayLabel</div>
+            <div class="slot @SlotClass(day.Visual)">
+                <span class="slot-icon">@day.Icon</span>@day.Caption
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];
+
+    private static string SlotClass(DaySlotVisual visual) => visual switch
+    {
+        DaySlotVisual.LiftDone => "lift",
+        DaySlotVisual.RunDone => "run",
+        DaySlotVisual.Joker => "joker",
+        DaySlotVisual.Today => "today",
+        DaySlotVisual.Rest => "rest",
+        _ => "",
+    };
+}

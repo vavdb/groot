@@ -1,0 +1,27 @@
+.segbar {
+    display: flex;
+    gap: 3px;
+}
+
+.segbar i {
+    height: 7px;
+    border-radius: 3px;
+    opacity: .34;
+}
+
+.segbar .w {
+    background: var(--g-ring);
+}
+
+.segbar .r {
+    background: var(--g-amber);
+}
+
+.segbar .done {
+    opacity: .34;
+}
+
+.segbar .now {
+    opacity: 1;
+    box-shadow: 0 0 0 2px var(--g-bg), 0 0 0 3px var(--g-amber);
+}

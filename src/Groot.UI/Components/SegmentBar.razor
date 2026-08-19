@@ -1,0 +1,22 @@
+@* A horizontal progress strip that maps the session's segments to run/walk colours.
+   Each stripe's width is the segment's seconds; past segments dim and the current one highlights. *@
+@using Groot.Core.Intervals
+
+<div class="segbar" aria-hidden="true">
+    @for (var i = 0; i < Segments.Count; i++)
+    {
+        var segment = Segments[i];
+        <i class="@(segment.Kind == SegmentKind.Run ? "r" : "w") @SegmentStateClass(i)"
+           style="flex-grow:@segment.Seconds"></i>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<Segment> Segments { get; set; } = [];
+    [Parameter] public int SegmentIndex { get; set; }
+    [Parameter] public bool Started { get; set; }
+    [Parameter] public bool Finished { get; set; }
+
+    private string SegmentStateClass(int index) =>
+        !Started ? "" : index < SegmentIndex || Finished ? "done" : index == SegmentIndex ? "now" : "";
+}

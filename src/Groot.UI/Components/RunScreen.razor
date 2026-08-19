@@ -1,72 +1,73 @@
-@* The 0→5K runner screen: driving the interval clock and cue playback. The flood panel and
-   segment bar are custom colour-state visuals; the buttons are MudBlazor. Interval maths comes
-   from Groot.Core's RunSession. *@
+@* The 0→5K runner screen: drives the interval clock and cue playback. The flood panel and
+   segment bar are custom colour-state visuals (see RunFlood/SegmentBar); the rest is MudBlazor.
+   Interval maths comes from Groot.Core's RunSession. *@
 @using System.Diagnostics
 @using Groot.Core.Intervals
 @using Groot.UI.Audio
 @implements IDisposable
 
-<section class="run-screen" aria-label="@Heading">
-    <header class="run-head">
-        <h2 class="g-serif">@ProgramName <small>@SessionLabel</small></h2>
-        <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
-            @for (var d = 1; d <= SessionsInWeek; d++)
-            {
-                <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
-            }
-        </div>
-    </header>
+<MudPaper Elevation="1" Class="run-screen" aria-label="@Heading">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Baseline" Justify="Justify.SpaceBetween" Class="run-head">
+            <MudText Typo="Typo.h6" Class="g-serif">
+                @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
+            </MudText>
+            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+                @for (var d = 1; d <= SessionsInWeek; d++)
+                {
+                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+                }
+            </div>
+        </MudStack>
 
-    <div class="flood @FloodClass">
-        <div class="st">@StateLabel</div>
-        <div class="t" aria-live="off">@Clock(_finished ? 0 : Progress.RemainingInSegment)</div>
-        <div class="nxt">@NextLine</div>
-    </div>
+        <RunFlood StateLabel="@StateLabel"
+                  TimeText="@Clock(_finished ? 0 : Progress.RemainingInSegment)"
+                  NextLine="@NextLine"
+                  FloodClass="@FloodClass" />
 
-    <p class="cue" aria-live="polite">
-        <span class="spk" aria-hidden="true">@(_cuePlayer is null or SilentCuePlayer ? "🔇" : "🔊")</span>
-        <span>@(_lastCueText ?? "Cues speak at every switch and ten seconds before it.")</span>
-    </p>
+        <MudPaper Elevation="0" Class="cue" aria-live="polite">
+            <MudText Typo="Typo.caption">
+                <span class="spk" aria-hidden="true">@(_cuePlayer is null or SilentCuePlayer ? "🔇" : "🔊")</span>
+                @(_lastCueText ?? "Cues speak at every switch and ten seconds before it.")
+            </MudText>
+        </MudPaper>
 
-    <div class="segbar" aria-hidden="true">
-        @for (var i = 0; i < Session.Segments.Count; i++)
-        {
-            var segment = Session.Segments[i];
-            <i class="@(segment.Kind == SegmentKind.Run ? "r" : "w") @SegmentStateClass(i)"
-               style="flex-grow:@segment.Seconds"></i>
-        }
-    </div>
+        <SegmentBar Segments="Session.Segments"
+                    SegmentIndex="Progress.SegmentIndex"
+                    Started="@_started"
+                    Finished="@_finished" />
 
-    <div class="runmeta">
-        <span>elapsed @Clock(Progress.ElapsedTotal)</span>
-        <span>segment @(Progress.SegmentIndex + 1)/@Session.Segments.Count</span>
-        <span>total @Clock(Session.TotalSeconds)</span>
-    </div>
+        <MudStack Row="true" Justify="Justify.SpaceBetween" Class="runmeta">
+            <MudText Typo="Typo.caption">elapsed @Clock(Progress.ElapsedTotal)</MudText>
+            <MudText Typo="Typo.caption">segment @(Progress.SegmentIndex + 1)/@Session.Segments.Count</MudText>
+            <MudText Typo="Typo.caption">total @Clock(Session.TotalSeconds)</MudText>
+        </MudStack>
 
-    @if (_finished)
-    {
-        <div class="summary">
-            <div class="big g-serif">Done · @Clock(Session.TotalSeconds)</div>
-            <div class="subt">@Session.RunCount run blocks · @Clock(Session.RunSeconds) running · @SessionLabel</div>
-        </div>
-    }
-
-    <div class="runbtns">
         @if (_finished)
         {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
+            <MudPaper Elevation="0" Class="summary">
+                <MudText Typo="Typo.h5" Class="g-serif big">Done · @Clock(Session.TotalSeconds)</MudText>
+                <MudText Typo="Typo.caption" Class="subt">@Session.RunCount run blocks · @Clock(Session.RunSeconds) running · @SessionLabel</MudText>
+            </MudPaper>
         }
-        else if (!_started)
-        {
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">Start ▶</MudButton>
-        }
-        else
-        {
-            <MudButton Variant="Variant.Outlined" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
-            <MudButton Variant="Variant.Outlined" OnClick="SkipAsync">⏭ Skip</MudButton>
-        }
-    </div>
-</section>
+
+        <MudStack Row="true" Spacing="2">
+            @if (_finished)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
+            }
+            else if (!_started)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">Start ▶</MudButton>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Outlined" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
+                <MudButton Variant="Variant.Outlined" OnClick="SkipAsync">⏭ Skip</MudButton>
+            }
+        </MudStack>
+    </MudStack>
+</MudPaper>
 
 @code {
     private const int TickMilliseconds = 250;
@@ -148,9 +149,6 @@
     private static string Label(Segment segment) => segment.Label ?? (segment.Kind == SegmentKind.Run ? "run" : "walk");
 
     private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
-
-    private string SegmentStateClass(int index) =>
-        !_started ? "" : index < Progress.SegmentIndex || _finished ? "done" : index == Progress.SegmentIndex ? "now" : "";
 
     private async Task StartAsync()
     {

@@ -1,0 +1,15 @@
+@* The colour-state panel at the top of the run screen: amber = run, moss = walk, card = done.
+   The background colour is the live state signal, so it has no MudBlazor equivalent. *@
+
+<div class="flood @FloodClass">
+    <div class="st">@StateLabel</div>
+    <div class="t" aria-live="off">@TimeText</div>
+    <div class="nxt">@NextLine</div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string StateLabel { get; set; } = "";
+    [Parameter, EditorRequired] public string TimeText { get; set; } = "";
+    [Parameter, EditorRequired] public string NextLine { get; set; } = "";
+    [Parameter] public string FloodClass { get; set; } = "";
+}

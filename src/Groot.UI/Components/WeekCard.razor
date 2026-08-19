@@ -2,34 +2,29 @@
    Meter values come from Core's ContractEvaluator; jokers render as filled/hollow diamonds. *@
 @using Groot.Core.Contract
 
-<div class="week-card">
-    <div class="week-card-head">
-        <span>@Title</span>
-        <span class="jokers">@JokerDisplay</span>
-    </div>
+<MudCard Elevation="1" Class="week-card">
+    <MudCardContent>
+        <MudStack Spacing="3">
+            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                <MudText Typo="Typo.overline">@Title</MudText>
+                <MudText Typo="Typo.overline" Class="jokers">@JokerDisplay</MudText>
+            </MudStack>
 
-    <div class="days">
-        @foreach (var day in Days)
-        {
-            <div class="day">
-                <div class="day-name">@day.DayLabel</div>
-                <div class="slot @SlotClass(day.Visual)">
-                    <span class="slot-icon">@day.Icon</span>@day.Caption
-                </div>
-            </div>
-        }
-    </div>
+            <DaySlots Days="Days" />
 
-    @if (Evaluation is { } eval)
-    {
-        <div class="meter">
-            <span>LIFT <b class="@(eval.LiftCredits + eval.JokersSpent >= Contract.Lifts ? "ok" : "")">@eval.LiftCredits/@Contract.Lifts</b></span>
-            <span>RUN <b class="@(eval.RunCredits >= Contract.Runs ? "ok" : "")">@eval.RunCredits/@Contract.Runs</b></span>
-            <span>REST <b>@(eval.RestKept ? "✓" : "—")</b></span>
-            <span class="@(JokersLeft == 0 ? "warn" : "")">◆ @JokersLeft left</span>
-        </div>
-    }
-</div>
+            @if (Evaluation is { } eval)
+            {
+                <MudDivider />
+                <MudStack Row="true" Justify="Justify.SpaceBetween" Class="meter">
+                    <MudText Typo="Typo.caption">LIFT <b class="@(eval.LiftCredits + eval.JokersSpent >= Contract.Lifts ? "ok" : "")">@eval.LiftCredits/@Contract.Lifts</b></MudText>
+                    <MudText Typo="Typo.caption">RUN <b class="@(eval.RunCredits >= Contract.Runs ? "ok" : "")">@eval.RunCredits/@Contract.Runs</b></MudText>
+                    <MudText Typo="Typo.caption">REST <b>@(eval.RestKept ? "✓" : "—")</b></MudText>
+                    <MudText Typo="Typo.caption" Class="@(JokersLeft == 0 ? "warn" : "")">◆ @JokersLeft left</MudText>
+                </MudStack>
+            }
+        </MudStack>
+    </MudCardContent>
+</MudCard>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];
@@ -42,14 +37,4 @@
     private string JokerDisplay =>
         string.Concat(Enumerable.Repeat("◆", Math.Max(0, JokersLeft)))
         + string.Concat(Enumerable.Repeat("◇", Evaluation?.JokersSpent ?? 0));
-
-    private static string SlotClass(DaySlotVisual visual) => visual switch
-    {
-        DaySlotVisual.LiftDone => "lift",
-        DaySlotVisual.RunDone => "run",
-        DaySlotVisual.Joker => "joker",
-        DaySlotVisual.Today => "today",
-        DaySlotVisual.Rest => "rest",
-        _ => "",
-    };
 }
