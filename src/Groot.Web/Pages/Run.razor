@@ -8,10 +8,9 @@
 
 <PageTitle>Run · Groot</PageTitle>
 
-<div class="run-page theme-@_theme">
+<div class="run-page">
     <header class="page-head">
         <h1 class="g-serif">0→5K<span>.</span> <small>interval coach</small></h1>
-        <button type="button" class="ghost" @onclick="ToggleTheme">@(_theme == "dark" ? "light" : "dark")</button>
     </header>
 
     <p class="sub">
@@ -93,13 +92,12 @@
     private int _day;
     private string _language = "en";
     private bool _sound = true;
-    private string _theme = "dark";
     private RunSession? _session;
 
     private IntervalProgram SelectedProgram => Catalog.IntervalProgram(_programId);
 
-    // Cached so renders unrelated to program/week/day (theme toggle, sound toggle) don't rebuild
-    // the cue schedule; invalidated whenever the selection changes.
+    // Cached so renders unrelated to program/week/day (e.g. the sound toggle) don't rebuild the
+    // cue schedule; invalidated whenever the selection changes.
     private RunSession Session => _session ??= RunSession.For(SelectedProgram, _week, _day);
 
     private string SessionKey => $"{_programId}-{_week}-{_day}";
@@ -144,8 +142,6 @@
     }
 
     private void OnSoundChanged(ChangeEventArgs e) => _sound = e.Value is true;
-
-    private void ToggleTheme() => _theme = _theme == "dark" ? "light" : "dark";
 
     private void ApplyLanguage() => Cues.Language = _language == "nl" ? "nl-NL" : "en-GB";
 }

@@ -1,5 +1,6 @@
-@* The 0→5K runner (design/run-05k.html): colour says what you do when you miss the sound.
-   Framework-free; the clock lives here, all interval maths comes from Groot.Core's RunSession. *@
+@* The 0→5K runner screen: driving the interval clock and cue playback. The flood panel and
+   segment bar are custom colour-state visuals; the buttons are MudBlazor. Interval maths comes
+   from Groot.Core's RunSession. *@
 @using System.Diagnostics
 @using Groot.Core.Intervals
 @using Groot.UI.Audio
@@ -53,16 +54,16 @@
     <div class="runbtns">
         @if (_finished)
         {
-            <button type="button" class="primary" @onclick="StartAsync">↻ Run it again</button>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
         }
         else if (!_started)
         {
-            <button type="button" class="primary" @onclick="StartAsync">Start ▶</button>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">Start ▶</MudButton>
         }
         else
         {
-            <button type="button" @onclick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</button>
-            <button type="button" @onclick="SkipAsync">⏭ Skip</button>
+            <MudButton Variant="Variant.Outlined" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="SkipAsync">⏭ Skip</MudButton>
         }
     </div>
 </section>

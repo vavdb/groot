@@ -173,52 +173,18 @@
     margin-top: 2px;
 }
 
+/* Layout of the MudBlazor button row. */
 .runbtns {
     display: flex;
     gap: 10px;
 }
 
-.runbtns button {
+.runbtns ::deep .mud-button {
     flex: 1;
-    padding: 13px 0;
-    border-radius: 12px;
-    border: 1px solid var(--g-line);
-    background: var(--g-card);
-    color: var(--g-ink);
-    font: inherit;
-    font-weight: 700;
-    font-size: 13px;
-    cursor: pointer;
-    transition: border-color 150ms ease, color 150ms ease, transform 100ms ease;
-}
-
-.runbtns button:hover {
-    border-color: var(--g-amber);
-    color: var(--g-amber);
-}
-
-.runbtns button:active {
-    transform: translateY(1px);
-}
-
-.runbtns button:focus-visible {
-    outline: 2px solid var(--g-amber);
-    outline-offset: 2px;
-}
-
-.runbtns button.primary {
-    background: var(--g-amber);
-    border-color: var(--g-amber);
-    color: var(--g-run-ink);
-}
-
-.runbtns button.primary:hover {
-    color: var(--g-run-ink);
-    filter: brightness(1.06);
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .flood, .runbtns button {
+    .flood {
         transition: none;
     }
 }
