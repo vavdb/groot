@@ -49,3 +49,12 @@
   font-family: "Fraunces", Georgia, serif;
 }
 
+/* Shared design primitives - used across heads and pages. */
+.accent {
+  color: var(--g-amber);
+}
+
+.sub {
+  color: var(--g-dim);
+}
+

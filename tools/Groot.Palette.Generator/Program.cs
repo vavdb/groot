@@ -66,6 +66,15 @@ sb.AppendLine(".g-serif {");
 sb.AppendLine("  font-family: \"Fraunces\", Georgia, serif;");
 sb.AppendLine("}");
 sb.AppendLine();
+sb.AppendLine("/* Shared design primitives - used across heads and pages. */");
+sb.AppendLine(".accent {");
+sb.AppendLine("  color: var(--g-amber);");
+sb.AppendLine("}");
+sb.AppendLine();
+sb.AppendLine(".sub {");
+sb.AppendLine("  color: var(--g-dim);");
+sb.AppendLine("}");
+sb.AppendLine();
 
 File.WriteAllText(outputPath, sb.ToString());
 Console.WriteLine($"wrote {tokens.Count} tokens to {outputPath}");
