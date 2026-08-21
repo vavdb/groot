@@ -37,5 +37,5 @@ jobs:
         run: dotnet build tools/Groot.UI.Gallery -c Release --nologo
       - name: Test Core engines
         run: dotnet test tests/Groot.Core.Tests -c Release --nologo
-      - name: Test UI palette (contrast, type scale)
+      - name: Test UI (palette contrast, type scale, bUnit components)
         run: dotnet test tests/Groot.UI.Tests -c Release --nologo

@@ -1,13 +1,14 @@
 ---
-status: "backlog"
+status: "done"
 tags: [Testing, UI]
 docs: none
 hook: bUnit smoke tests — render every routable page + key components, assert no exception
 order: 27
+shipped: 2026-08-21
 ---
 # bUnit smoke tests
 
-No test coverage exists for `Groot.UI` — CI only runs `dotnet test` on
+No test coverage existed for `Groot.UI` — CI only ran `dotnet test` on
 `Groot.Core.Tests` (pure domain logic). `dotnet build` compiles Razor
 clean even when it's broken at render: three bugs shipped invisibly this
 way in one sitting (2026-08-21) — `Home.razor` missing `@page "/"` on both
@@ -16,17 +17,26 @@ heads, `GrootAudioControls` throwing on `@bind-Language`/`@bind-Sound`
 `<MudPopoverProvider />` breaking every dropdown. All three were only
 found by actually running the app with Playwright, not by CI.
 
-bUnit gives fast, in-process component rendering — no browser — so it
-fits as a normal `dotnet test` CI step:
-* Render every routable page (`Home`, `Run`) with `GrootShell`, assert no
-  exception.
-* Render `GrootRunScene`/`GrootAudioControls` together, assert the
-  `@bind-*` wiring doesn't throw (would have caught today's crash).
-* Assert `MudPopoverProvider` (or equivalent) is present in the shell.
+`tests/Groot.UI.Tests` (bUnit 2.9 + xUnit) now covers:
+* `BottomNavTests` — renders all four destinations, marks the selected
+  one active, raises `OnSelectedChanged` on click.
+* `RegressionTests` — one guard per bug above: `Home.razor` has a `"/"`
+  `RouteAttribute`; `GrootShell` renders `.mud-popover-provider`;
+  `GrootRunScene` with `ShowAudioControls` doesn't throw; changing the
+  `Voice` select actually raises `LanguageChanged`.
 
-Playwright/E2E is a separate, heavier follow-on (catches CSS/visual and
-scope-attribute-class issues bUnit can't) — not in scope for this card.
+Wired into `.github/workflows/ci.yml` as a normal `dotnet test` step next
+to the Core test step, and added to `Groot.slnx`.
 
-* Next step: add a `tests/Groot.UI.Tests` project (bUnit + xUnit), wire
-  into `.github/workflows/ci.yml` alongside the existing Core test step.
-* Links: `.github/workflows/ci.yml`, commit `a50d954`
+Gotchas hit building this (left as comments in the test file): MudBlazor
+registers `IAsyncDisposable`-only services, so the test class needs
+`IAsyncLifetime` or xUnit's default sync `Dispose()` throws on teardown;
+`MudSelect` opens on `mousedown` against `.mud-input-control`, not
+`click`; its popover content renders into a separately-rendered
+`MudPopoverProvider`, not under the select's own component tree.
+
+Playwright/E2E stays a separate, heavier follow-on (catches CSS/visual
+and scope-attribute-class issues bUnit can't) — not in scope here.
+
+* Links: `.github/workflows/ci.yml`, `tests/Groot.UI.Tests/`, commit
+  `a50d954`
