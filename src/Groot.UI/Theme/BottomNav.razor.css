@@ -1,0 +1,38 @@
+.bottom-nav {
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    background: var(--g-card);
+    border-top: 1px solid var(--g-line);
+    box-shadow: var(--g-shadow);
+    /* clear the home-indicator / gesture bar on notched phones */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.items {
+    display: flex;
+    height: 64px;
+}
+
+.item {
+    flex: 1 1 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: var(--g-dim);
+    cursor: pointer;
+    user-select: none;
+}
+
+.item .label {
+    font-size: .6875rem;
+    letter-spacing: .02em;
+}
+
+.item.active {
+    color: var(--g-moss);
+}

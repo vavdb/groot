@@ -1,0 +1,55 @@
+@* The phone-shaped nav chrome: four fixed destinations, icon + label. Presentational only —
+   selection is a parameter the caller (a layout, or the gallery for preview) drives; this
+   component fires OnSelectedChanged and never owns routing itself.
+   Custom markup: MudBlazor 9.8 has no bottom-navigation component (MudNavMenu is drawer-shaped,
+   MudTabs is desktop-shaped) — same "custom because no equivalent" rule as DaySlots. Plain
+   <div> root, not MudPaper: a component-wrapped root doesn't reliably carry this file's CSS
+   isolation scope attribute (confirmed against WeekCard/MudCard — a pre-existing gap, not
+   reintroduced here), so styling below is plain CSS instead of Mud elevation. *@
+
+<div class="bottom-nav">
+    <div class="items" role="tablist" aria-label="Primary">
+        @foreach (var dest in Destinations)
+        {
+            <div class="item @(dest == Selected ? "active" : "")"
+                 role="tab" aria-selected="@(dest == Selected)"
+                 @onclick="@(() => OnSelectedChanged.InvokeAsync(dest))">
+                <MudIcon Icon="@IconFor(dest)" Size="Size.Medium" />
+                <span class="label">@LabelFor(dest)</span>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private static readonly GrootDestination[] Destinations =
+    [
+        GrootDestination.Home,
+        GrootDestination.Lift,
+        GrootDestination.Run,
+        GrootDestination.Progress,
+    ];
+
+    /// <summary>The currently active destination.</summary>
+    [Parameter] public GrootDestination Selected { get; set; } = GrootDestination.Home;
+
+    [Parameter] public EventCallback<GrootDestination> OnSelectedChanged { get; set; }
+
+    private static string IconFor(GrootDestination dest) => dest switch
+    {
+        GrootDestination.Home => Icons.Material.Filled.Home,
+        GrootDestination.Lift => Icons.Material.Filled.FitnessCenter,
+        GrootDestination.Run => Icons.Material.Filled.DirectionsRun,
+        GrootDestination.Progress => Icons.Material.Filled.Insights,
+        _ => Icons.Material.Filled.Circle,
+    };
+
+    private static string LabelFor(GrootDestination dest) => dest switch
+    {
+        GrootDestination.Home => "Home",
+        GrootDestination.Lift => "Lift",
+        GrootDestination.Run => "Run",
+        GrootDestination.Progress => "Progress",
+        _ => "",
+    };
+}
