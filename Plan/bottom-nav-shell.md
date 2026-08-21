@@ -2,7 +2,7 @@
 status: "done"
 tags: [UI, Shell]
 docs: none
-hook: Mobile bottom nav (Home/Lift/Run/Progress) — static, previewed in the gallery, both themes
+hook: Mobile bottom nav (Run/Home/Lift/Progress) — static, previewed in the gallery, both themes
 order: 28
 shipped: 2026-08-21
 ---
@@ -11,7 +11,8 @@ shipped: 2026-08-21
 Phone head (`Groot.App`) runs `GrootShell ShowDrawer="false"` with no
 navigation chrome — only the web head's side drawer existed. Built the
 phone-shaped counterpart: `BottomNav` (`Groot.UI/Theme`), four items —
-Home / Lift / Run / Progress — icon + label, active-state highlight.
+Run first (the one screen that's actually functional today), then
+Home / Lift / Progress — icon + label, active-state highlight.
 
 Corrections along the way:
 * MudBlazor 9.8 has no `MudBottomNavigation` at all (checked the DLL) —

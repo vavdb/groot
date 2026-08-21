@@ -17,7 +17,7 @@ public sealed class BottomNavTests : BunitContext
         var cut = Render<BottomNav>();
 
         var labels = cut.FindAll(".item .label").Select(e => e.TextContent).ToArray();
-        Assert.Equal(["Home", "Lift", "Run", "Progress"], labels);
+        Assert.Equal(["Run", "Home", "Lift", "Progress"], labels); // Run first: the one working screen leads
     }
 
     [Theory]
@@ -39,12 +39,12 @@ public sealed class BottomNavTests : BunitContext
     {
         GrootDestination? raised = null;
         var cut = Render<BottomNav>(p => p
-            .Add(x => x.Selected, GrootDestination.Home)
+            .Add(x => x.Selected, GrootDestination.Run)
             .Add(x => x.OnSelectedChanged, d => raised = d));
 
-        cut.FindAll(".item")[2].Click(); // Run is the third item
+        cut.FindAll(".item")[1].Click(); // Home is the second item
 
-        Assert.Equal(GrootDestination.Run, raised);
+        Assert.Equal(GrootDestination.Home, raised);
     }
 
     private static string LabelFor(GrootDestination dest) => dest switch
