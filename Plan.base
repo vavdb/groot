@@ -1,0 +1,40 @@
+filters:
+  and:
+    - file.inFolder("Plan")
+    - file.ext == "md"
+properties:
+  file.name:
+    displayName: Card
+  status:
+    displayName: Status
+  tags:
+    displayName: Area
+  docs:
+    displayName: Doc
+  hook:
+    displayName: Hook
+  order:
+    displayName: Order
+  shipped:
+    displayName: Shipped
+views:
+  - type: cards
+    name: Board
+    groupBy:
+      property: status
+      direction: ASC
+    order:
+      - file.name
+      - hook
+      - tags
+      - docs
+  - type: table
+    name: Missing docs
+    filters:
+      and:
+        - docs == "none"
+        - status != "done"
+    order:
+      - file.name
+      - tags
+      - status

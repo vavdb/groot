@@ -76,6 +76,35 @@ that assert the implementation instead of the behaviour.
 Output: one line per finding, `path:line: severity: problem. fix.` No praise, no summaries.
 ```
 
+## The Plan rule (board)
+
+`Plan/` is the kanban board and single source of truth for what work
+exists — one markdown card per file, `Plan.base` is the Obsidian view over
+them (nothing to regenerate). Modeled on the Vindicator project's board.
+
+- All work — features, fixes, debt, decisions — lives as a card in `Plan/`
+  before it's touched. A card states WHAT and WHY so any agent can pick it
+  up from that one file alone. Filename is a kebab-case slug of the title.
+- Frontmatter:
+
+  ```yaml
+  status: "backlog"   # backlog | doing | done
+  tags: [Run, App]     # subject tags
+  docs: research.md    # doc/spec this card touches, or none
+  hook: One line — the board's at-a-glance row.
+  order: 12            # position within its column
+  shipped: 2026-08-19   # done cards only
+  ```
+
+  Then `# <title>`, then the body.
+- A card ships by setting `status: "done"` plus `shipped:` in the same
+  change that lands the work.
+- `Plan/kanban.sh` is a CLI helper: `list`, `board`, `status <file>`,
+  `set <file> <status>`, `create <slug>`, `delete <file>`, `tags <file>`,
+  `edit <file>`, `search <term>`.
+- Orient without Obsidian: `Plan/kanban.sh board`, or
+  `grep -m1 -H '^hook:' Plan/*.md` for the whole board one line per card.
+
 ## Infrastructure
 
 - Harness: the VPS (this machine) runs the DSH web. Agent preset `code-claude` exposes `subagent_claude_code` + `subagent_codex` (both enabled; profile patch + ~/.dsh/.agent-presets/code-claude/).

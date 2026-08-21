@@ -266,6 +266,25 @@ readability, hardest to render well. Archive in Research/UI if ever revisited.
 animate later).** A answers *today*, B answers *lately*, C answers *who have I become* — three
 time horizons, one metaphor, no a character tree-man anywhere.
 
+**UPDATE (2026-08-21): metaphor swap, owner decision.** Concept C is now a barbell loaded with
+plates, viewed head-on — not a tree cross-section. Concentric rings read as plates stacked on the
+sleeve. Fits the app domain directly (no tree needed at all, finishing what §6b started) and reuses
+the same ring-per-closed-week structure:
+- ring thickness = plate diameter for that week (from week volume, normalized — thicker plate,
+  bigger week)
+- ring color = standard plate color coding (25 kg red, 20 kg blue, 15 kg yellow, 10 kg green,
+  5 kg white; run-heavy weeks lean a run accent instead of a lift-plate color)
+- joker week = a collar/clip mark on the rim
+- broken week = a gap in the plate stack (bar visible through the hairline)
+- year boundary = a change of bar sleeve (visual break in the stack); PR weeks = a small chalk
+  mark on the rim
+- center = the bar sleeve/collar, not a growth-ring pith
+- Display and interaction unchanged (rolling rings, tap for week summary, pinch for years) —
+  only the render metaphor changes; re-language "tree age: 87 weeks" to "87 weeks on the bar" or
+  similar (final copy pass owed against §5b humanizer rules).
+
+Tree-cross-section language above is superseded by this update; kept for history.
+
 ---
 
 ## 5. Screens touched (mockup shows all)
