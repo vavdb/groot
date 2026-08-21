@@ -50,36 +50,88 @@ h1:focus {
         content: "An error has occurred."
     }
 
-.loading-progress {
+#app:has(.g-boot) {
+    position: fixed;
+    inset: 0;
+    background: var(--g-bg, #151a12);
+}
+
+.g-boot {
     position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: var(--g-card, #1d2419);
+}
+
+.g-boot-rings {
     display: block;
-    width: 8rem;
-    height: 8rem;
-    inset: 20vh 0 auto 0;
-    margin: 0 auto 0 auto;
+    width: 9rem;
+    height: 9rem;
+    overflow: visible;
 }
 
-    .loading-progress circle {
-        fill: none;
-        stroke: #e0e0e0;
-        stroke-width: 0.6rem;
-        transform-origin: 50% 50%;
-        transform: rotate(-90deg);
-    }
-
-        .loading-progress circle:last-child {
-            stroke: var(--g-amber, #c98f2d);
-            stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
-            transition: stroke-dasharray 0.05s ease-in-out;
-        }
-
-.loading-progress-text {
-    position: absolute;
-    text-align: center;
-    font-weight: bold;
-    inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
+.g-boot-rings circle {
+    fill: none;
+    transform-origin: 50% 50%;
 }
 
-    .loading-progress-text:after {
-        content: var(--blazor-load-percentage-text, "Loading");
+.g-ring {
+    stroke: var(--g-moss, #7fb47a);
+    stroke-linecap: round;
+    opacity: 0;
+    animation: g-ring-grow 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+.g-ring-1 {
+    stroke-width: 0.5rem;
+    animation-delay: 0s;
+}
+
+.g-ring-2 {
+    stroke: var(--g-amber, #e0aa4a);
+    stroke-width: 0.62rem;
+    animation-delay: 0.28s;
+}
+
+.g-ring-track {
+    stroke: var(--g-line, #33402c);
+    stroke-width: 0.44rem;
+}
+
+.g-ring-progress {
+    stroke: var(--g-moss, #7fb47a);
+    stroke-width: 0.44rem;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.88), 500%;
+    transition: stroke-dasharray 0.15s ease-out;
+}
+
+.g-pith {
+    fill: var(--g-bark, #c49a6c);
+    stroke: none;
+    animation: g-pith-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes g-ring-grow {
+      0% { transform: scale(0.72); opacity: 0; }
+     18% { opacity: 0.95; }
+     70% { transform: scale(1);    opacity: 0.95; }
+    100% { transform: scale(1.08); opacity: 0; }
+}
+
+@keyframes g-pith-pulse {
+    0%, 100% { opacity: 0.75; }
+        50%  { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .g-ring,
+    .g-pith {
+        animation: none;
+        opacity: 0.95;
+        transform: none;
     }
+    .g-ring-progress { transition: none; }
+}

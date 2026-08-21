@@ -23,11 +23,15 @@
 
 <body>
     <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
+        <div class="g-boot">
+            <svg class="g-boot-rings" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <circle class="g-ring g-ring-1" cx="50%" cy="50%" r="17%" />
+                <circle class="g-ring g-ring-2" cx="50%" cy="50%" r="30%" />
+                <circle class="g-ring-track" cx="50%" cy="50%" r="44%" />
+                <circle class="g-ring-progress" cx="50%" cy="50%" r="44%" />
+                <circle class="g-pith" cx="50%" cy="50%" r="6%" />
+            </svg>
+        </div>
     </div>
 
     <div id="blazor-error-ui">
