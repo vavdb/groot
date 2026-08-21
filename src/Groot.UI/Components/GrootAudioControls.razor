@@ -17,13 +17,11 @@
     private const string Dutch = "nl";
 
     [Parameter] public string Language { get; set; } = English;
-    [Parameter] public bool Sound { get; set; } = true;
-
-    /// <summary>Two-way binding targets for @bind-Language / @bind-Sound; Blazor throws at render without them.</summary>
     [Parameter] public EventCallback<string> LanguageChanged { get; set; }
+    [Parameter] public bool Sound { get; set; } = true;
     [Parameter] public EventCallback<bool> SoundChanged { get; set; }
 
-    /// <summary>Raised after both values have been pushed to the owner, so it reads the new pair.</summary>
+    /// <summary>Fires after either value changes, once both @bind-* callbacks above have run.</summary>
     [Parameter] public EventCallback ValuesChanged { get; set; }
 
     private async Task RaiseChanged()
