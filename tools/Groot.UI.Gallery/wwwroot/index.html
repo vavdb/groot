@@ -11,13 +11,24 @@
     <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
     <link rel="stylesheet" href="_content/Groot.UI/tokens.css" />
+    <link rel="stylesheet" href="_content/Groot.UI/boot-loader.css" />
     <link rel="stylesheet" href="css/app.css" />
     <link href="Groot.UI.Gallery.styles.css" rel="stylesheet" />
     <script type="importmap"></script>
 </head>
 
 <body>
-    <div id="app">Loading Groot.UI gallery…</div>
+    <div id="app">
+        <div class="g-boot">
+            <svg class="g-boot-rings" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <circle class="g-ring g-ring-1" cx="50%" cy="50%" r="17%" />
+                <circle class="g-ring g-ring-2" cx="50%" cy="50%" r="30%" />
+                <circle class="g-ring-track" cx="50%" cy="50%" r="44%" />
+                <circle class="g-ring-progress" cx="50%" cy="50%" r="44%" />
+                <circle class="g-pith" cx="50%" cy="50%" r="6%" />
+            </svg>
+        </div>
+    </div>
 
     <div id="blazor-error-ui" style="display:none">
         An unhandled error has occurred.
