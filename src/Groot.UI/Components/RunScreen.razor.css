@@ -53,11 +53,6 @@
     font-size: var(--g-text-md);
 }
 
-::deep .runmeta {
-    color: var(--g-dim);
-    font-variant-numeric: tabular-nums;
-}
-
 ::deep .summary {
     text-align: center;
     border-color: var(--g-moss);

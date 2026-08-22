@@ -2,11 +2,12 @@
    and the session, so there is no second copy of any of that: the pencil beside the session dots
    opens the picker in place, and closes it again. Both heads embed this; the head-specific
    inputs are Programs, ShowProgram, the cue player, and the audio callbacks. *@
+@using Groot.Core.Intervals
 @using Groot.Core.Programs
 @using Groot.UI.Audio
 
 <div class="run-scene">
-    @if (_selection is { } selected)
+    @if (Selection is { } selected)
     {
         <RunScreen @key="SessionKey(selected)"
                    Session="selected.Session"
@@ -45,7 +46,9 @@
     /// <summary>Raised when the voice language or sound toggle changes. Web maps this onto its cue player.</summary>
     [Parameter] public EventCallback<GrootAudioState> AudioChanged { get; set; }
 
-    private GrootProgramSelection? _selection;
+    private string _programId = "";
+    private int _week;
+    private int _day;
     private bool _editing;
     private string Language { get; set; } = "en";
     private bool SoundEnabled { get; set; } = true;
@@ -54,13 +57,18 @@
     private static string SessionKey(GrootProgramSelection selection) =>
         $"{selection.Session.Id?.ProgramName}-{selection.Session.Id?.Week}-{selection.Session.Id?.Day}";
 
-    /// <summary>The picker itself. It stays mounted with its controls hidden, so the selection survives a close.</summary>
+    /// <summary>The controls, which appear inside the panel while the pencil is open.</summary>
     private RenderFragment Picker => __builder =>
     {
         <GrootProgramPicker Programs="Programs"
                             ShowProgram="ShowProgram"
                             ShowControls="_editing"
-                            SelectionChanged="OnSelectionChanged">
+                            ProgramId="_programId"
+                            ProgramIdChanged="OnProgramChanged"
+                            Week="_week"
+                            WeekChanged="OnWeekChanged"
+                            Day="_day"
+                            DayChanged="OnDayChanged">
             @if (ShowAudioControls)
             {
                 <GrootAudioControls @bind-Language="Language"
@@ -70,9 +78,42 @@
         </GrootProgramPicker>
     };
 
+    private IntervalProgram SelectedProgram =>
+        Programs.FirstOrDefault(p => p.Id == _programId) ?? Programs[0];
+
+    /// <summary>The session the controls currently name, resolved fresh rather than held.</summary>
+    private GrootProgramSelection? Selection =>
+        Programs.Count == 0 ? null
+        : new GrootProgramSelection(
+            RunSession.For(SelectedProgram, _week, _day),
+            SelectedProgram.Week(_week).SessionsPerWeek);
+
+    protected override void OnParametersSet()
+    {
+        if (Programs.Count == 0) return;
+        if (Programs.All(p => p.Id != _programId)) _programId = Programs[0].Id;
+        if (!SelectedProgram.WeekNumbers.Contains(_week)) _week = SelectedProgram.WeekNumbers[0];
+        if (!RunSession.DaysOf(SelectedProgram, _week).Contains(_day)) _day = RunSession.DaysOf(SelectedProgram, _week)[0];
+    }
+
     private void ToggleEditing() => _editing = !_editing;
 
-    private void OnSelectionChanged(GrootProgramSelection selection) => _selection = selection;
+    private void OnProgramChanged(string programId)
+    {
+        _programId = programId;
+        _week = SelectedProgram.WeekNumbers[0];
+        _day = RunSession.DaysOf(SelectedProgram, _week)[0];
+    }
+
+    /// <summary>A week can be shorter than the one before it, so the day follows it down.</summary>
+    private void OnWeekChanged(int week)
+    {
+        _week = week;
+        var days = RunSession.DaysOf(SelectedProgram, _week);
+        if (!days.Contains(_day)) _day = days[0];
+    }
+
+    private void OnDayChanged(int day) => _day = day;
 
     private Task OnAudioChanged() => AudioChanged.InvokeAsync(new GrootAudioState(Language, SoundEnabled));
 }

@@ -40,11 +40,11 @@
                     Started="@_started"
                     Finished="@_finished" />
 
-        <MudStack Row="true" Justify="Justify.SpaceBetween" Class="runmeta">
-            <MudText Typo="Typo.caption">elapsed @Clock(Progress.ElapsedTotal)</MudText>
-            <MudText Typo="Typo.caption">segment @(Progress.SegmentIndex + 1)/@Session.Segments.Count</MudText>
-            <MudText Typo="Typo.caption">total @Clock(Session.TotalSeconds)</MudText>
-        </MudStack>
+        <GrootStats>
+            <GrootStat Label="elapsed" Value="@Clock(Progress.ElapsedTotal)" />
+            <GrootStat Label="segment" Value="@($"{Progress.SegmentIndex + 1}/{Session.Segments.Count}")" />
+            <GrootStat Label="total" Value="@Clock(Session.TotalSeconds)" />
+        </GrootStats>
 
         @if (_finished)
         {

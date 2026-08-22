@@ -32,6 +32,35 @@
 </section>
 
 <section class="section">
+    <h2>GrootStats</h2>
+    <div class="caption">the reading line a session screen ends with</div>
+    <div class="stack">
+        <GrootStats>
+            <GrootStat Label="elapsed" Value="4:12" />
+            <GrootStat Label="segment" Value="7/18" />
+            <GrootStat Label="total" Value="30:00" />
+        </GrootStats>
+        <GrootStats>
+            <GrootStat Label="sets" Value="5/11" />
+            <GrootStat Label="reps" Value="15" />
+            <GrootStat Label="volume" Value="900 kg" />
+        </GrootStats>
+    </div>
+</section>
+
+<section class="section">
+    <h2>GrootChoice</h2>
+    <div class="caption">one choice from a short list · the dropdown opens in the shell theme</div>
+    <div class="row">
+        <GrootChoice T="string" Label="Program" Items="@(new[] { "0-to-5k", "gzclp-rack" })" Value="@_program"
+                     Display="@(id => id == "gzclp-rack" ? "GZCLP" : "0→5K")"
+                     ValueChanged="@(id => _program = id)" />
+        <GrootChoice T="int" Label="Week" Items="@(new[] { 1, 2, 3 })" Value="@_week"
+                     Display="@(week => $"Week {week}")" ValueChanged="@(week => _week = week)" />
+    </div>
+</section>
+
+<section class="section">
     <h2>SeasonGrid</h2>
     <div class="caption">26 weeks · a cell per day, weeks left to right, today ringed</div>
     <div class="stack">
@@ -89,6 +118,9 @@
 </section>
 
 @code {
+    private string _program = "0-to-5k";
+    private int _week = 1;
+
     private static readonly DateOnly Monday = new(2026, 8, 17);
 
     // Four sessions most weeks, three lean weeks, the odd double day.

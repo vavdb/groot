@@ -1,6 +1,6 @@
-@* The interval-program selector: program, week, session. Owns the selection state and raises
-   SelectionChanged whenever a value changes. It keeps that state whether or not the controls are
-   on screen, so the owner can open and close it without losing the session being run. *@
+@* The three interval controls: program, week, session. Controlled, not stateful: it renders the
+   values it is given and raises the change. The selection lives with the owner because this sits
+   inside the keyed run panel, and a component that resets itself on its own change is no use. *@
 @using Groot.Core.Intervals
 @using Groot.Core.Programs
 
@@ -9,85 +9,45 @@
     <MudStack Spacing="2" Class="picker-controls">
         @if (ShowProgram)
         {
-            <MudSelect T="string" Label="Program" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                       @bind-Value="_programId" @bind-Value:after="Notify">
-                @foreach (var program in Programs)
-                {
-                    <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <GrootChoice T="string" Label="Program" Items="ProgramIds" Value="ProgramId"
+                         Display="@(id => Programs.First(p => p.Id == id).Name)"
+                         ValueChanged="ProgramIdChanged" />
         }
 
-        <MudSelect T="int" Label="Week" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                   @bind-Value="_week" @bind-Value:after="OnWeekChanged">
-            @foreach (var week in SelectedProgram.WeekNumbers)
-            {
-                <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
-            }
-        </MudSelect>
+        <GrootChoice T="int" Label="Week" Items="Program.WeekNumbers" Value="Week"
+                     Display="@(week => $"Week {week}")" ValueChanged="WeekChanged" />
 
-        <MudSelect T="int" Label="Session" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                   @bind-Value="_day" @bind-Value:after="Notify">
-            @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
-            {
-                <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
-            }
-        </MudSelect>
+        <GrootChoice T="int" Label="Session" Items="RunSession.DaysOf(Program, Week)" Value="Day"
+                     Display="@(day => $"Day {day}")" ValueChanged="DayChanged" />
 
         @ChildContent
     </MudStack>
 }
 
 @code {
-    /// <summary>Interval programs to offer (empty hides the control).</summary>
+    /// <summary>Interval programs to offer.</summary>
     [Parameter, EditorRequired] public IReadOnlyList<IntervalProgram> Programs { get; set; } = [];
 
     /// <summary>Show the program selector (false for a single fixed program).</summary>
     [Parameter] public bool ShowProgram { get; set; } = true;
 
-    /// <summary>Render the controls. False keeps the selection alive with nothing on screen.</summary>
+    /// <summary>Render the controls at all.</summary>
     [Parameter] public bool ShowControls { get; set; } = true;
 
     /// <summary>Extra controls under the selects, for whatever else the owner edits here.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
-    /// <summary>Raised with the resolved session and week size whenever the selection changes.</summary>
-    [Parameter] public EventCallback<GrootProgramSelection> SelectionChanged { get; set; }
+    [Parameter, EditorRequired] public string ProgramId { get; set; } = "";
+    [Parameter] public EventCallback<string> ProgramIdChanged { get; set; }
 
-    [Parameter] public EventCallback OnInitialSelection { get; set; }
+    [Parameter] public int Week { get; set; }
+    [Parameter] public EventCallback<int> WeekChanged { get; set; }
 
-    private string _programId = "";
-    private int _week;
-    private int _day;
-    private IntervalProgram SelectedProgram =>
-        Programs.FirstOrDefault(p => p.Id == _programId) ?? Programs[0];
+    [Parameter] public int Day { get; set; }
+    [Parameter] public EventCallback<int> DayChanged { get; set; }
 
-    protected override void OnInitialized()
-    {
-        if (Programs.Count == 0) return;
-        _programId = Programs[0].Id;
-        _week = SelectedProgram.WeekNumbers[0];
-        _day = RunSession.DaysOf(SelectedProgram, _week)[0];
-    }
+    private IReadOnlyList<string> ProgramIds => Programs.Select(p => p.Id).ToArray();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender && Programs.Count > 0)
-        {
-            await OnInitialSelection.InvokeAsync();
-            await Notify();
-        }
-    }
-
-    private async Task OnWeekChanged()
-    {
-        var days = RunSession.DaysOf(SelectedProgram, _week);
-        if (days.Count > 0 && !days.Contains(_day)) _day = days[0];
-        await Notify();
-    }
-
-    private async Task Notify() =>
-        await SelectionChanged.InvokeAsync(new GrootProgramSelection(
-            RunSession.For(SelectedProgram, _week, _day),
-            SelectedProgram.Week(_week).SessionsPerWeek));
+    private IntervalProgram Program =>
+        Programs.FirstOrDefault(p => p.Id == ProgramId) ?? Programs[0];
 }

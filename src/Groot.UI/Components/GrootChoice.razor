@@ -1,0 +1,27 @@
+@* One choice from a short list: the program, the week, the session, the day, the voice. Every
+   picker in the app was repeating the same three MudSelect settings and its own label wiring;
+   this holds them in one place. It composes MudBlazor rather than re-exposing it: the API is a
+   list, a value and how to read one, and the chrome is not the caller's business. *@
+@typeparam T
+
+<MudSelect T="T" Label="@Label" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+           Value="Value" ValueChanged="ValueChanged" ToStringFunc="@(item => Display(item))"
+           AnchorOrigin="Origin.BottomCenter">
+    @foreach (var item in Items)
+    {
+        <MudSelectItem T="T" Value="@item">@Display(item)</MudSelectItem>
+    }
+</MudSelect>
+
+@code {
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired] public IReadOnlyList<T> Items { get; set; } = [];
+
+    [Parameter] public T? Value { get; set; }
+
+    [Parameter] public EventCallback<T> ValueChanged { get; set; }
+
+    /// <summary>How one item reads. The default is its own ToString.</summary>
+    [Parameter] public Func<T, string> Display { get; set; } = item => item?.ToString() ?? "";
+}

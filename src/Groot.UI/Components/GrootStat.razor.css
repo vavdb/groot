@@ -1,0 +1,13 @@
+.stat {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+}
+
+.stat-value {
+    color: var(--g-ink);
+    font-variant-numeric: tabular-nums;
+}

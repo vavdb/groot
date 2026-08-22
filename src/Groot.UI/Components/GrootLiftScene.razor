@@ -19,13 +19,9 @@
         <ChildContent>
             @if (_editing)
             {
-                <MudSelect T="string" Label="Day" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
-                           @bind-Value="_dayKey">
-                    @foreach (var key in Program.Rotation)
-                    {
-                        <MudSelectItem T="string" Value="@key">@key · @Summary(key)</MudSelectItem>
-                    }
-                </MudSelect>
+                <GrootChoice T="string" Label="Day" Items="Program.Rotation" Value="_dayKey"
+                             Display="@(key => $"{key} · {Summary(key)}")"
+                             ValueChanged="@(key => _dayKey = key)" />
             }
         </ChildContent>
     </LiftScreen>

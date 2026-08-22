@@ -1,0 +1,14 @@
+@* One reading inside a GrootStats row: what it is, then what it says. *@
+
+<div class="stat">
+    <span class="stat-label">@Label</span>
+    <span class="stat-value">@Value</span>
+</div>
+
+@code {
+    /// <summary>What the reading is, in lower case: "elapsed", "segment", "volume".</summary>
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+
+    /// <summary>What it says right now, already formatted.</summary>
+    [Parameter, EditorRequired] public string Value { get; set; } = "";
+}

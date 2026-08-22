@@ -1,0 +1,12 @@
+@* The reading line a session screen ends with: a few short label-and-value pairs spread across
+   the width, tabular so the numbers do not dance while a clock runs. The run screen and the
+   lifting screen both had their own copy of this. *@
+
+<div class="stats">
+    @ChildContent
+</div>
+
+@code {
+    /// <summary>The readings, as GrootStat children.</summary>
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+}

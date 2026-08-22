@@ -2,11 +2,9 @@
    values back and reacts via callbacks (Web drives Web Speech; phone heads omit this). *@
 
 <MudStack Spacing="3">
-    <MudSelect T="string" Label="Voice" Variant="Variant.Outlined"
-               @bind-Value="Language" @bind-Value:after="RaiseChanged">
-        <MudSelectItem T="string" Value="@English">English</MudSelectItem>
-        <MudSelectItem T="string" Value="@Dutch">Nederlands</MudSelectItem>
-    </MudSelect>
+    <GrootChoice T="string" Label="Voice" Items="Languages" Value="Language"
+                 Display="@(code => code == Dutch ? "Nederlands" : "English")"
+                 ValueChanged="OnLanguageChanged" />
 
     <MudSwitch T="bool" Label="Sound cues" Color="Color.Primary" @bind-Value="Sound"
                @bind-Value:after="RaiseChanged" />
@@ -16,6 +14,8 @@
     private const string English = "en";
     private const string Dutch = "nl";
 
+    private static readonly string[] Languages = [English, Dutch];
+
     [Parameter] public string Language { get; set; } = English;
     [Parameter] public EventCallback<string> LanguageChanged { get; set; }
     [Parameter] public bool Sound { get; set; } = true;
@@ -23,6 +23,12 @@
 
     /// <summary>Fires after either value changes, once both @bind-* callbacks above have run.</summary>
     [Parameter] public EventCallback ValuesChanged { get; set; }
+
+    private async Task OnLanguageChanged(string language)
+    {
+        Language = language;
+        await RaiseChanged();
+    }
 
     private async Task RaiseChanged()
     {
