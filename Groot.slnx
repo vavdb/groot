@@ -8,6 +8,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Groot.Core.Tests/Groot.Core.Tests.csproj" />
+    <Project Path="tests/Groot.UI.Tests/Groot.UI.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
     <Project Path="tools/Groot.UI.Gallery/Groot.UI.Gallery.csproj" />
