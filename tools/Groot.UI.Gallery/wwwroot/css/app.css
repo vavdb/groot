@@ -262,8 +262,7 @@
 /* The mark as an app icon: the same SVG with the turn frozen at one of its two ends, and the
    load ring dropped for a solid one, since an icon has nothing to report. */
 .g-icon-rings,
-.g-icon-barbell,
-.g-icon-barbell-dot {
+.g-icon-barbell {
     animation: none;
 }
 
@@ -272,10 +271,7 @@
 .g-icon-rings .g-pith,
 .g-icon-barbell .g-plate,
 .g-icon-barbell .g-bar,
-.g-icon-barbell .g-pith,
-.g-icon-barbell-dot .g-plate,
-.g-icon-barbell-dot .g-bar,
-.g-icon-barbell-dot .g-pith {
+.g-icon-barbell .g-pith {
     animation: none;
 }
 
@@ -283,33 +279,17 @@
 .g-icon-rings .g-bar { opacity: 0; }
 .g-icon-rings .g-pith { opacity: 0.85; }
 
-.g-icon-barbell .g-plate,
-.g-icon-barbell-dot .g-plate { transform: translateX(var(--g-depth)) scaleX(0.02); }
-.g-icon-barbell .g-bar,
-.g-icon-barbell-dot .g-bar { opacity: 1; transform: none; }
+.g-icon-barbell .g-plate { transform: translateX(var(--g-depth)) scaleX(0.02); }
+.g-icon-barbell .g-bar { opacity: 1; transform: none; }
 .g-icon-barbell .g-pith { opacity: 0; }
 
-/* The same bar with the pith kept: a brown collar where the shaft crosses the middle. */
-.g-icon-barbell-dot .g-pith { opacity: 0.85; transform: none; }
-
-/* Animated variant: the pith never hands over, it rides the shaft through the whole turn. */
-.g-turn-dot .g-pith { animation-name: g-pith-stay; }
-
-@keyframes g-pith-stay {
-    0%, 100% { opacity: 0.85; transform: scale(1); }
-    22%, 38% { opacity: 0.85; transform: scale(0.62); }
-    72%, 88% { opacity: 0.85; transform: scale(0.62); }
-}
-
 .g-icon-rings .g-ring-progress,
-.g-icon-barbell .g-ring-progress,
-.g-icon-barbell-dot .g-ring-progress {
+.g-icon-barbell .g-ring-progress {
     display: none;
 }
 
 .g-icon-rings .g-ring-track,
-.g-icon-barbell .g-ring-track,
-.g-icon-barbell-dot .g-ring-track {
+.g-icon-barbell .g-ring-track {
     stroke: var(--g-moss);
 }
 
@@ -350,3 +330,127 @@
 
 .icon-tile.sm { width: 48px; height: 48px; }
 .icon-tile.sm .g-boot-rings { transform: translate(-50%, -50%) scale(0.25); }
+
+/* Notification mocks. Android draws a squarer card with a coloured app line; iOS draws a wide
+   rounded tile with heavier type. Both sit on their own dimmed lock-screen ground. */
+.notif-set {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.notif-col {
+    flex: 1 1 300px;
+    max-width: 360px;
+}
+
+.notif {
+    background: var(--g-card);
+    border: 1px solid var(--g-line);
+    padding: 12px 14px 14px;
+    margin-bottom: 14px;
+}
+
+.notif.android { border-radius: 18px; }
+
+.notif.ios {
+    border-radius: 26px;
+    padding: 14px 16px 16px;
+}
+
+.notif-head {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 6px;
+}
+
+.notif-icon {
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    background: var(--g-bg);
+    display: grid;
+    place-items: center;
+}
+
+.notif-mark {
+    width: 14px;
+    height: 14px;
+    fill: none;
+}
+
+.nm-ring { stroke: var(--g-moss); stroke-width: 12; }
+.nm-inner { stroke: var(--g-amber); stroke-width: 14; }
+.nm-pith { fill: var(--g-bark); stroke: none; }
+
+.notif-app {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}
+
+.notif-time {
+    margin-left: auto;
+    font-size: var(--g-text-2xs);
+    color: var(--g-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.notif-title {
+    font-size: var(--g-text-lg);
+    font-weight: 700;
+    color: var(--g-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.notif.ios .notif-title { font-size: var(--g-text-xl); }
+
+.notif-body {
+    margin-top: 2px;
+    font-size: var(--g-text-sm);
+    color: var(--g-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+.notif-bar {
+    margin-top: 10px;
+    height: 4px;
+    border-radius: 999px;
+    background: var(--g-line);
+    overflow: hidden;
+}
+
+.notif-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--g-moss);
+}
+
+.notif-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+/* Android draws its actions as flat text, iOS as filled pills. */
+.notif-action {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--g-amber-text);
+}
+
+.notif.ios .notif-action {
+    text-transform: none;
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-ink);
+    background: var(--g-bg);
+    border: 1px solid var(--g-line);
+    border-radius: 999px;
+    padding: 5px 12px;
+}
