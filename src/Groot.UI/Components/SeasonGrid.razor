@@ -1,0 +1,65 @@
+@* Training history as a cell per day, weeks running left to right, Monday at the top. Reads at a
+   glance: how dense the year is, and where the gaps are. Presentational only, it counts nothing
+   itself; Days carries the sessions per date and anything missing is a day with none. *@
+
+<div class="season-grid">
+    <div class="head">
+        <span class="title">@Title</span>
+        <span class="count">@Total sessions · @Weeks weeks</span>
+    </div>
+
+    <div class="cells" role="img" aria-label="@AriaLabel">
+        @foreach (var date in Dates())
+        {
+            <div class="cell level-@Level(date) @(date == TodayDate ? "today" : "")"></div>
+        }
+    </div>
+
+    <div class="legend">
+        <span>none</span>
+        <div class="cell level-0"></div>
+        <div class="cell level-1"></div>
+        <div class="cell level-2"></div>
+        <div class="cell level-3"></div>
+        <span>three</span>
+    </div>
+</div>
+
+@code {
+    /// <summary>Sessions per date. Dates outside the window are ignored, missing dates count as none.</summary>
+    [Parameter] public IReadOnlyList<SeasonDay> Days { get; set; } = [];
+
+    /// <summary>How many weeks to show, ending with the week that holds today.</summary>
+    [Parameter] public int Weeks { get; set; } = 26;
+
+    /// <summary>Today, injectable so a test or a head can pin the window.</summary>
+    [Parameter] public DateOnly? Today { get; set; }
+
+    [Parameter] public string Title { get; set; } = "History";
+
+    private DateOnly TodayDate => Today ?? DateOnly.FromDateTime(DateTime.Now);
+
+    private DateOnly FirstMonday =>
+        TodayDate.AddDays(-(((int)TodayDate.DayOfWeek + 6) % 7)).AddDays(-7 * (Weeks - 1));
+
+    private Dictionary<DateOnly, int> ByDate =>
+        Days.GroupBy(d => d.Date).ToDictionary(g => g.Key, g => g.Sum(d => d.Sessions));
+
+    private int Total => Dates().Sum(Sessions);
+
+    private string AriaLabel => $"Training history, {Weeks} weeks, {Total} sessions.";
+
+    /// <summary>Every date in the window, column by column: each column is one week, Monday first.</summary>
+    private IEnumerable<DateOnly> Dates()
+    {
+        var start = FirstMonday;
+        for (var day = 0; day < Weeks * 7; day++)
+        {
+            yield return start.AddDays(day);
+        }
+    }
+
+    private int Sessions(DateOnly date) => ByDate.GetValueOrDefault(date);
+
+    private int Level(DateOnly date) => Math.Clamp(Sessions(date), 0, 3);
+}

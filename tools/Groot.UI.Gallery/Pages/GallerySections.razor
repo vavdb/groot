@@ -10,6 +10,25 @@
 </section>
 
 <section class="section">
+    <h2>SeasonGrid</h2>
+    <div class="caption">26 weeks · a cell per day, weeks left to right, today ringed</div>
+    <div class="stack">
+        <div>
+            <div class="caption">a training year</div>
+            <SeasonGrid Days="DenseHistory" Today="Monday" />
+        </div>
+        <div>
+            <div class="caption">a few weeks in</div>
+            <SeasonGrid Days="SparseHistory" Today="Monday" />
+        </div>
+        <div>
+            <div class="caption">nothing logged yet, the home screen before a first session</div>
+            <SeasonGrid Days="@(Array.Empty<SeasonDay>())" Today="Monday" />
+        </div>
+    </div>
+</section>
+
+<section class="section">
     <h2>SetCircle</h2>
     <div class="caption">session in progress · tap = logged</div>
     <div class="row">
@@ -48,6 +67,23 @@
 
 @code {
     private static readonly DateOnly Monday = new(2026, 8, 17);
+
+    // Four sessions most weeks, a lighter fortnight in the middle, one double day a month.
+    private static readonly SeasonDay[] DenseHistory =
+        Enumerable.Range(0, 26 * 7)
+            .Select(offset => Monday.AddDays(-(25 * 7) + offset))
+            .Where(date => date.DayOfWeek is not DayOfWeek.Sunday)
+            .Where(date => (date.DayOfYear % 7) < 4)
+            .Select(date => new SeasonDay(date, date.Day % 11 == 0 ? 2 : 1))
+            .ToArray();
+
+    // The first three weeks of a habit.
+    private static readonly SeasonDay[] SparseHistory =
+        Enumerable.Range(0, 21)
+            .Select(offset => Monday.AddDays(-20 + offset))
+            .Where(date => date.DayOfWeek is DayOfWeek.Monday or DayOfWeek.Wednesday or DayOfWeek.Saturday)
+            .Select(date => new SeasonDay(date, 1))
+            .ToArray();
     private static readonly WeekContract Contract = new();
 
     private static ContractSession Lift(int d) => new(Monday.AddDays(d), SessionKind.Lift);

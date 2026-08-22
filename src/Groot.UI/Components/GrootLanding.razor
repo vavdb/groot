@@ -28,7 +28,7 @@
             </MudButton>
         </MudStack>
 
-        <MudText Typo="Typo.caption" Class="sub">Lifting and settings are not built yet.</MudText>
+        <SeasonGrid Days="History" Today="Today" Weeks="26" Title="History" />
     </MudStack>
 </div>
 
@@ -38,6 +38,9 @@
 
     /// <summary>The week's contract result. Null hides the meter, which is right before anything is logged.</summary>
     [Parameter] public WeekEvaluation? Evaluation { get; set; }
+
+    /// <summary>Logged sessions per day behind the history grid. Empty until there is a store.</summary>
+    [Parameter] public IReadOnlyList<SeasonDay> History { get; set; } = [];
 
     /// <summary>Where the run button goes.</summary>
     [Parameter] public string RunHref { get; set; } = "/run";
