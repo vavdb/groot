@@ -17,13 +17,13 @@
 }
 
 .run-head h2 {
-    font-size: 19px;
+    font-size: var(--g-text-xl);
     font-weight: 900;
     margin: 0;
 }
 
 .run-head small {
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     font-weight: 600;
     color: var(--g-dim);
     margin-left: 6px;
@@ -80,7 +80,7 @@
 }
 
 .flood .st {
-    font-size: 13px;
+    font-size: var(--g-text-sm);
     font-weight: 700;
     letter-spacing: .38em;
 }
@@ -88,13 +88,13 @@
 .flood .t {
     font-family: "Fraunces", Georgia, serif;
     font-weight: 900;
-    font-size: 72px;
+    font-size: var(--g-text-hero);
     line-height: 1.02;
     font-variant-numeric: tabular-nums;
 }
 
 .flood .nxt {
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     font-weight: 700;
     opacity: .8;
 }
@@ -106,7 +106,7 @@
     border-left: 3px solid var(--g-amber);
     border-radius: 10px;
     padding: 9px 13px;
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     color: var(--g-ink);
     display: flex;
     gap: 8px;
@@ -114,7 +114,7 @@
 }
 
 .cue .spk {
-    font-size: 15px;
+    font-size: var(--g-text-md);
 }
 
 .segbar {
@@ -148,7 +148,7 @@
 .runmeta {
     display: flex;
     justify-content: space-between;
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     font-weight: 600;
     color: var(--g-dim);
     font-variant-numeric: tabular-nums;
@@ -162,13 +162,13 @@
 }
 
 .summary .big {
-    font-size: 26px;
+    font-size: var(--g-text-2xl);
     font-weight: 900;
     color: var(--g-moss);
 }
 
 .summary .subt {
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     color: var(--g-dim);
     margin-top: 2px;
 }

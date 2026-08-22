@@ -50,5 +50,7 @@ design/habit-system.md; this file is the short version that applies on every cha
 - `dotnet build` takes one project per invocation. Restore new tool projects once.
 - After rebuilding a WASM project, restart its preview server (the boot manifest is
   fingerprinted) or run it under `dotnet watch`.
+- The NuGet cache lives at `D:\DataStorage\.nuget` (set through `NUGET_PACKAGES`), not under
+  `~/.nuget`. Resolve it with `dotnet nuget locals global-packages --list` instead of guessing.
 - Deleting files or folders: use `Move-Item` to the session scratchpad. The shell delete
   guard on this machine blocks `Remove-Item` and `rmdir` with false positives.

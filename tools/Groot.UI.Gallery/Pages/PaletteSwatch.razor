@@ -1,9 +1,9 @@
-@* One color swatch: chip + name + hex. Colors come from the theme columns. *@
+@* One colour swatch: the chip paints from the token itself, the label shows the resolved hex. *@
 
 <div class="swatch">
-    <div class="swatch-chip" style="background:@Value"></div>
+    <div class="swatch-chip" style="background: var(--g-@Name)"></div>
     <div class="swatch-meta">
-        <span class="swatch-name">@Name</span>
+        <span class="swatch-name">--g-@Name</span>
         <span class="swatch-hex">@Value</span>
     </div>
 </div>

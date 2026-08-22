@@ -27,7 +27,7 @@
 }
 
 .flood .st {
-    font-size: 13px;
+    font-size: var(--g-text-sm);
     font-weight: 700;
     letter-spacing: .38em;
 }
@@ -35,13 +35,13 @@
 .flood .t {
     font-family: "Fraunces", Georgia, serif;
     font-weight: 900;
-    font-size: 72px;
+    font-size: var(--g-text-hero);
     line-height: 1.02;
     font-variant-numeric: tabular-nums;
 }
 
 .flood .nxt {
-    font-size: 12px;
+    font-size: var(--g-text-sm);
     font-weight: 700;
     opacity: .8;
 }

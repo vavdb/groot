@@ -9,7 +9,7 @@
 }
 
 .day-name {
-    font-size: 10px;
+    font-size: var(--g-text-2xs);
     font-weight: 700;
     color: var(--g-dim);
     letter-spacing: .08em;
@@ -25,14 +25,14 @@
     align-items: center;
     justify-content: center;
     gap: 1px;
-    font-size: 9.5px;
+    font-size: var(--g-text-2xs);
     font-weight: 700;
     letter-spacing: .04em;
     color: var(--g-dim);
 }
 
 .slot-icon {
-    font-size: 14px;
+    font-size: var(--g-text-md);
     line-height: 1;
 }
 

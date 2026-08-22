@@ -4,6 +4,7 @@
 
 <div class="@(_darkMode ? "theme-dark" : "theme-light") shell">
     <MudThemeProvider Theme="GrootTheme.Theme" @bind-IsDarkMode="_darkMode" />
+    <MudPopoverProvider />
     <MudDialogProvider />
     <MudSnackbarProvider />
     <MudLayout>

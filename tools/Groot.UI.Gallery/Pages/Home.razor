@@ -4,124 +4,16 @@
 
 <div class="ds">
     <header class="ds-head">
-        <h1 class="g-serif">Groot.UI<span>.</span></h1>
-        <p>
-            Design system, palette, and component gallery. MudBlazor everywhere except where not
-            possible — the custom visuals below exist only because MudBlazor has no equivalent.
-        </p>
+        <h1 class="g-serif">Groot.UI<span class="accent">.</span></h1>
+        <p class="sub">Design system. Light on the left, dark on the right, one token source (GrootPalette → tokens.css) for our components and for MudBlazor chrome alike.</p>
     </header>
 
-    @* ---- 1. Palette, both themes, driven by GrootPalette (single source) ---- *@
-    <section class="ds-section">
-        <h2>Palette</h2>
-        <div class="duo">
-            <div class="theme-light theme-col">
-                <span class="theme-label">Light</span>
-                @foreach (var s in GrootPalette.All)
-                {
-                    <PaletteSwatch Name="@s.Name" Value="@s.Light" />
-                }
-            </div>
-            <div class="theme-dark theme-col">
-                <span class="theme-label">Dark</span>
-                @foreach (var s in GrootPalette.All)
-                {
-                    <PaletteSwatch Name="@s.Name" Value="@s.Dark" />
-                }
-            </div>
+    <div class="duo">
+        <div class="theme-light theme-col">
+            <GalleryColumn IsDark="false" />
         </div>
-    </section>
-
-    @* ---- 2. Typography ---- *@
-    <section class="ds-section">
-        <h2>Typography</h2>
-        <div class="type-row">
-            <div>
-                <span class="caption">Fraunces · display</span>
-                <div class="g-serif type-big">Groot</div>
-                <div class="g-serif type-sub">The season keeps score.</div>
-            </div>
-            <div>
-                <span class="caption">Public Sans · UI</span>
-                <div class="type-big">Training, tracked.</div>
-                <div class="type-sub">2 lifts · 2 runs · 1 rest closes the week.</div>
-            </div>
+        <div class="theme-dark theme-col">
+            <GalleryColumn IsDark="true" />
         </div>
-    </section>
-
-    @* ---- 3. MudBlazor chrome: buttons, panels, inputs ---- *@
-    <section class="ds-section">
-        <h2>MudBlazor chrome</h2>
-        <div class="mud-row">
-            <span class="caption">Buttons — filled</span>
-            <div class="btn-row">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary">Primary</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary">Secondary</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Tertiary">Tertiary</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Error">Error</MudButton>
-            </div>
-        </div>
-        <div class="mud-row">
-            <span class="caption">Buttons — outlined / text</span>
-            <div class="btn-row">
-                <MudButton Variant="Variant.Outlined" Color="Color.Primary">Outlined</MudButton>
-                <MudButton Variant="Variant.Text" Color="Color.Primary">Text</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">Disabled</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow">Icon</MudButton>
-            </div>
-        </div>
-        <div class="mud-row">
-            <span class="caption">Chips</span>
-            <div class="btn-row">
-                <MudChip T="string" Color="Color.Primary">Lift</MudChip>
-                <MudChip T="string" Color="Color.Secondary">Run</MudChip>
-                <MudChip T="string" Color="Color.Error">Rest</MudChip>
-            </div>
-        </div>
-        <div class="mud-row">
-            <span class="caption">Inputs</span>
-            <div class="input-row">
-                <MudTextField T="string" Label="Weight (kg)" Variant="Variant.Outlined" Value="@_weight" Adornment="Adornment.End" AdornmentText="kg" />
-                <MudSelect T="string" Label="Program" Variant="Variant.Outlined" Value="@_program" AnchorOrigin="Origin.BottomCenter">
-                    <MudSelectItem T="string" Value="@_programC25k">0→5K</MudSelectItem>
-                    <MudSelectItem T="string" Value="@_programGzclp">GZCLP</MudSelectItem>
-                </MudSelect>
-                <MudSwitch T="bool" Label="Sound cues" Value="@_sound" Color="Color.Primary" />
-            </div>
-        </div>
-        <div class="mud-row">
-            <span class="caption">Panel / card</span>
-            <MudPaper Elevation="1" Class="sample-panel">
-                <MudText Typo="Typo.h6" Class="g-serif">This week</MudText>
-                <MudText Typo="Typo.body2">
-                    A MudPaper card with MudText — the same chrome the app uses for program
-                    editors, toasts, and dialogs.
-                </MudText>
-            </MudPaper>
-        </div>
-    </section>
-
-    @* ---- 4. Our components ---- *@
-    <section class="ds-section">
-        <h2>Components</h2>
-        <div class="duo">
-            <div class="theme-light theme-col">
-                <span class="theme-label">Light</span>
-                <GallerySections />
-            </div>
-            <div class="theme-dark theme-col">
-                <span class="theme-label">Dark</span>
-                <GallerySections />
-            </div>
-        </div>
-    </section>
+    </div>
 </div>
-
-@code {
-    private string _weight = "60";
-    private string _program = "0-to-5k";
-    private string _programC25k = "0-to-5k";
-    private string _programGzclp = "gzclp";
-    private bool _sound = true;
-}
-

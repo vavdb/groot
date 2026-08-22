@@ -1,50 +1,61 @@
-/* Gallery chrome only — component styling lives in Groot.UI. */
+/* Gallery page chrome only. Layout and spacing live here; every colour and every
+   font size comes from tokens.css (the shell wraps the page in a theme scope). */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
-body {
-    font-family: "Public Sans", system-ui, sans-serif;
-    background: #20261c;
-    color: #e8ead9;
-}
+.ds { padding: 8px 32px 56px; }
 
-.gallery-header {
-    padding: 24px 32px 8px;
-}
+.ds-head { padding: 8px 0 24px; }
 
-.gallery-header h1 {
-    font-family: "Fraunces", Georgia, serif;
+.ds-head h1 {
+    font-size: var(--g-text-4xl);
     font-weight: 900;
-    font-size: 28px;
 }
 
-.gallery-header p {
-    font-size: 13px;
-    color: #93a087;
-    margin-top: 4px;
+.ds-head p {
+    font-size: var(--g-text-md);
+    margin-top: 6px;
+    max-width: 720px;
 }
 
 .duo {
     display: flex;
     flex-wrap: wrap;
+    gap: 24px;
 }
 
-.duo > * {
-    flex: 1 1 480px;
-    padding: 24px 32px 48px;
-    min-height: 100vh;
+.duo > * { flex: 1 1 480px; }
+
+.theme-col {
+    padding: 20px 24px 40px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.section {
-    margin-bottom: 36px;
-}
-
-.section h2 {
-    font-size: 11px;
+.theme-label, .section > h2, .caption, .type-name {
     font-weight: 700;
-    letter-spacing: .24em;
+    letter-spacing: var(--g-track-caps);
     text-transform: uppercase;
     color: var(--g-dim);
-    margin-bottom: 14px;
+}
+
+.theme-label { font-size: var(--g-text-2xs); }
+
+.section { margin-bottom: 28px; }
+
+.section > h2 {
+    font-size: var(--g-text-xs);
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--g-line);
+    padding-bottom: 8px;
+}
+
+.caption {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    text-transform: none;
+    margin: 8px 0 6px;
 }
 
 .row {
@@ -52,89 +63,15 @@ body {
     gap: 12px;
     align-items: center;
     flex-wrap: wrap;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 
-.caption {
-    font-size: 11px;
-    color: var(--g-dim);
-    margin-bottom: 8px;
-}
+.row .mud-input-control { min-width: 180px; }
 
 .stack {
     display: flex;
     flex-direction: column;
     gap: 18px;
-}
-
-#blazor-error-ui {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: #b45f3c;
-    color: #fff;
-    padding: 8px 16px;
-    z-index: 10;
-}
-
-/* ---- Design-system page chrome (Home.razor) ---- */
-.ds {
-    padding: 8px 32px 56px;
-}
-
-.ds-head {
-    padding: 8px 0 24px;
-}
-
-.ds-head h1 {
-    font-family: "Fraunces", Georgia, serif;
-    font-weight: 900;
-    font-size: 40px;
-    margin: 0;
-}
-
-.ds-head h1 span {
-    color: var(--g-amber);
-}
-
-.ds-head p {
-    font-size: 13px;
-    color: var(--g-dim);
-    margin-top: 6px;
-    max-width: 640px;
-}
-
-.ds-section {
-    margin-bottom: 40px;
-}
-
-.ds-section > h2 {
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: .24em;
-    text-transform: uppercase;
-    color: var(--g-dim);
-    margin-bottom: 16px;
-    border-bottom: 1px solid var(--g-line);
-    padding-bottom: 8px;
-}
-
-.theme-col {
-    padding: 18px 20px;
-    border-radius: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.theme-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: .24em;
-    text-transform: uppercase;
-    color: var(--g-dim);
-    margin-bottom: 4px;
 }
 
 .swatch {
@@ -155,67 +92,63 @@ body {
     display: flex;
     gap: 10px;
     align-items: baseline;
-    font-size: 12px;
+    font-size: var(--g-text-sm);
 }
 
 .swatch-name {
     font-weight: 700;
     color: var(--g-ink);
-    min-width: 72px;
+    min-width: 120px;
 }
 
 .swatch-hex {
     color: var(--g-dim);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 11.5px;
+    font-size: var(--g-text-xs);
 }
 
-.type-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 40px;
-}
-
-.type-big {
-    font-size: 42px;
+.type-display {
+    font-size: var(--g-text-4xl);
     font-weight: 900;
-    color: var(--g-ink);
     line-height: 1.05;
-    margin-top: 4px;
 }
 
-.type-sub {
-    font-size: 15px;
-    color: var(--g-dim);
-    margin-top: 4px;
+.type-ui {
+    font-size: var(--g-text-2xl);
+    font-weight: 700;
+    line-height: 1.1;
 }
 
-.mud-row {
-    margin-bottom: 22px;
-}
-
-.btn-row {
+.type-step {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin-top: 6px;
+    align-items: baseline;
+    gap: 16px;
+    padding: 4px 0;
+    border-bottom: 1px dotted var(--g-line);
 }
 
-.input-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 14px;
-    align-items: center;
-    margin-top: 6px;
+.type-name {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    text-transform: none;
+    min-width: 150px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-.input-row .mud-input-control {
-    min-width: 180px;
-}
+.type-sample { line-height: 1.2; }
 
 .sample-panel {
     padding: 18px 20px;
     max-width: 420px;
-    margin-top: 6px;
+}
+
+#blazor-error-ui {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--g-clay);
+    color: var(--g-card);
+    padding: 8px 16px;
+    z-index: 10;
 }

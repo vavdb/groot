@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 16px;
+    font-size: var(--g-text-lg);
     font-family: inherit;
     border: 1.5px solid var(--g-line);
     color: var(--g-dim);

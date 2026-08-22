@@ -1,0 +1,90 @@
+@* One complete gallery column for one theme. Home renders it twice: light left, dark right.
+   Everything shown here resolves through tokens.css; nothing in this file names a colour or a size. *@
+
+<span class="theme-label">@(IsDark ? "Dark" : "Light")</span>
+
+<section class="section">
+    <h2>Palette</h2>
+    @foreach (var t in GrootPalette.All.Where(t => t.Name != "shadow"))
+    {
+        <PaletteSwatch Name="@t.Name" Value="@(IsDark ? t.Dark : t.Light)" />
+    }
+</section>
+
+<section class="section">
+    <h2>Typography</h2>
+    <div class="caption">display · @GrootPalette.Fixed("font-display")</div>
+    <div class="g-serif type-display">Groot</div>
+    <div class="caption">ui · @GrootPalette.Fixed("font-ui")</div>
+    <div class="type-ui">Training, tracked.</div>
+    <div class="caption">scale · every component picks a step, never a px value</div>
+    @foreach (var s in GrootPalette.Scale.Where(s => s.Name.StartsWith("text-")))
+    {
+        <div class="type-step">
+            <span class="type-name">--g-@s.Name · @s.Value</span>
+            <span class="type-sample" style="font-size: var(--g-@s.Name)">2 lifts · 2 runs · 1 rest</span>
+        </div>
+    }
+</section>
+
+<section class="section">
+    <h2>MudBlazor chrome</h2>
+    <div class="caption">buttons</div>
+    <div class="row">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary">Primary</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Secondary">Secondary</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Tertiary">Tertiary</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Error">Error</MudButton>
+    </div>
+    <div class="row">
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary">Outlined</MudButton>
+        <MudButton Variant="Variant.Text" Color="Color.Primary">Text</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="true">Disabled</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow">Start</MudButton>
+    </div>
+    <div class="caption">chips</div>
+    <div class="row">
+        <MudChip T="string" Color="Color.Primary">Run</MudChip>
+        <MudChip T="string" Color="Color.Secondary">Lift</MudChip>
+        <MudChip T="string" Color="Color.Tertiary">Rest</MudChip>
+        <MudChip T="string" Color="Color.Error">Joker</MudChip>
+    </div>
+    <div class="caption">inputs · select · switch (the dropdown itself opens in the shell theme)</div>
+    <div class="row">
+        <MudTextField T="string" Label="Weight (kg)" Variant="Variant.Outlined" Value="@_weight" Adornment="Adornment.End" AdornmentText="kg" />
+        <MudSelect T="string" Label="Program" Variant="Variant.Outlined" Value="@_program" AnchorOrigin="Origin.BottomCenter">
+            <MudSelectItem T="string" Value="@ProgramRun">0→5K</MudSelectItem>
+            <MudSelectItem T="string" Value="@ProgramLift">GZCLP</MudSelectItem>
+        </MudSelect>
+        <MudSwitch T="bool" Label="Sound cues" Value="@_sound" Color="Color.Primary" />
+    </div>
+    <div class="caption">menu</div>
+    <div class="row">
+        <MudMenu Label="Equipment" Variant="Variant.Outlined" Color="Color.Primary" EndIcon="@Icons.Material.Filled.KeyboardArrowDown">
+            <MudMenuItem>ATX bar · kg</MudMenuItem>
+            <MudMenuItem>PowerBlock · lb</MudMenuItem>
+            <MudMenuItem>Add equipment</MudMenuItem>
+        </MudMenu>
+    </div>
+    <div class="caption">panel</div>
+    <MudPaper Elevation="1" Class="sample-panel">
+        <MudText Typo="Typo.h6">This week</MudText>
+        <MudText Typo="Typo.body2">A MudPaper card with MudText, the same chrome the app uses for program editors, toasts, and dialogs.</MudText>
+    </MudPaper>
+</section>
+
+<section class="section">
+    <h2>Components</h2>
+    <GallerySections />
+</section>
+
+@code {
+    [Parameter] public bool IsDark { get; set; }
+
+    private const string ProgramRun = "0-to-5k";
+    private const string ProgramLift = "gzclp";
+
+    private string _weight = "60";
+    private string _program = ProgramRun;
+    private bool _sound = true;
+}
