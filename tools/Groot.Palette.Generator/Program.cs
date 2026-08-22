@@ -42,9 +42,24 @@ var roles = rolePattern.Matches(source)
     .Select(m => new MudRole(m.Groups["mud"].Value, m.Groups["token"].Value))
     .ToList();
 
+// A partial parse is the dangerous case: a stylesheet missing five tokens still looks like a
+// stylesheet, and every component using those five falls back to nothing. Count the entries each
+// list declares (the palette writes them target-typed, one per line) and insist on all of them.
+var declared = DeclaredEntries(source, "IReadOnlyList<Token> All");
+var declaredFixed = DeclaredEntries(source, "IReadOnlyList<FixedToken> Scale");
+var declaredRoles = DeclaredEntries(source, "IReadOnlyList<MudRole> MudRoles");
+
 if (tokens.Count == 0)
 {
     Console.Error.WriteLine("no colour tokens parsed - check the new(\"name\", \"light\", \"dark\") format.");
+    return 1;
+}
+
+if (tokens.Count != declared || fixedTokens.Count != declaredFixed || roles.Count != declaredRoles)
+{
+    Console.Error.WriteLine(
+        $"partial parse: {tokens.Count}/{declared} tokens, {fixedTokens.Count}/{declaredFixed} fixed, " +
+        $"{roles.Count}/{declaredRoles} roles. GrootPalette.cs was reformatted in a way the patterns miss.");
     return 1;
 }
 
@@ -69,10 +84,13 @@ sb.AppendLine("   Do not edit by hand; edit GrootPalette instead and rebuild.");
 sb.AppendLine("   Scope a subtree with .theme-light / .theme-dark; components only use var(). */");
 sb.AppendLine();
 
-sb.AppendLine("/* Fonts, type scale, tracking: theme-independent. */");
+sb.AppendLine("/* Fonts, type scale, tracking: theme-independent. Colours default to the dark theme so");
+sb.AppendLine("   anything painted before a .theme-* class exists (the boot screen) still reads tokens. */");
 sb.AppendLine(":root {");
 foreach (var f in fixedTokens)
     sb.Append("  --g-").Append(f.Name).Append(": ").Append(f.Value).AppendLine(";");
+foreach (var t in tokens)
+    sb.Append("  --g-").Append(t.Name).Append(": ").Append(t.Dark).AppendLine(";");
 sb.AppendLine("}");
 sb.AppendLine();
 
@@ -102,6 +120,18 @@ sb.AppendLine();
 File.WriteAllText(outputPath, sb.ToString());
 Console.WriteLine($"wrote {tokens.Count} colour tokens, {fixedTokens.Count} fixed tokens, {roles.Count} Mud roles to {outputPath}");
 return 0;
+
+// Entries between a list property and the "];" that closes it.
+static int DeclaredEntries(string source, string property)
+{
+    var start = source.IndexOf(property, StringComparison.Ordinal);
+    if (start < 0) return -1;
+
+    var end = source.IndexOf("];", start, StringComparison.Ordinal);
+    if (end < 0) return -1;
+
+    return Regex.Matches(source[start..end], @"new(\s+\w+)?\s*\(").Count;
+}
 
 void EmitScope(string scope, Func<Token, string> pick)
 {

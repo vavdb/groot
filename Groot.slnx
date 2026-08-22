@@ -11,6 +11,7 @@
     <Project Path="tests/Groot.UI.Tests/Groot.UI.Tests.csproj" />
   </Folder>
   <Folder Name="/tools/">
+    <Project Path="tools/Groot.Palette.Generator/Groot.Palette.Generator.csproj" />
     <Project Path="tools/Groot.UI.Gallery/Groot.UI.Gallery.csproj" />
   </Folder>
 </Solution>

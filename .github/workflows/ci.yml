@@ -23,12 +23,18 @@ jobs:
       # locally and on release only.
       - name: Build Core (domain engines)
         run: dotnet build src/Groot.Core -c Release --nologo
-      - name: Build Data (SQLite + Dapper)
-        run: dotnet build src/Groot.Data -c Release --nologo
       - name: Build UI (Razor class library)
         run: dotnet build src/Groot.UI -c Release --nologo
       # Building UI regenerates tokens.css from GrootPalette.cs. A diff here means the
       # palette changed and the generated file was not rebuilt and committed with it.
+      # The generator runs explicitly first: on a fresh checkout the palette and the stylesheet
+      # carry the same timestamp, and MSBuild's incremental check would otherwise skip the target
+      # and let this diff pass without anything having been generated.
+      - name: Regenerate tokens.css
+        run: |
+          dotnet build tools/Groot.Palette.Generator -c Release --nologo
+          dotnet tools/Groot.Palette.Generator/bin/Release/net10.0/Groot.Palette.Generator.dll \
+            src/Groot.UI/Theme/GrootPalette.cs src/Groot.UI/wwwroot/tokens.css
       - name: tokens.css matches GrootPalette.cs
         run: git diff --exit-code -- src/Groot.UI/wwwroot/tokens.css
       - name: Build Web (Blazor WASM PWA)

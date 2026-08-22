@@ -29,8 +29,14 @@
 }
 
 .item .label {
-    font-size: .6875rem;
-    letter-spacing: .02em;
+    font-size: var(--g-text-xs);
+    letter-spacing: var(--g-track-wide);
+}
+
+.item:focus-visible {
+    outline: 2px solid var(--g-amber-text);
+    outline-offset: -3px;
+    border-radius: 10px;
 }
 
 .item.active {

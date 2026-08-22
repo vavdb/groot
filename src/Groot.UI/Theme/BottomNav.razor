@@ -13,7 +13,9 @@
         {
             <div class="item @(dest == Selected ? "active" : "")"
                  role="tab" aria-selected="@(dest == Selected)"
-                 @onclick="@(() => OnSelectedChanged.InvokeAsync(dest))">
+                 tabindex="0"
+                 @onclick="@(() => OnSelectedChanged.InvokeAsync(dest))"
+                 @onkeydown="@(e => OnKeyDown(e, dest))">
                 <MudIcon Icon="@IconFor(dest)" Size="Size.Medium" />
                 <span class="label">@LabelFor(dest)</span>
             </div>
@@ -34,6 +36,12 @@
     [Parameter] public GrootDestination Selected { get; set; } = GrootDestination.Home;
 
     [Parameter] public EventCallback<GrootDestination> OnSelectedChanged { get; set; }
+
+    /// <summary>Enter and Space activate a tab, the way a button would.</summary>
+    private async Task OnKeyDown(KeyboardEventArgs args, GrootDestination dest)
+    {
+        if (args.Key is "Enter" or " ") await OnSelectedChanged.InvokeAsync(dest);
+    }
 
     private static string IconFor(GrootDestination dest) => dest switch
     {

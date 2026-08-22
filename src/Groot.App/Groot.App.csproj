@@ -72,7 +72,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Groot.Core\Groot.Core.csproj" />
         <ProjectReference Include="..\Groot.UI\Groot.UI.csproj" />
-        <ProjectReference Include="..\Groot.Data\Groot.Data.csproj" />
     </ItemGroup>
 
 </Project>
