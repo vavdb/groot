@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="stylesheet" href="_content/Groot.UI/tokens.css" />
     <link rel="stylesheet" href="_content/Groot.UI/boot-loader.css" />
+    <meta name="theme-color" content="#151a12" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="Groot.Web.styles.css" rel="stylesheet" />
     <link href="manifest.webmanifest" rel="manifest" />
@@ -45,7 +46,15 @@
     </div>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
     <script src="_framework/blazor.webassembly#[.{fingerprint}].js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js', { updateViaCache: 'none' });</script>
+    <script>
+        // Registration throws on a page served over plain http (LAN testing) and in browsers
+        // without service workers. The app runs fine without one; it just is not installable.
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker
+                .register('service-worker.js', { updateViaCache: 'none' })
+                .catch(error => console.warn('Groot: service worker not registered.', error));
+        }
+    </script>
 </body>
 
 </html>

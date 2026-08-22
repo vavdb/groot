@@ -9,7 +9,7 @@
 
 <div class="bottom-nav">
     <div class="items" role="tablist" aria-label="Primary">
-        @foreach (var dest in Destinations)
+        @foreach (var dest in Show)
         {
             <div class="item @(dest == Selected ? "active" : "")"
                  role="tab" aria-selected="@(dest == Selected)"
@@ -24,13 +24,19 @@
 </div>
 
 @code {
-    private static readonly GrootDestination[] Destinations =
+    private static readonly GrootDestination[] AllDestinations =
     [
         GrootDestination.Run,
         GrootDestination.Home,
         GrootDestination.Lift,
         GrootDestination.Progress,
     ];
+
+    /// <summary>
+    /// Which destinations to offer, in order. The default is all four; a head passes the subset it
+    /// has screens for, because a tab that goes nowhere is worse than a tab that is not there.
+    /// </summary>
+    [Parameter] public IReadOnlyList<GrootDestination>? Destinations { get; set; }
 
     /// <summary>The currently active destination.</summary>
     [Parameter] public GrootDestination Selected { get; set; } = GrootDestination.Home;
@@ -42,6 +48,8 @@
     {
         if (args.Key is "Enter" or " ") await OnSelectedChanged.InvokeAsync(dest);
     }
+
+    private IReadOnlyList<GrootDestination> Show => Destinations ?? AllDestinations;
 
     private static string IconFor(GrootDestination dest) => dest switch
     {

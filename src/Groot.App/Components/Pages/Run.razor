@@ -1,17 +1,25 @@
 @page "/run"
 @using Groot.Core.Programs
+@using Groot.App.Audio
 @using Groot.UI.Audio
 @using Groot.UI.Components
 @inject ICuePlayer Cues
 
-<PageTitle>Run</PageTitle>
+<PageTitle>Run · Groot</PageTitle>
 
 <GrootRunScene Programs="CouchPrograms"
                CuePlayer="Cues"
                ShowProgram="false"
-               ShowAudioControls="false" />
+               ShowAudioControls="true"
+               AudioChanged="OnAudioChanged" />
 
 @code {
     private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
         [ ProgramCatalog.Embedded.IntervalProgram("0-to-5k") ];
+
+    /// <summary>The phone speaks through the platform's own voice, so it needs the locale.</summary>
+    private void OnAudioChanged(GrootAudioState state)
+    {
+        if (Cues is MauiCuePlayer maui) maui.Language = state.Language;
+    }
 }

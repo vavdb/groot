@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Groot</title>
     <base href="/" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="_content/MudBlazor/MudBlazor.min.css" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="_content/Groot.UI/tokens.css" />
+    <link rel="stylesheet" href="_content/Groot.UI/boot-loader.css" />
     <link rel="stylesheet" href="Groot.App.styles.css" />
     <link rel="icon" href="data:,">
 </head>
@@ -19,7 +20,20 @@
 
     <div class="status-bar-safe-area"></div>
 
-    <div id="app">Loading...</div>
+    <div id="app">
+        <div class="g-boot">
+            <svg class="g-boot-rings" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+                <line class="g-bar" x1="14%" y1="50%" x2="86%" y2="50%" />
+                <circle class="g-ring g-ring-2 g-plate g-far" cx="50%" cy="50%" r="30%" />
+                <circle class="g-ring g-ring-2 g-plate g-near" cx="50%" cy="50%" r="30%" />
+                <circle class="g-ring g-ring-1 g-plate g-far" cx="50%" cy="50%" r="17%" />
+                <circle class="g-ring g-ring-1 g-plate g-near" cx="50%" cy="50%" r="17%" />
+                <circle class="g-ring-track" cx="50%" cy="50%" r="44%" />
+                <circle class="g-ring-progress" cx="50%" cy="50%" r="44%" />
+                <circle class="g-pith" cx="50%" cy="50%" r="3.5%" />
+            </svg>
+        </div>
+    </div>
 
     <div id="blazor-error-ui" data-nosnippet>
         An unhandled error has occurred.

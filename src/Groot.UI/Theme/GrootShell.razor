@@ -1,3 +1,5 @@
+@inject NavigationManager Navigation
+
 @* The app shell: MudBlazor theme/dialog/snackbar providers, an app bar with a dark/light
    toggle, an optional side drawer, and the page body. Wraps its content in .theme-light /
    .theme-dark so the --g-* CSS tokens (see tokens.css) resolve everywhere beneath it. *@
@@ -31,6 +33,13 @@
         <MudMainContent>
             @ChildContent
         </MudMainContent>
+
+        @if (BottomNavDestinations is { Count: > 0 })
+        {
+            <BottomNav Destinations="BottomNavDestinations"
+                       Selected="SelectedDestination"
+                       OnSelectedChanged="GoTo" />
+        }
     </MudLayout>
 </div>
 
@@ -44,11 +53,34 @@
     /// <summary>Nav content inside the drawer (a MudNavMenu), used only when ShowDrawer is true.</summary>
     [Parameter] public RenderFragment? DrawerContent { get; set; }
 
+    /// <summary>
+    /// Destinations for the phone nav along the bottom. Null or empty leaves it out, which is what
+    /// the desktop web head does: it navigates from the drawer.
+    /// </summary>
+    [Parameter] public IReadOnlyList<GrootDestination>? BottomNavDestinations { get; set; }
+
     /// <summary>The page body supplied by the owning layout.</summary>
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
 
     private bool _drawerOpen = true;
     private bool _darkMode = true;
+
+    /// <summary>Which tab reads as current, taken from the address rather than held separately.</summary>
+    private GrootDestination SelectedDestination => Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') switch
+    {
+        "run" => GrootDestination.Run,
+        "lift" => GrootDestination.Lift,
+        "progress" => GrootDestination.Progress,
+        _ => GrootDestination.Home,
+    };
+
+    private void GoTo(GrootDestination destination) => Navigation.NavigateTo(destination switch
+    {
+        GrootDestination.Run => "/run",
+        GrootDestination.Lift => "/lift",
+        GrootDestination.Progress => "/progress",
+        _ => "/",
+    });
 
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 

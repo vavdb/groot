@@ -1,23 +1,65 @@
+using Groot.Core.Intervals;
 using Groot.UI.Audio;
 using Microsoft.Maui.Media;
 
 namespace Groot.App.Audio;
 
 /// <summary>
-/// On-device cue player for the MAUI head: platform TextToSpeech voice (offline,
-/// locale-matched). Android ToneGenerator beeps land here once the API-36 binding
-/// signature is confirmed — the voice itself is the primary cue for now.
+/// On-device cue player for the MAUI head: the platform TextToSpeech voice, offline and
+/// locale-matched. Android ToneGenerator beeps land here once the API-36 binding signature is
+/// confirmed (Plan/android-foreground-rest-timer.md); the voice is the cue until then.
 /// </summary>
 public sealed class MauiCuePlayer : ICuePlayer
 {
-    public async ValueTask SpeakAsync(string text, CancellationToken cancellationToken = default)
+    private Locale? _voice;
+    private string _language = RunCueText.DefaultLanguage;
+
+    /// <summary>
+    /// Cue language, as the two-letter code the programs use. Setting it drops the cached voice so
+    /// the next cue picks one that matches.
+    /// </summary>
+    public string Language
     {
-        await TextToSpeech.Default.SpeakAsync(text, new SpeechOptions { Volume = 1f });
+        get => _language;
+        set
+        {
+            if (_language == value) return;
+
+            _language = value;
+            _voice = null;
+        }
     }
 
-    public ValueTask PlayAsync(CueSound sound, CancellationToken cancellationToken = default)
+    public async ValueTask SpeakAsync(string text, CancellationToken cancellationToken = default)
     {
-        // TODO: Android ToneGenerator beep (audio-focus ducking) — see design/habit-system.md §3.2.
-        return ValueTask.CompletedTask;
+        try
+        {
+            var options = new SpeechOptions { Volume = 1f, Locale = await VoiceAsync() };
+            await TextToSpeech.Default.SpeakAsync(text, options, cancellationToken);
+        }
+        catch (OperationCanceledException)
+        {
+            // The session moved on. A cue that is no longer current is not worth speaking.
+        }
+    }
+
+    public ValueTask PlayAsync(CueSound sound, CancellationToken cancellationToken = default) =>
+        ValueTask.CompletedTask;
+
+    /// <summary>
+    /// The first installed voice whose language matches, cached until the language changes. Null
+    /// means the device has no voice for it, and TextToSpeech falls back to the system default:
+    /// wrong accent, right words, which beats silence.
+    /// </summary>
+    private async ValueTask<Locale?> VoiceAsync()
+    {
+        if (_voice is not null) return _voice;
+
+        var locales = await TextToSpeech.Default.GetLocalesAsync();
+
+        _voice = locales.FirstOrDefault(l =>
+            l.Language.StartsWith(_language, StringComparison.OrdinalIgnoreCase));
+
+        return _voice;
     }
 }

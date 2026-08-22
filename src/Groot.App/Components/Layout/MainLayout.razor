@@ -1,5 +1,17 @@
 @inherits LayoutComponentBase
+@using Groot.UI.Theme
 
-<GrootShell ShowDrawer="false">
+@* Phone chrome: no drawer, a bottom nav for the screens that exist. Progress has no screen yet,
+   so it is not offered. *@
+<GrootShell ShowDrawer="false" BottomNavDestinations="Destinations">
     <ChildContent>@Body</ChildContent>
 </GrootShell>
+
+@code {
+    private static readonly GrootDestination[] Destinations =
+    [
+        GrootDestination.Run,
+        GrootDestination.Home,
+        GrootDestination.Lift,
+    ];
+}

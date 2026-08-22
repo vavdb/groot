@@ -33,3 +33,6 @@ mockups/
 
 # MSBuild SDK resolver scratch files (dropped next to the MAUI csproj on every build)
 *.SdkResolver.*.proj.Backup.tmp
+
+# Screenshots taken while verifying UI work. The keepers live in docs/screenshots/.
+/*.png

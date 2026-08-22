@@ -58,9 +58,9 @@
 
         <!-- Images, fonts and raw assets: the folders are empty until the app ships its own.
              Fraunces and Public Sans arrive through wwwroot/index.html like on the web head. -->
-        <MauiImage Include="Resources\Images\*" />
-        <MauiFont Include="Resources\Fonts\*" />
-        <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+        <!-- Images, Fonts and Raw have no content yet; the globs come back with the files.
+             Fonts in particular: the heads load Fraunces and Public Sans from Google, so the
+             installed app needs the network to render its own typeface (Plan/pwa-icon-and-branding-pass.md). -->
     </ItemGroup>
 
     <ItemGroup>
