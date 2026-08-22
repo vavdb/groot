@@ -58,6 +58,24 @@ public static class GrootTheme
             {
                 FontFamily = new[] { "Public Sans", "system-ui", "sans-serif" },
             },
+            // Fraunces ships at 500, 700 and 900. MudBlazor's own heading weights are lighter
+            // than that (h1 is 300), so a heading asking for one gets a synthesised face or the
+            // nearest cut. Every serif heading role is pinned to a weight the font actually has.
+            H1 = new H1Typography
+            {
+                FontFamily = new[] { "Fraunces", "Georgia", "serif" },
+                FontWeight = "900",
+            },
+            H4 = new H4Typography
+            {
+                FontFamily = new[] { "Fraunces", "Georgia", "serif" },
+                FontWeight = "900",
+            },
+            H5 = new H5Typography
+            {
+                FontFamily = new[] { "Fraunces", "Georgia", "serif" },
+                FontWeight = "900",
+            },
             H6 = new H6Typography
             {
                 FontFamily = new[] { "Fraunces", "Georgia", "serif" },
