@@ -20,5 +20,5 @@
     [Parameter] public bool Sound { get; set; } = true;
     [Parameter] public EventCallback ValuesChanged { get; set; }
 
-    private async void RaiseChanged() => await ValuesChanged.InvokeAsync();
+    private Task RaiseChanged() => ValuesChanged.InvokeAsync();
 }
