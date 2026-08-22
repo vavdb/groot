@@ -262,7 +262,8 @@
 /* The mark as an app icon: the same SVG with the turn frozen at one of its two ends, and the
    load ring dropped for a solid one, since an icon has nothing to report. */
 .g-icon-rings,
-.g-icon-barbell {
+.g-icon-barbell,
+.g-icon-barbell-dot {
     animation: none;
 }
 
@@ -271,7 +272,10 @@
 .g-icon-rings .g-pith,
 .g-icon-barbell .g-plate,
 .g-icon-barbell .g-bar,
-.g-icon-barbell .g-pith {
+.g-icon-barbell .g-pith,
+.g-icon-barbell-dot .g-plate,
+.g-icon-barbell-dot .g-bar,
+.g-icon-barbell-dot .g-pith {
     animation: none;
 }
 
@@ -279,17 +283,33 @@
 .g-icon-rings .g-bar { opacity: 0; }
 .g-icon-rings .g-pith { opacity: 0.85; }
 
-.g-icon-barbell .g-plate { transform: translateX(var(--g-depth)) scaleX(0.02); }
-.g-icon-barbell .g-bar { opacity: 1; transform: none; }
+.g-icon-barbell .g-plate,
+.g-icon-barbell-dot .g-plate { transform: translateX(var(--g-depth)) scaleX(0.02); }
+.g-icon-barbell .g-bar,
+.g-icon-barbell-dot .g-bar { opacity: 1; transform: none; }
 .g-icon-barbell .g-pith { opacity: 0; }
 
+/* The same bar with the pith kept: a brown collar where the shaft crosses the middle. */
+.g-icon-barbell-dot .g-pith { opacity: 0.85; transform: none; }
+
+/* Animated variant: the pith never hands over, it rides the shaft through the whole turn. */
+.g-turn-dot .g-pith { animation-name: g-pith-stay; }
+
+@keyframes g-pith-stay {
+    0%, 100% { opacity: 0.85; transform: scale(1); }
+    22%, 38% { opacity: 0.85; transform: scale(0.62); }
+    72%, 88% { opacity: 0.85; transform: scale(0.62); }
+}
+
 .g-icon-rings .g-ring-progress,
-.g-icon-barbell .g-ring-progress {
+.g-icon-barbell .g-ring-progress,
+.g-icon-barbell-dot .g-ring-progress {
     display: none;
 }
 
 .g-icon-rings .g-ring-track,
-.g-icon-barbell .g-ring-track {
+.g-icon-barbell .g-ring-track,
+.g-icon-barbell-dot .g-ring-track {
     stroke: var(--g-moss);
 }
 
