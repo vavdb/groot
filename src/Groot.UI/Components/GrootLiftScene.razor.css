@@ -1,0 +1,6 @@
+/* Own root <div>; the lift panel carries its own styles (LiftScreen). */
+.lift-scene {
+    padding: 16px 12px 32px;
+    display: flex;
+    justify-content: center;
+}

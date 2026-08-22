@@ -40,12 +40,48 @@
     <GrootRunScene Programs="AllPrograms" ShowProgram="true" ShowAudioControls="true" />
 </ScreenFrame>
 
+<ScreenFrame Name="Lift" Note="both heads · GZCLP day A1, tap a circle to log the set" Nav="GrootDestination.Lift">
+    <GrootLiftScene />
+</ScreenFrame>
+
 <ScreenFrame Name="Not found" Note="both heads · GrootNotFound">
     <GrootNotFound />
 </ScreenFrame>
 
 @code {
     [Parameter] public bool IsDark { get; set; }
+
+    private static readonly DateOnly Today = new(2026, 8, 22);
+
+    /// <summary>Six months of plausible training: four sessions most weeks, two lean stretches,
+    /// the odd double day. Deterministic, so the gallery looks the same on every render.</summary>
+    private static readonly SeasonDay[] SampleHistory = SampleWeeks();
+
+    private static SeasonDay[] SampleWeeks()
+    {
+        var monday = Today.AddDays(-(((int)Today.DayOfWeek + 6) % 7)).AddDays(-25 * 7);
+        var days = new List<SeasonDay>();
+
+        for (var week = 0; week < 26; week++)
+        {
+            // Two lean weeks in February and one in June: travel, a cold, a deload.
+            var lean = week is 7 or 8 or 19;
+            var planned = lean ? 1 : week % 5 == 0 ? 5 : 4;
+
+            // Which days of the week, rotated so the pattern does not stripe.
+            var offsets = new[] { 0, 2, 4, 5, 1, 3 }.Skip(week % 3).Take(planned).ToArray();
+
+            foreach (var offset in offsets)
+            {
+                var date = monday.AddDays(week * 7 + offset);
+                if (date > Today) continue;
+                var sessions = (week * 7 + offset) % 17 == 0 ? 2 : 1;
+                days.Add(new SeasonDay(date, sessions));
+            }
+        }
+
+        return days.ToArray();
+    }
 
     private static readonly IReadOnlyList<IntervalProgram> AllPrograms =
         ProgramCatalog.Embedded.IntervalPrograms;

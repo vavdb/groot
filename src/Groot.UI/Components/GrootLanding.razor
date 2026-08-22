@@ -14,14 +14,14 @@
                        StartIcon="@Icons.Material.Filled.DirectionsRun" Class="cta" FullWidth="true">
                 Start a run
             </MudButton>
-            @* Not disabled buttons: MudBlazor's disabled fill is nearly invisible on the light
-               card. aria-disabled says the same thing to a screen reader, leaves the control
-               focusable, and lets the styles below stay on Groot's tokens. Neither has a
-               handler, so a click does nothing. *@
-            <MudButton Variant="Variant.Outlined" Color="Color.Inherit" aria-disabled="true"
-                       StartIcon="@Icons.Material.Filled.FitnessCenter" Class="cta soon" FullWidth="true">
+            <MudButton Href="@LiftHref" Variant="Variant.Filled" Color="Color.Secondary"
+                       StartIcon="@Icons.Material.Filled.FitnessCenter" Class="cta" FullWidth="true">
                 Start a lift
             </MudButton>
+
+            @* Settings has no screen yet. aria-disabled says so to a screen reader, leaves the
+               control focusable, and lets the styles below stay on Groot's tokens; there is no
+               handler, so a click does nothing. *@
             <MudButton Variant="Variant.Outlined" Color="Color.Inherit" aria-disabled="true"
                        StartIcon="@Icons.Material.Filled.Settings" Class="cta soon" FullWidth="true">
                 Settings
@@ -44,6 +44,9 @@
 
     /// <summary>Where the run button goes.</summary>
     [Parameter] public string RunHref { get; set; } = "/run";
+
+    /// <summary>Where the lift button goes.</summary>
+    [Parameter] public string LiftHref { get; set; } = "/lift";
 
     /// <summary>Today, injectable so a test or a head can pin the week.</summary>
     [Parameter] public DateOnly? Today { get; set; }

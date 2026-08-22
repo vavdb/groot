@@ -1,0 +1,72 @@
+@* The lifting screen and the day picker behind its pencil, the same shape the run screen has.
+   Working weights stand in until there is a store: the head can pass its own, and the defaults
+   here are a plain starting table, not a recommendation. *@
+@using Groot.Core.Programs
+@using Groot.Core.Sessions
+
+<div class="lift-scene">
+    <LiftScreen @key="_dayKey"
+                Plan="Plan"
+                SessionsInWeek="Program.SessionsPerWeek"
+                Day="@(RotationIndex % Program.SessionsPerWeek + 1)">
+        <HeaderAction>
+            <MudIconButton Icon="@(_editing ? Icons.Material.Filled.Check : Icons.Material.Filled.Edit)"
+                           Size="Size.Small"
+                           aria-label="@(_editing ? "Done choosing day" : "Change day")"
+                           OnClick="ToggleEditing" />
+        </HeaderAction>
+        <ChildContent>
+            @if (_editing)
+            {
+                <MudSelect T="string" Label="Day" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                           @bind-Value="_dayKey">
+                    @foreach (var key in Program.Rotation)
+                    {
+                        <MudSelectItem T="string" Value="@key">@key · @Summary(key)</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+        </ChildContent>
+    </LiftScreen>
+</div>
+
+@code {
+    /// <summary>The program to train. Defaults to the one program in the catalog that has days.</summary>
+    [Parameter] public LiftProgram Program { get; set; } = ProgramCatalog.Embedded.LiftPrograms[0];
+
+    /// <summary>Working weights per exercise id, in kg. Missing exercises show as bodyweight.</summary>
+    [Parameter] public IReadOnlyDictionary<string, decimal> WorkingWeightsKg { get; set; } = StarterWeights;
+
+    /// <summary>Which day of the rotation to open on.</summary>
+    [Parameter] public string? DayKey { get; set; }
+
+    /// <summary>A plain starting table, the weights a first week tends to begin at. Replaced by the store.</summary>
+    private static readonly Dictionary<string, decimal> StarterWeights = new()
+    {
+        ["squat"] = 60m,
+        ["bench-press"] = 45m,
+        ["overhead-press"] = 30m,
+        ["deadlift"] = 70m,
+        ["dumbbell-row"] = 22.5m,
+        ["dumbbell-curl"] = 12.5m,
+        ["dumbbell-lateral-raise"] = 7.5m,
+    };
+
+    private string _dayKey = "";
+    private bool _editing;
+
+    protected override void OnParametersSet() =>
+        _dayKey = _dayKey is { Length: > 0 } && Program.Rotation.Contains(_dayKey)
+            ? _dayKey
+            : DayKey ?? Program.Rotation[0];
+
+    private int RotationIndex => Math.Max(0, Program.Rotation.ToList().IndexOf(_dayKey));
+
+    private LiftSessionPlan Plan => LiftSessionBuilder.For(Program, _dayKey, WorkingWeightsKg);
+
+    /// <summary>The lifts of a day, so the picker reads as "A1 · squat, bench press, chin up".</summary>
+    private string Summary(string key) =>
+        string.Join(", ", Program.Day(key).Exercises.Select(e => string.Join(' ', e.ExerciseId.Split('-'))));
+
+    private void ToggleEditing() => _editing = !_editing;
+}

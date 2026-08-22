@@ -1,0 +1,284 @@
+@* The lifting screen: one training day, exercise by exercise. Tapping the active circle logs
+   that set at its target and starts the rest clock; tapping it again takes the log back. The
+   AMRAP set logs its target first and the stepper beside it records what actually happened.
+   Plate maths and the session plan come from Groot.Core; this screen keeps only what is logged
+   and how long the rest has left. *@
+@using System.Diagnostics
+@using Groot.Core.Equipment
+@using Groot.Core.Sessions
+@implements IDisposable
+
+<section class="lift-screen" aria-label="@Heading">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Baseline" Justify="Justify.SpaceBetween" Class="lift-head">
+            <MudText Typo="Typo.h6" Class="g-serif">
+                @ShortName <MudText Typo="Typo.caption" Inline="true" Class="dim">@Plan.DayKey</MudText>
+            </MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+                    @for (var d = 1; d <= SessionsInWeek; d++)
+                    {
+                        <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+                    }
+                </div>
+                @HeaderAction
+            </MudStack>
+        </MudStack>
+
+        @ChildContent
+
+        @foreach (var exercise in Plan.Exercises)
+        {
+            <div class="exercise @(IsComplete(exercise) ? "complete" : "")">
+                <div class="ex-head">
+                    <span class="ex-name">@Name(exercise.ExerciseId)</span>
+                    <span class="tier">T@(exercise.Tier)</span>
+                    <span class="scheme">@exercise.Scheme.Text</span>
+                    <span class="load">@Load(exercise)</span>
+                </div>
+
+                <div class="plates">@Plates(exercise)</div>
+
+                <div class="sets">
+                    @foreach (var set in exercise.Sets)
+                    {
+                        <SetCircle State="StateOf(exercise, set)"
+                                   Reps="RepsOf(exercise, set)"
+                                   OnTap="@(() => ToggleAsync(exercise, set))" />
+                    }
+
+                    @if (AmrapLogged(exercise) is { } amrap)
+                    {
+                        <div class="amrap">
+                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
+                                           aria-label="One rep fewer on the last set"
+                                           OnClick="@(() => NudgeAmrap(exercise, -1))" />
+                            <span class="amrap-count">@amrap</span>
+                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                           aria-label="One rep more on the last set"
+                                           OnClick="@(() => NudgeAmrap(exercise, 1))" />
+                        </div>
+                    }
+                </div>
+
+                @if (RestingIn(exercise) is { } remaining)
+                {
+                    <div class="rest" aria-live="polite">
+                        <span class="rest-time">rest @Clock(remaining)</span>
+                        <MudProgressLinear Color="Color.Primary" Rounded="true"
+                                           Value="@RestPercent(exercise, remaining)" Class="rest-bar" />
+                        <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="EndRest">Skip</MudButton>
+                    </div>
+                }
+            </div>
+        }
+
+        @if (Finished)
+        {
+            <MudPaper Elevation="0" Class="summary">
+                <MudText Typo="Typo.h5" Class="g-serif big">Done · @TotalReps reps</MudText>
+                <MudText Typo="Typo.caption" Class="subt">@Plan.TotalSets sets · @Volume kg lifted</MudText>
+            </MudPaper>
+        }
+
+        <MudStack Row="true" Justify="Justify.SpaceBetween" Class="liftmeta">
+            <MudText Typo="Typo.caption">sets @LoggedSets/@Plan.TotalSets</MudText>
+            <MudText Typo="Typo.caption">reps @TotalReps</MudText>
+            <MudText Typo="Typo.caption">volume @Volume kg</MudText>
+        </MudStack>
+    </MudStack>
+</section>
+
+@code {
+    private const int TickMilliseconds = 250;
+
+    /// <summary>The day to train. Replacing it needs an <c>@key</c> so the log does not carry over.</summary>
+    [Parameter, EditorRequired] public LiftSessionPlan Plan { get; set; } = null!;
+
+    /// <summary>The bar every barbell lift is loaded on. Its unit and counts-as weight come with it.</summary>
+    [Parameter] public Equipment Bar { get; set; } = DefaultBar;
+
+    /// <summary>The plates on hand, in pairs. Empty hides the per-side breakdown.</summary>
+    [Parameter] public IReadOnlyList<PlatePair> Inventory { get; set; } = DefaultInventory;
+
+    /// <summary>A control beside the session dots, for whatever the owner puts there (the session pencil).</summary>
+    [Parameter] public RenderFragment? HeaderAction { get; set; }
+
+    /// <summary>Content directly under the header. The owner's session editor lives here.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    [Parameter] public int SessionsInWeek { get; set; } = 3;
+
+    [Parameter] public int Day { get; set; } = 1;
+
+    [Parameter] public EventCallback OnFinished { get; set; }
+
+    /// <summary>A 20 kg bar, the one most racks come with.</summary>
+    private static readonly Equipment DefaultBar =
+        new("bar", "Barbell", EquipmentKind.Bar, WeightUnit.Kg, ActualKg: 20m, CountsAsKg: 20m);
+
+    /// <summary>A common home set: pairs of 20, 15, 10, 5, 2.5 and 1.25 kg.</summary>
+    private static readonly PlatePair[] DefaultInventory =
+    [
+        new(20m, 2), new(15m, 1), new(10m, 2), new(5m, 2), new(2.5m, 2), new(1.25m, 2),
+    ];
+
+    // Logged reps per set, keyed by exercise and set index. Absent means the set is not done.
+    private readonly Dictionary<(string Exercise, int Set), int> _logged = [];
+
+    private CancellationTokenSource? _restLoop;
+    private string? _restingExercise;
+    private long _restEndsAtMs;
+
+    private int LoggedSets => _logged.Count;
+
+    private int TotalReps => _logged.Values.Sum();
+
+    private bool Finished => LoggedSets == Plan.TotalSets;
+
+    private string Heading => $"{Plan.ProgramName} {Plan.DayKey}";
+
+    /// <summary>The program name without its parenthetical, so the header stays one line on a phone.</summary>
+    private string ShortName =>
+        Plan.ProgramName.Split(" (", StringSplitOptions.TrimEntries)[0];
+
+    /// <summary>Reps times the weight on the bar, rounded to whole kilos; bodyweight work adds nothing.</summary>
+    private decimal Volume => Math.Round(Plan.Exercises.Sum(exercise =>
+        (exercise.TargetKg ?? 0m) * exercise.Sets.Sum(set => RepsOf(exercise, set) is { } reps && IsDone(exercise, set) ? reps : 0)), 0);
+
+    private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+
+    /// <summary>"bench-press" reads as "Bench press" until there are resource strings to look up.</summary>
+    private static string Name(string exerciseId) =>
+        string.Join(' ', exerciseId.Split('-')) is { Length: > 0 } words
+            ? char.ToUpperInvariant(words[0]) + words[1..]
+            : exerciseId;
+
+    private string Load(LiftExercisePlan exercise) =>
+        exercise.TargetKg is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+
+    private string Plates(LiftExercisePlan exercise)
+    {
+        if (exercise.TargetKg is not { } kg || Inventory.Count == 0) return "";
+
+        var breakdown = PlateSolver.PerSideBreakdown(kg, Bar, Inventory);
+        if (breakdown is null) return $"{Bar.Name} cannot be loaded to {kg:0.##} kg";
+        if (breakdown.Count == 0) return $"{Bar.Name} alone";
+
+        return $"{Bar.EffectiveBarKg:0.##} + {string.Join(" + ", breakdown.Select(p => $"{p:0.##}"))} per side";
+    }
+
+    private bool IsDone(LiftExercisePlan exercise, LiftSet set) =>
+        _logged.ContainsKey((exercise.ExerciseId, set.Index));
+
+    private bool IsComplete(LiftExercisePlan exercise) =>
+        exercise.Sets.All(set => IsDone(exercise, set));
+
+    private SetCircleState StateOf(LiftExercisePlan exercise, LiftSet set)
+    {
+        if (IsDone(exercise, set)) return SetCircleState.Done;
+        return NextSet(exercise)?.Index == set.Index ? SetCircleState.Active : SetCircleState.Pending;
+    }
+
+    private LiftSet? NextSet(LiftExercisePlan exercise) =>
+        exercise.Sets.FirstOrDefault(set => !IsDone(exercise, set));
+
+    private int? RepsOf(LiftExercisePlan exercise, LiftSet set) =>
+        _logged.TryGetValue((exercise.ExerciseId, set.Index), out var reps) ? reps
+        : StateOf(exercise, set) == SetCircleState.Active ? set.TargetReps
+        : null;
+
+    /// <summary>Reps on a logged AMRAP set, which is the only set the stepper applies to.</summary>
+    private int? AmrapLogged(LiftExercisePlan exercise) =>
+        exercise.Sets.FirstOrDefault(set => set.IsAmrap) is { } amrap && IsDone(exercise, amrap)
+            ? _logged[(exercise.ExerciseId, amrap.Index)]
+            : null;
+
+    private async Task ToggleAsync(LiftExercisePlan exercise, LiftSet set)
+    {
+        var key = (exercise.ExerciseId, set.Index);
+
+        if (_logged.Remove(key))
+        {
+            EndRest();
+            return;
+        }
+
+        _logged[key] = set.TargetReps;
+        StartRest(exercise);
+
+        if (Finished)
+        {
+            EndRest();
+            await OnFinished.InvokeAsync();
+        }
+    }
+
+    private void NudgeAmrap(LiftExercisePlan exercise, int delta)
+    {
+        if (exercise.Sets.FirstOrDefault(set => set.IsAmrap) is not { } amrap) return;
+
+        var key = (exercise.ExerciseId, amrap.Index);
+        if (!_logged.TryGetValue(key, out var reps)) return;
+
+        _logged[key] = Math.Max(1, reps + delta);
+    }
+
+    private int? RestingIn(LiftExercisePlan exercise)
+    {
+        if (_restingExercise != exercise.ExerciseId) return null;
+
+        var remaining = (int)Math.Ceiling((_restEndsAtMs - NowMs()) / 1000.0);
+        return remaining > 0 ? remaining : null;
+    }
+
+    private double RestPercent(LiftExercisePlan exercise, int remaining) =>
+        exercise.RestSeconds == 0 ? 100 : 100.0 * (exercise.RestSeconds - remaining) / exercise.RestSeconds;
+
+    private static long NowMs() => (long)(Stopwatch.GetTimestamp() * 1000.0 / Stopwatch.Frequency);
+
+    private void StartRest(LiftExercisePlan exercise)
+    {
+        EndRest();
+        if (exercise.RestSeconds <= 0) return;
+
+        _restingExercise = exercise.ExerciseId;
+        _restEndsAtMs = NowMs() + exercise.RestSeconds * 1000L;
+
+        var cts = new CancellationTokenSource();
+        _restLoop = cts;
+        _ = TickRestAsync(cts.Token);
+    }
+
+    private void EndRest()
+    {
+        _restLoop?.Cancel();
+        _restLoop?.Dispose();
+        _restLoop = null;
+        _restingExercise = null;
+    }
+
+    private async Task TickRestAsync(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested && NowMs() < _restEndsAtMs)
+            {
+                await Task.Delay(TickMilliseconds, token);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The rest was skipped or the screen went away; nothing to clean up beyond Dispose.
+        }
+
+        if (!token.IsCancellationRequested)
+        {
+            _restingExercise = null;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose() => EndRest();
+}
