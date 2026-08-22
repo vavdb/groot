@@ -48,15 +48,16 @@
     color: var(--g-run-ink);
 }
 
+/* Text and strokes on the card use the text-safe accents; fills above keep the base colour. */
 .slot.joker {
-    border-color: var(--g-clay);
-    color: var(--g-clay);
+    border-color: var(--g-clay-text);
+    color: var(--g-clay-text);
     border-style: dashed;
 }
 
 .slot.today {
-    border: 2px solid var(--g-amber);
-    color: var(--g-amber);
+    border: 2px solid var(--g-amber-text);
+    color: var(--g-amber-text);
     animation: slot-pulse 1.8s infinite;
 }
 
@@ -66,7 +67,7 @@
 
 @keyframes slot-pulse {
     0%, 100% { box-shadow: 0 0 0 0 transparent; }
-    50% { box-shadow: 0 0 0 5px rgba(224, 170, 74, .15); }
+    50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--g-amber) 15%, transparent); }
 }
 
 @media (prefers-reduced-motion: reduce) {

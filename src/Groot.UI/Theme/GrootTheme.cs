@@ -5,7 +5,9 @@ namespace Groot.UI.Theme;
 /// <summary>
 /// The MudBlazor theme that skins Groot's chrome (forms, buttons, cards, dialogs, tables).
 /// Colours resolve from <see cref="GrootPalette"/>: amber = Primary, moss = Secondary,
-/// bark = Tertiary, clay = Error, with surfaces/text/lines from the bg/card/ink/dim/line tokens.
+/// bark = Tertiary, clay-text = Error, with surfaces/text/lines from the bg/card/ink/dim/line
+/// tokens. Keep in step with <see cref="GrootPalette.MudRoles"/>, which emits the same
+/// mapping as CSS variables per theme scope.
 /// Body text uses Public Sans; headings use Fraunces.
 /// </summary>
 public static class GrootTheme
@@ -17,7 +19,7 @@ public static class GrootTheme
             Primary = GrootPalette.Light("amber"),
             Secondary = GrootPalette.Light("moss"),
             Tertiary = GrootPalette.Light("bark"),
-            Error = GrootPalette.Light("clay"),
+            Error = GrootPalette.Light("clay-text"),
             Background = GrootPalette.Light("bg"),
             Surface = GrootPalette.Light("card"),
             AppbarBackground = GrootPalette.Light("card"),
@@ -34,7 +36,7 @@ public static class GrootTheme
             Primary = GrootPalette.Dark("amber"),
             Secondary = GrootPalette.Dark("moss"),
             Tertiary = GrootPalette.Dark("bark"),
-            Error = GrootPalette.Dark("clay"),
+            Error = GrootPalette.Dark("clay-text"),
             Background = GrootPalette.Dark("bg"),
             Surface = GrootPalette.Dark("card"),
             AppbarBackground = GrootPalette.Dark("card"),

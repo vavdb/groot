@@ -25,14 +25,15 @@
     border: 1.5px solid var(--g-line);
 }
 
+/* Session dots are 9px UI graphics on the page: text-safe amber clears 3:1 in both themes. */
 .dots i.done {
-    background: var(--g-amber);
-    border-color: var(--g-amber);
+    background: var(--g-amber-text);
+    border-color: var(--g-amber-text);
 }
 
 .dots i.now {
-    border-color: var(--g-amber);
-    box-shadow: inset 0 0 0 2px var(--g-bg), 0 0 0 2px rgba(224, 170, 74, .25);
+    border-color: var(--g-amber-text);
+    box-shadow: inset 0 0 0 2px var(--g-bg), 0 0 0 2px color-mix(in srgb, var(--g-amber) 25%, transparent);
 }
 
 ::deep .cue {

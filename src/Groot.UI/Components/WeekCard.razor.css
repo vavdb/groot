@@ -6,7 +6,7 @@
 
 ::deep .jokers {
     letter-spacing: .1em;
-    color: var(--g-clay);
+    color: var(--g-clay-text);
 }
 
 ::deep .meter {
@@ -22,5 +22,5 @@
 }
 
 ::deep .meter .warn {
-    color: var(--g-clay);
+    color: var(--g-clay-text);
 }

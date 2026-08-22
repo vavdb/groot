@@ -31,6 +31,8 @@
   --g-bark: #6b4f35;
   --g-amber: #c98f2d;
   --g-clay: #b45f3c;
+  --g-amber-text: #8f6212;
+  --g-clay-text: #a04f2e;
   --g-ring: #8aa385;
   --g-wither: #c9c2ae;
   --g-run-ink: #241c08;
@@ -47,8 +49,8 @@
   --mud-palette-tertiary: var(--g-bark);
   --mud-palette-tertiary-rgb: 107, 79, 53;
   --mud-palette-tertiary-text: var(--g-card);
-  --mud-palette-error: var(--g-clay);
-  --mud-palette-error-rgb: 180, 95, 60;
+  --mud-palette-error: var(--g-clay-text);
+  --mud-palette-error-rgb: 160, 79, 46;
   --mud-palette-error-text: var(--g-card);
   --mud-palette-background: var(--g-bg);
   --mud-palette-background-gray: var(--g-bg);
@@ -95,6 +97,8 @@
   --g-bark: #c49a6c;
   --g-amber: #e0aa4a;
   --g-clay: #d97e56;
+  --g-amber-text: #e0aa4a;
+  --g-clay-text: #d97e56;
   --g-ring: #4a5f45;
   --g-wither: #3a4234;
   --g-run-ink: #241c08;
@@ -111,7 +115,7 @@
   --mud-palette-tertiary: var(--g-bark);
   --mud-palette-tertiary-rgb: 196, 154, 108;
   --mud-palette-tertiary-text: var(--g-card);
-  --mud-palette-error: var(--g-clay);
+  --mud-palette-error: var(--g-clay-text);
   --mud-palette-error-rgb: 217, 126, 86;
   --mud-palette-error-text: var(--g-card);
   --mud-palette-background: var(--g-bg);

@@ -33,6 +33,11 @@ public static class GrootPalette
         new("bark",      "#6b4f35", "#c49a6c"),
         new("amber",     "#c98f2d", "#e0aa4a"),
         new("clay",      "#b45f3c", "#d97e56"),
+        // Amber and clay used as text or as a thin stroke on bg/card. Light darkens them to
+        // clear 4.5:1 (amber itself reads 2.5:1 there); dark keeps the base colour.
+        // PaletteContrastTests pins both. Fills stay amber/clay with run-ink/card on top.
+        new("amber-text", "#8f6212", "#e0aa4a"),
+        new("clay-text",  "#a04f2e", "#d97e56"),
         // Signature-visual accents (CSS-only; no MudBlazor role)
         new("ring",      "#8aa385", "#4a5f45"),
         new("wither",    "#c9c2ae", "#3a4234"),
@@ -76,7 +81,7 @@ public static class GrootPalette
         new MudRole("secondary-text",     "card"),
         new MudRole("tertiary",           "bark"),
         new MudRole("tertiary-text",      "card"),
-        new MudRole("error",              "clay"),
+        new MudRole("error",              "clay-text"),   // card on clay is 4.4:1 in light; clay-text clears 4.5
         new MudRole("error-text",         "card"),
         new MudRole("background",         "bg"),
         new MudRole("background-gray",    "bg"),

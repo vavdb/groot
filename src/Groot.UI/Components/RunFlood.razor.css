@@ -33,7 +33,7 @@
 }
 
 .flood .t {
-    font-family: "Fraunces", Georgia, serif;
+    font-family: var(--g-font-display);
     font-weight: 900;
     font-size: var(--g-text-hero);
     line-height: 1.02;

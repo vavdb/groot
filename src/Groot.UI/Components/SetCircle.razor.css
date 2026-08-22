@@ -15,15 +15,22 @@
     padding: 0;
 }
 
+.set-circle:focus-visible {
+    outline: 2px solid var(--g-amber-text);
+    outline-offset: 3px;
+}
+
 .set-circle.done {
     border-color: var(--g-moss);
     background: var(--g-moss);
     color: var(--g-card);
 }
 
+/* The active number and ring are text and stroke on the card: text-safe amber. The pulse
+   behind it is decorative and keeps the base amber. */
 .set-circle.active {
-    border: 2px solid var(--g-amber);
-    color: var(--g-amber);
+    border: 2px solid var(--g-amber-text);
+    color: var(--g-amber-text);
     position: relative;
 }
 
