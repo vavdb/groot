@@ -75,9 +75,11 @@
 .g-ring-1.g-near { --g-depth: 30px; }
 .g-ring-1.g-far { --g-depth: -30px; }
 
+/* The shaft is exactly as thick as the bar end is wide: the dot turns into this line, and a
+   step in weight between the two reads as a fault. */
 .g-bar {
     stroke: var(--g-bark, #c49a6c);
-    stroke-width: 0.34rem;
+    stroke-width: 0.63rem;
     stroke-linecap: round;
     transform-origin: 50% 50%;
     opacity: 0;
