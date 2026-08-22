@@ -1,42 +1,33 @@
-@* The complete run screen surface: the program/week/session picker, optional voice/sound
-   controls, a segment summary, and the embedded run screen. Both heads embed this; the only
-   head-specific inputs are Programs, ShowProgram, the cue player, and the audio callbacks. *@
+@* The run screen, and nothing around it. The panel's own header carries the program, the week
+   and the session, so there is no second copy of any of that: the pencil beside the session dots
+   opens the picker in place, and closes it again. Both heads embed this; the head-specific
+   inputs are Programs, ShowProgram, the cue player, and the audio callbacks. *@
 @using Groot.Core.Programs
 @using Groot.UI.Audio
 
 <div class="run-scene">
-    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="6" AlignItems="AlignItems.Start">
-        <MudPaper Elevation="1" Class="picker">
-            <MudStack Spacing="3">
-                <GrootProgramPicker Programs="Programs"
-                                    ShowProgram="ShowProgram"
-                                    SelectionChanged="OnSelectionChanged" />
-
-                @if (ShowAudioControls)
-                {
-                    <GrootAudioControls @bind-Language="Language"
-                                        @bind-Sound="SoundEnabled"
-                                        ValuesChanged="OnAudioChanged" />
-                }
-
-                @if (_selection is { } sel)
-                {
-                    <MudText Typo="Typo.caption">
-                        @sel.Session.Segments.Count segments · @Format(sel.Session.TotalSeconds) total ·
-                        @sel.Session.RunCount run blocks · @Format(sel.Session.RunSeconds) running
-                    </MudText>
-                }
-            </MudStack>
-        </MudPaper>
-
-        @if (_selection is { } selected)
-        {
-            <GrootRunPage Session="selected.Session"
-                          CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
-                          Language="Language"
-                          SessionsInWeek="selected.SessionsInWeek" />
-        }
-    </MudStack>
+    @if (_selection is { } selected)
+    {
+        <RunScreen @key="SessionKey(selected)"
+                   Session="selected.Session"
+                   CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
+                   Language="Language"
+                   SessionsInWeek="selected.SessionsInWeek">
+            <HeaderAction>
+                <MudIconButton Icon="@(_editing ? Icons.Material.Filled.Check : Icons.Material.Filled.Edit)"
+                               Size="Size.Small"
+                               aria-label="@(_editing ? "Done choosing session" : "Change session")"
+                               OnClick="ToggleEditing" />
+            </HeaderAction>
+            <ChildContent>
+                @Picker
+            </ChildContent>
+        </RunScreen>
+    }
+    else
+    {
+        @Picker
+    }
 </div>
 
 @code {
@@ -55,10 +46,31 @@
     [Parameter] public EventCallback<GrootAudioState> AudioChanged { get; set; }
 
     private GrootProgramSelection? _selection;
+    private bool _editing;
     private string Language { get; set; } = "en";
     private bool SoundEnabled { get; set; } = true;
 
-    private static string Format(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+    /// <summary>Keys the run screen: a new program, week or day rebuilds the timer instead of reusing it.</summary>
+    private static string SessionKey(GrootProgramSelection selection) =>
+        $"{selection.Session.Id?.ProgramName}-{selection.Session.Id?.Week}-{selection.Session.Id?.Day}";
+
+    /// <summary>The picker itself. It stays mounted with its controls hidden, so the selection survives a close.</summary>
+    private RenderFragment Picker => __builder =>
+    {
+        <GrootProgramPicker Programs="Programs"
+                            ShowProgram="ShowProgram"
+                            ShowControls="_editing"
+                            SelectionChanged="OnSelectionChanged">
+            @if (ShowAudioControls)
+            {
+                <GrootAudioControls @bind-Language="Language"
+                                    @bind-Sound="SoundEnabled"
+                                    ValuesChanged="OnAudioChanged" />
+            }
+        </GrootProgramPicker>
+    };
+
+    private void ToggleEditing() => _editing = !_editing;
 
     private void OnSelectionChanged(GrootProgramSelection selection) => _selection = selection;
 

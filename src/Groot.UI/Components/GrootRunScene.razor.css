@@ -1,10 +1,6 @@
-/* Own root <div>; the picker paper is a MudBlazor child, reached through ::deep. */
+/* Own root <div>; the run panel carries its own styles (RunScreen). */
 .run-scene {
-    padding: 28px 16px 64px;
-}
-
-::deep .picker {
-    min-width: 220px;
-    max-width: 300px;
-    padding: 16px;
+    padding: 16px 12px 32px;
+    display: flex;
+    justify-content: center;
 }

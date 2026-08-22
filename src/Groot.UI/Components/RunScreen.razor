@@ -12,13 +12,18 @@
             <MudText Typo="Typo.h6" Class="g-serif">
                 @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
             </MudText>
-            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
-                @for (var d = 1; d <= SessionsInWeek; d++)
-                {
-                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
-                }
-            </div>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+                    @for (var d = 1; d <= SessionsInWeek; d++)
+                    {
+                        <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+                    }
+                </div>
+                @HeaderAction
+            </MudStack>
         </MudStack>
+
+        @ChildContent
 
         <RunFlood StateLabel="@StateLabel"
                   TimeText="@Clock(_finished ? 0 : Progress.RemainingInSegment)"
@@ -78,6 +83,12 @@
     /// of reusing it against the new session's segments — both heads already key it.
     /// </summary>
     [Parameter, EditorRequired] public RunSession Session { get; set; } = null!;
+
+    /// <summary>A control beside the session dots, for whatever the owner puts there (the session pencil).</summary>
+    [Parameter] public RenderFragment? HeaderAction { get; set; }
+
+    /// <summary>Content directly under the header, above the clock. The owner's session editor lives here.</summary>
+    [Parameter] public RenderFragment? ChildContent { get; set; }
 
     /// <summary>Where cues are spoken. Null keeps the screen silent but fully usable.</summary>
     [Parameter] public ICuePlayer? CuePlayer { get; set; }
