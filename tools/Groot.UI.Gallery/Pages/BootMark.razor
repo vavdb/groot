@@ -1,0 +1,22 @@
+@* The boot mark, exactly as the two index.html blocks render it, styled by boot-loader.css.
+   The wrapper class differs on purpose: .g-boot inside the running app would re-arm the
+   #app:has(.g-boot) full-screen rule. check-rules.sh compares the <svg> below against both
+   index.html blocks, so keep it identical; Turn carries the comparison variants instead. *@
+
+<div class="g-boot-demo @Turn">
+    <svg class="g-boot-rings" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+        <line class="g-bar" x1="14%" y1="50%" x2="86%" y2="50%" />
+        <circle class="g-ring g-ring-2 g-plate g-far" cx="50%" cy="50%" r="30%" />
+        <circle class="g-ring g-ring-2 g-plate g-near" cx="50%" cy="50%" r="30%" />
+        <circle class="g-ring g-ring-1 g-plate g-far" cx="50%" cy="50%" r="17%" />
+        <circle class="g-ring g-ring-1 g-plate g-near" cx="50%" cy="50%" r="17%" />
+        <circle class="g-ring-track" cx="50%" cy="50%" r="44%" />
+        <circle class="g-ring-progress" cx="50%" cy="50%" r="44%" />
+        <circle class="g-pith" cx="50%" cy="50%" r="6%" />
+    </svg>
+</div>
+
+@code {
+    /// <summary>Turn variant class for the boot lab (g-turn-4, g-turn-5, g-turn-smooth). Empty is what ships.</summary>
+    [Parameter] public string Turn { get; set; } = "";
+}

@@ -58,7 +58,7 @@ done
 
 # The boot mark is copied into every WASM head's index.html and into the gallery preview.
 # They must stay identical; boot-loader.css styles all three.
-boot_files=(src/Groot.Web/wwwroot/index.html tools/Groot.UI.Gallery/wwwroot/index.html tools/Groot.UI.Gallery/Pages/ScreenColumn.razor)
+boot_files=(src/Groot.Web/wwwroot/index.html tools/Groot.UI.Gallery/wwwroot/index.html tools/Groot.UI.Gallery/Pages/BootMark.razor)
 boot_ref=""
 for file in "${boot_files[@]}"; do
     block=$(perl -0777 -ne 'print $1 if m{(<svg class="g-boot-rings".*?</svg>)}s' "$file" | tr -s '[:space:]' ' ')
