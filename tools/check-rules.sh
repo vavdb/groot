@@ -56,6 +56,21 @@ for file in src/Groot.UI/Components/*.razor src/Groot.Core/Intervals/RunCueText.
     fi
 done
 
+# The boot mark is copied into every WASM head's index.html and into the gallery preview.
+# They must stay identical; boot-loader.css styles all three.
+boot_files=(src/Groot.Web/wwwroot/index.html tools/Groot.UI.Gallery/wwwroot/index.html tools/Groot.UI.Gallery/Pages/ScreenColumn.razor)
+boot_ref=""
+for file in "${boot_files[@]}"; do
+    block=$(perl -0777 -ne 'print $1 if m{(<svg class="g-boot-rings".*?</svg>)}s' "$file" | tr -s '[:space:]' ' ')
+    if [ -z "$block" ]; then
+        fail "$file: no g-boot-rings block; the boot mark lives in every WASM head and the gallery preview"
+    elif [ -z "$boot_ref" ]; then
+        boot_ref="$block"
+    elif [ "$block" != "$boot_ref" ]; then
+        fail "$file: g-boot-rings block differs from ${boot_files[0]}; keep the boot mark identical"
+    fi
+done
+
 if [ "$status" -eq 0 ]; then
     echo "check-rules: clean"
 fi

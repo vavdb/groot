@@ -1,12 +1,63 @@
-@* The landing page body: serif wordmark, one-line pitch, and a primary call-to-action to /run.
-   Own root <div> so the scoped styles apply; the MudButton is reached through ::deep. *@
+@* The home screen: the wordmark, this week's contract card, and the three things you can start
+   from here. No byline. Days and Evaluation are parameters so a head can feed logged sessions
+   once there is a store; the default is the current week with nothing logged yet. *@
+@using Groot.Core.Contract
 
 <div class="groot-landing">
-    <MudStack Spacing="2" AlignItems="AlignItems.Start">
+    <MudStack Spacing="4" AlignItems="AlignItems.Stretch">
         <MudText Typo="Typo.h1" Class="g-serif">Groot<span class="accent">.</span></MudText>
-        <MudText Typo="Typo.body1" Class="sub">A workout logger and habit tracker for lifters who also run.</MudText>
-        <MudButton Href="/run" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow" Class="cta">
-            Start a session
-        </MudButton>
+
+        <WeekCard Days="@(Days ?? ThisWeek())" Evaluation="Evaluation" />
+
+        <MudStack Spacing="2">
+            <MudButton Href="@RunHref" Variant="Variant.Filled" Color="Color.Primary"
+                       StartIcon="@Icons.Material.Filled.DirectionsRun" Class="cta" FullWidth="true">
+                Start a run
+            </MudButton>
+            @* Not disabled buttons: MudBlazor's disabled fill is nearly invisible on the light
+               card. aria-disabled says the same thing to a screen reader, leaves the control
+               focusable, and lets the styles below stay on Groot's tokens. Neither has a
+               handler, so a click does nothing. *@
+            <MudButton Variant="Variant.Outlined" Color="Color.Inherit" aria-disabled="true"
+                       StartIcon="@Icons.Material.Filled.FitnessCenter" Class="cta soon" FullWidth="true">
+                Start a lift
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Inherit" aria-disabled="true"
+                       StartIcon="@Icons.Material.Filled.Settings" Class="cta soon" FullWidth="true">
+                Settings
+            </MudButton>
+        </MudStack>
+
+        <MudText Typo="Typo.caption" Class="sub">Lifting and settings are not built yet.</MudText>
     </MudStack>
 </div>
+
+@code {
+    /// <summary>The seven day cells. Null builds the current week with nothing logged.</summary>
+    [Parameter] public IReadOnlyList<DaySlot>? Days { get; set; }
+
+    /// <summary>The week's contract result. Null hides the meter, which is right before anything is logged.</summary>
+    [Parameter] public WeekEvaluation? Evaluation { get; set; }
+
+    /// <summary>Where the run button goes.</summary>
+    [Parameter] public string RunHref { get; set; } = "/run";
+
+    /// <summary>Today, injectable so a test or a head can pin the week.</summary>
+    [Parameter] public DateOnly? Today { get; set; }
+
+    private static readonly string[] DayLabels = ["MO", "TU", "WE", "TH", "FR", "SA", "SU"];
+
+    private IReadOnlyList<DaySlot> ThisWeek()
+    {
+        var today = Today ?? DateOnly.FromDateTime(DateTime.Now);
+        var monday = today.AddDays(-(((int)today.DayOfWeek + 6) % 7));
+
+        return Enumerable.Range(0, 7).Select(offset =>
+        {
+            var date = monday.AddDays(offset);
+            if (date == today) return new DaySlot(DayLabels[offset], "▶", "TODAY", DaySlotVisual.Today);
+            if (offset == 6) return new DaySlot(DayLabels[offset], "☾", "REST", DaySlotVisual.Rest);
+            return new DaySlot(DayLabels[offset], "·", "", DaySlotVisual.Pending);
+        }).ToArray();
+    }
+}

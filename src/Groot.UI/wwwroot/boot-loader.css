@@ -1,8 +1,20 @@
-/* The themed WASM boot screen: barbell-mark rings on #app while Blazor loads. Shared by every
+/* The themed WASM boot screen: the barbell mark on #app while Blazor loads. Shared by every
    WASM head (Groot.Web, Groot.UI.Gallery) so the boot experience never drifts between them.
-   Pair with the matching #app markup — see Groot.Web/wwwroot/index.html for the reference block:
-   a .g-boot wrapper around a .g-boot-rings <svg> with g-ring-1/g-ring-2/g-ring-track/
-   g-ring-progress/g-pith circles. */
+   Pair with the matching #app markup — see Groot.Web/wwwroot/index.html for the reference
+   block: a .g-boot wrapper around a .g-boot-rings <svg>.
+
+   The mark turns. Face on it reads as concentric rings, the view down the end of a loaded bar:
+   the pith is the bar end, the two ring sizes are the plates. It then rotates a quarter turn to
+   the side view, where every plate lands edge on at its own place along the shaft (the big
+   plates near the middle, the small ones outboard) and the pith stretches into the bar itself.
+   Each plate is drawn twice, once per side, so the side view is loaded symmetrically.
+
+   The rotation is faked with the two transforms a quarter turn about the vertical axis produces:
+   scaleX(cos) squashes the circle to an edge, translateX(depth * sin) walks it out to its place
+   on the shaft. The keyframes below sample cos and sin at 0, 45, and 90 degrees.
+
+   The outer track and progress circle never turn: they are the load indicator, driven by
+   --blazor-load-percentage, and stay a readable ring around the mark the whole way. */
 
 #app:has(.g-boot) {
     position: fixed;
@@ -23,6 +35,9 @@
     width: 9rem;
     height: 9rem;
     overflow: visible;
+
+    /* One cycle: face on, turn, hold the barbell, turn back. */
+    --g-turn: 5.4s;
 }
 
 .g-boot-rings circle {
@@ -33,19 +48,40 @@
 .g-ring {
     stroke: var(--g-moss, #7fb47a);
     stroke-linecap: round;
-    opacity: 0;
-    animation: g-ring-grow 2.4s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+    opacity: 0.95;
 }
 
-.g-ring-1 {
-    stroke-width: 0.5rem;
-    animation-delay: 0s;
-}
+.g-ring-1 { stroke-width: 0.5rem; }
 
 .g-ring-2 {
     stroke: var(--g-amber, #e0aa4a);
     stroke-width: 0.62rem;
-    animation-delay: 0.28s;
+}
+
+/* Where each plate sits along the shaft in the side view, in viewBox units from the middle.
+   Big plates inboard, small plates outboard, the way a bar is actually loaded. */
+.g-plate {
+    /* The stroke keeps its width through the squash, so edge on a plate reads as one straight
+       line instead of the outline of a very thin ellipse. */
+    vector-effect: non-scaling-stroke;
+    animation: g-plate-turn var(--g-turn) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* The plates on the far side of the bar sit back a little. */
+.g-far { opacity: 0.7; }
+
+.g-ring-2.g-near { --g-depth: 14px; }
+.g-ring-2.g-far { --g-depth: -14px; }
+.g-ring-1.g-near { --g-depth: 30px; }
+.g-ring-1.g-far { --g-depth: -30px; }
+
+.g-bar {
+    stroke: var(--g-bark, #c49a6c);
+    stroke-width: 0.34rem;
+    stroke-linecap: round;
+    transform-origin: 50% 50%;
+    opacity: 0;
+    animation: g-bar-extend var(--g-turn) cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 .g-ring-track {
@@ -65,27 +101,41 @@
 .g-pith {
     fill: var(--g-bark, #c49a6c);
     stroke: none;
-    animation: g-pith-pulse 2.4s ease-in-out infinite;
+    animation: g-pith-turn var(--g-turn) cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
-@keyframes g-ring-grow {
-      0% { transform: scale(0.72); opacity: 0; }
-     18% { opacity: 0.95; }
-     70% { transform: scale(1);    opacity: 0.95; }
-    100% { transform: scale(1.08); opacity: 0; }
+@keyframes g-plate-turn {
+    /* face on, the rings concentric */
+    0%, 22% { transform: translateX(0) scaleX(1); }
+    /* halfway: 45 degrees */
+    29% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
+    /* edge on, every plate at its place on the shaft */
+    36%, 64% { transform: translateX(var(--g-depth)) scaleX(0.02); }
+    71% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
+    78%, 100% { transform: translateX(0) scaleX(1); }
 }
 
-@keyframes g-pith-pulse {
-    0%, 100% { opacity: 0.75; }
-        50%  { opacity: 1; }
+@keyframes g-bar-extend {
+    0%, 26% { transform: scaleX(0); opacity: 0; }
+    38%, 64% { transform: scaleX(1); opacity: 1; }
+    74%, 100% { transform: scaleX(0); opacity: 0; }
+}
+
+/* The bar end, face on. It hands over to the shaft as the mark turns. */
+@keyframes g-pith-turn {
+    0%, 22% { opacity: 0.85; transform: scale(1); }
+    33%, 67% { opacity: 0; transform: scale(0.5); }
+    78%, 100% { opacity: 0.85; transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .g-ring,
+    .g-plate,
+    .g-bar,
     .g-pith {
         animation: none;
-        opacity: 0.95;
-        transform: none;
     }
+    .g-plate { transform: none; }
+    .g-bar { opacity: 0; }
+    .g-pith { opacity: 0.85; }
     .g-ring-progress { transition: none; }
 }

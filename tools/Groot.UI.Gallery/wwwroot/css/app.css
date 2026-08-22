@@ -234,3 +234,12 @@
 }
 
 .screen-frame.wide .screen-body { padding: 24px; }
+
+/* Boot mark preview. The real one fills the viewport; here it fills the frame instead.
+   --blazor-load-percentage is a fixed sample so the progress ring reads as a ring. */
+.g-boot-demo {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    --blazor-load-percentage: 62%;
+}

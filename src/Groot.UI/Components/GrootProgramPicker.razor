@@ -1,36 +1,52 @@
-@* The interval-program selector: program, week, and session. Owns the selection state and
-   raises SelectionChanged with the resolved RunSession whenever a value changes. The owner
-   (GrootRunScene) supplies the surrounding paper; this is only the three selects. *@
+@* The interval-program selector. Collapsed it is one line, "0→5K · W1 D1", with a pencil that
+   opens the selects; the selects are the same three (program, week, session) and close again on
+   Done. Owns the selection state and raises SelectionChanged whenever a value changes. The owner
+   (GrootRunScene) supplies the surrounding paper. *@
 @using Groot.Core.Intervals
 @using Groot.Core.Programs
 
-<MudStack Spacing="3">
-    @if (ShowProgram)
+<MudStack Spacing="2">
+    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+        <MudText Typo="Typo.subtitle1" Class="g-serif">@Summary</MudText>
+        <MudSpacer />
+        <MudIconButton Icon="@(_editing ? Icons.Material.Filled.Check : Icons.Material.Filled.Edit)"
+                       Size="Size.Small"
+                       Color="Color.Default"
+                       aria-label="@(_editing ? "Done choosing session" : "Change session")"
+                       OnClick="ToggleEditing" />
+    </MudStack>
+
+    @if (_editing)
     {
-        <MudSelect T="string" Label="Program" Variant="Variant.Outlined"
-                   @bind-Value="_programId" @bind-Value:after="Notify">
-            @foreach (var program in Programs)
+        <MudStack Spacing="2">
+            @if (ShowProgram)
             {
-                <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
+                <MudSelect T="string" Label="Program" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                           @bind-Value="_programId" @bind-Value:after="Notify">
+                    @foreach (var program in Programs)
+                    {
+                        <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
+                    }
+                </MudSelect>
             }
-        </MudSelect>
+
+            <MudSelect T="int" Label="Week" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                       @bind-Value="_week" @bind-Value:after="OnWeekChanged">
+                @foreach (var week in SelectedProgram.WeekNumbers)
+                {
+                    <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="int" Label="Session" Variant="Variant.Outlined" Margin="Margin.Dense" Dense="true"
+                       @bind-Value="_day" @bind-Value:after="Notify">
+                @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
+                {
+                    <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
+                }
+            </MudSelect>
+        </MudStack>
     }
-
-    <MudSelect T="int" Label="Week" Variant="Variant.Outlined"
-               @bind-Value="_week" @bind-Value:after="OnWeekChanged">
-        @foreach (var week in SelectedProgram.WeekNumbers)
-        {
-            <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
-        }
-    </MudSelect>
-
-    <MudSelect T="int" Label="Session" Variant="Variant.Outlined"
-               @bind-Value="_day" @bind-Value:after="Notify">
-        @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
-        {
-            <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
-        }
-    </MudSelect>
 </MudStack>
 
 @code {
@@ -48,9 +64,15 @@
     private string _programId = "";
     private int _week;
     private int _day;
+    private bool _editing;
 
     private IntervalProgram SelectedProgram =>
         Programs.FirstOrDefault(p => p.Id == _programId) ?? Programs[0];
+
+    /// <summary>The one-line state: program name when there is a choice, then week and day.</summary>
+    private string Summary =>
+        Programs.Count == 0 ? "" :
+        ShowProgram ? $"{SelectedProgram.Name} · W{_week} D{_day}" : $"W{_week} D{_day}";
 
     protected override void OnInitialized()
     {
@@ -68,6 +90,8 @@
             await Notify();
         }
     }
+
+    private void ToggleEditing() => _editing = !_editing;
 
     private async Task OnWeekChanged()
     {
