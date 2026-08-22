@@ -146,7 +146,7 @@ public sealed class ProgramCatalog
 
         return new LiftProgram(
             id, name, version, sessions, rotation,
-            ParseSchemes(root, id),
+            ParseTiers(root, id),
             ParseRestSeconds(root, id),
             days);
     }
@@ -172,25 +172,61 @@ public sealed class ProgramCatalog
         return exercises;
     }
 
-    /// <summary>Reads the scheme each tier starts on, from progression.T1.scheme and its siblings.</summary>
-    private static IReadOnlyDictionary<int, SetScheme> ParseSchemes(JsonElement root, string id)
+    /// <summary>Reads progression.T1 and its siblings: scheme, increments, fail ladder, reset.</summary>
+    private static IReadOnlyDictionary<int, TierProgression> ParseTiers(JsonElement root, string id)
     {
         if (!root.TryGetProperty("progression", out var progression) || progression.ValueKind != JsonValueKind.Object)
             throw new InvalidOperationException($"Lift program '{id}' has no progression object.");
 
-        var schemes = new Dictionary<int, SetScheme>();
+        var tiers = new Dictionary<int, TierProgression>();
         foreach (var tier in progression.EnumerateObject())
         {
             if (tier.Name.Length != 2 || tier.Name[0] != 'T' || !int.TryParse(tier.Name[1..], out var number))
                 throw new InvalidOperationException($"Lift program '{id}' has a progression key '{tier.Name}'; expected T1, T2 or T3.");
 
-            schemes[number] = SetScheme.Parse(RequiredString(tier.Value, "scheme"));
+            tiers[number] = ParseTier(tier.Value, id, tier.Name);
         }
 
-        if (schemes.Count == 0)
-            throw new InvalidOperationException($"Lift program '{id}' declares no tier schemes.");
+        if (tiers.Count == 0)
+            throw new InvalidOperationException($"Lift program '{id}' declares no tiers.");
 
-        return schemes;
+        return tiers;
+    }
+
+    private static TierProgression ParseTier(JsonElement element, string id, string tierName)
+    {
+        var scheme = SetScheme.Parse(RequiredString(element, "scheme"));
+
+        var increment = 0m;
+        var overrides = new Dictionary<string, decimal>();
+        if (element.TryGetProperty("incrementKg", out var incrementElement))
+        {
+            foreach (var entry in incrementElement.EnumerateObject())
+            {
+                var kg = entry.Value.GetDecimal();
+                if (kg < 0m)
+                    throw new InvalidOperationException($"Lift program '{id}' {tierName} increments by {kg} kg.");
+
+                if (entry.Name == "default") increment = kg;
+                else overrides[entry.Name] = kg;
+            }
+        }
+
+        var ladder = element.TryGetProperty("failLadder", out var ladderElement)
+            ? ladderElement.EnumerateArray().Select(rung => SetScheme.Parse(rung.GetString() ?? "")).ToArray()
+            : [];
+
+        decimal? resetPct = null;
+        decimal? resetBump = null;
+        if (element.TryGetProperty("afterLadderReset", out var reset))
+        {
+            if (reset.TryGetProperty("toPctOfLast5x3", out var pct)) resetPct = pct.GetDecimal();
+            if (reset.TryGetProperty("bumpKg", out var bump)) resetBump = bump.GetDecimal();
+        }
+
+        int? threshold = element.TryGetProperty("progressAtTotalReps", out var reps) ? reps.GetInt32() : null;
+
+        return new TierProgression(scheme, increment, overrides, ladder, resetPct, resetBump, threshold);
     }
 
     private static IReadOnlyDictionary<int, int> ParseRestSeconds(JsonElement root, string id)

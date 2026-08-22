@@ -41,6 +41,21 @@ public sealed record FailLadder(int Stages, decimal ResetPct) : IProgressionRule
     }
 }
 
+/// <summary>
+/// On failure past the last rung: keep the ladder's shape but add weight and start over, which is
+/// how GZCLP restarts a T2 rather than dropping it back down.
+/// </summary>
+public sealed record FailLadderBump(int Stages, decimal BumpKg) : IProgressionRule
+{
+    public ProgressionDecision? Evaluate(ExerciseState state, SessionResult result)
+    {
+        if (result.AllSetsCompleted) return null;
+        return state.Stage < Stages
+            ? new(state.WorkingWeightKg, state.Stage + 1, "same weight, next stage")
+            : new(state.WorkingWeightKg + BumpKg, 0, $"+{BumpKg} kg, scheme restarts");
+    }
+}
+
 /// <summary>T3-style: progress only when total reps reach the threshold.</summary>
 public sealed record AmrapThreshold(int TotalReps, decimal Kg) : IProgressionRule
 {

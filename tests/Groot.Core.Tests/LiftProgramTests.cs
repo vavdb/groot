@@ -155,3 +155,83 @@ public class LiftSessionBuilderTests
         Assert.Equal([180, 120, 60], plan.Exercises.Select(e => e.RestSeconds));
     }
 }
+
+public class LiftProgressionPlannerTests
+{
+    private static LiftProgram Gzclp => ProgramCatalog.Embedded.LiftProgram("gzclp-rack");
+
+    private static ExerciseOutcome Squat(bool completed, int stage = 0, decimal weight = 60m, int reps = 15) =>
+        new("squat", Tier: 1, weight, stage, completed, reps);
+
+    [Fact]
+    public void tiers_carry_their_increments_and_ladder()
+    {
+        var t1 = Gzclp.TierFor(1);
+
+        Assert.Equal(2.5m, t1.IncrementFor("squat"));
+        Assert.Equal(5.0m, t1.IncrementFor("deadlift"));
+        Assert.Equal([new SetScheme(6, 2, true), new SetScheme(10, 1, true)], t1.FailLadder);
+        Assert.Equal(0.9m, t1.ResetPctOfLast);
+    }
+
+    [Fact]
+    public void a_clean_session_adds_the_increment_and_keeps_the_scheme()
+    {
+        var next = LiftProgressionPlanner.Next(Gzclp, Squat(completed: true));
+
+        Assert.Equal(62.5m, next.WeightKg);
+        Assert.Equal(new SetScheme(5, 3, true), next.Scheme);
+        Assert.Equal(0, next.Stage);
+    }
+
+    [Fact]
+    public void a_deadlift_climbs_by_its_own_increment()
+    {
+        var outcome = new ExerciseOutcome("deadlift", Tier: 1, WeightKg: 100m, Stage: 0, AllSetsCompleted: true, TotalReps: 15);
+
+        Assert.Equal(105m, LiftProgressionPlanner.Next(Gzclp, outcome).WeightKg);
+    }
+
+    [Fact]
+    public void a_failed_session_keeps_the_weight_and_drops_a_rung()
+    {
+        var next = LiftProgressionPlanner.Next(Gzclp, Squat(completed: false));
+
+        Assert.Equal(60m, next.WeightKg);
+        Assert.Equal(new SetScheme(6, 2, true), next.Scheme);
+        Assert.Equal(1, next.Stage);
+    }
+
+    [Fact]
+    public void failing_the_last_rung_resets_to_ninety_percent_and_the_first_scheme()
+    {
+        var next = LiftProgressionPlanner.Next(Gzclp, Squat(completed: false, stage: 2));
+
+        Assert.Equal(54m, next.WeightKg);
+        Assert.Equal(new SetScheme(5, 3, true), next.Scheme);
+        Assert.Equal(0, next.Stage);
+    }
+
+    [Fact]
+    public void a_failed_t2_ends_its_ladder_by_adding_weight_and_starting_again()
+    {
+        var outcome = new ExerciseOutcome("bench-press", Tier: 2, WeightKg: 45m, Stage: 2, AllSetsCompleted: false, TotalReps: 20);
+
+        var next = LiftProgressionPlanner.Next(Gzclp, outcome);
+
+        Assert.Equal(47.5m, next.WeightKg);
+        Assert.Equal(new SetScheme(3, 10, false), next.Scheme);
+        Assert.Equal(0, next.Stage);
+    }
+
+    [Theory]
+    [InlineData(25, 22.5)]
+    [InlineData(45, 22.5)]
+    [InlineData(24, 20.0)]
+    public void a_t3_climbs_only_once_the_reps_add_up(int totalReps, double expected)
+    {
+        var outcome = new ExerciseOutcome("dumbbell-row", Tier: 3, WeightKg: 20m, Stage: 0, AllSetsCompleted: true, totalReps);
+
+        Assert.Equal((decimal)expected, LiftProgressionPlanner.Next(Gzclp, outcome).WeightKg);
+    }
+}
