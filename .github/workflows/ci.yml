@@ -13,6 +13,10 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
+      # The mechanical half of AGENTS.md: colour and font literals, focus styles,
+      # reduced motion, async void, em dashes in copy.
+      - name: Rule checks
+        run: bash tools/check-rules.sh
       # `dotnet build` accepts one project per invocation (MSB1008 otherwise),
       # so build each project separately; project references build transitively.
       # The MAUI head (Groot.App) stays excluded: workload-heavy, it builds
@@ -23,9 +27,15 @@ jobs:
         run: dotnet build src/Groot.Data -c Release --nologo
       - name: Build UI (Razor class library)
         run: dotnet build src/Groot.UI -c Release --nologo
+      # Building UI regenerates tokens.css from GrootPalette.cs. A diff here means the
+      # palette changed and the generated file was not rebuilt and committed with it.
+      - name: tokens.css matches GrootPalette.cs
+        run: git diff --exit-code -- src/Groot.UI/wwwroot/tokens.css
       - name: Build Web (Blazor WASM PWA)
         run: dotnet build src/Groot.Web -c Release --nologo
       - name: Build UI Gallery (dev tool)
         run: dotnet build tools/Groot.UI.Gallery -c Release --nologo
       - name: Test Core engines
         run: dotnet test tests/Groot.Core.Tests -c Release --nologo
+      - name: Test UI palette (contrast, type scale)
+        run: dotnet test tests/Groot.UI.Tests -c Release --nologo
