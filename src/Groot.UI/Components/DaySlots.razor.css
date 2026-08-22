@@ -9,7 +9,7 @@
 }
 
 .day-name {
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 700;
     color: var(--g-dim);
     letter-spacing: .08em;
@@ -25,7 +25,7 @@
     align-items: center;
     justify-content: center;
     gap: 1px;
-    font-size: 8.5px;
+    font-size: 9.5px;
     font-weight: 700;
     letter-spacing: .04em;
     color: var(--g-dim);
@@ -45,7 +45,7 @@
 .slot.run {
     background: var(--g-amber);
     border-color: var(--g-amber);
-    color: var(--g-card);
+    color: var(--g-run-ink);
 }
 
 .slot.joker {

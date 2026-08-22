@@ -19,7 +19,7 @@ public static class GrootPalette
         new("card",      "#fdfcf7", "#1d2419"),
         new("line",      "#ddd6c3", "#33402c"),
         new("ink",       "#26301f", "#e8ead9"),
-        new("dim",       "#6f7a63", "#93a087"),
+        new("dim",       "#5b6650", "#a3b197"),
         // Brand / semantic colours
         new("moss",      "#4a7048", "#7fb47a"),
         new("moss-deep", "#2f4d2e", "#a5cf9f"),
