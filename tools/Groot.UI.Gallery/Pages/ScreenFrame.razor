@@ -1,0 +1,36 @@
+@* A labelled device frame for one app screen. Gallery chrome, so the markup here is raw by
+   design; the screen inside it is the same component the heads compose. Wide="true" gives the
+   desktop web width, the default is a phone. *@
+
+<div class="screen">
+    <div class="screen-head">
+        <span class="screen-name">@Name</span>
+        <span class="screen-note">@Note</span>
+    </div>
+    <div class="screen-frame @(Wide ? "wide" : "")">
+        <div class="screen-body">
+            @ChildContent
+        </div>
+        @if (Nav is { } selected)
+        {
+            <BottomNav Selected="selected" />
+        }
+    </div>
+</div>
+
+@code {
+    /// <summary>Screen name, shown above the frame.</summary>
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+
+    /// <summary>One line on which head shows this screen and how it is configured.</summary>
+    [Parameter] public string Note { get; set; } = "";
+
+    /// <summary>Desktop width instead of the phone width.</summary>
+    [Parameter] public bool Wide { get; set; }
+
+    /// <summary>Destination to mark active in the phone nav. Null leaves the nav off.</summary>
+    [Parameter] public GrootDestination? Nav { get; set; }
+
+    /// <summary>The screen body: the same component a head puts on the page.</summary>
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+}

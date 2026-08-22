@@ -1,5 +1,12 @@
 @inherits LayoutComponentBase
 
 <GrootShell ShowDrawer="false" Title="Groot.UI">
-    <ChildContent>@Body</ChildContent>
+    <ChildContent>
+        @* Gallery page chrome: two pages, raw markup by design. *@
+        <nav class="ds-nav" aria-label="Gallery">
+            <NavLink href="" Match="NavLinkMatch.All">Design system</NavLink>
+            <NavLink href="screens">Screens</NavLink>
+        </nav>
+        @Body
+    </ChildContent>
 </GrootShell>

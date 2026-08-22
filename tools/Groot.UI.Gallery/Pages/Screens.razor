@@ -1,0 +1,22 @@
+@* Every app screen, light and dark. Second route: the landing CTA points at /run, so the
+   gallery answers that address with this page instead of a dead link. *@
+@page "/screens"
+@page "/run"
+
+<PageTitle>Groot.UI — Screens</PageTitle>
+
+<div class="ds">
+    <header class="ds-head">
+        <h1 class="g-serif">Screens<span class="accent">.</span></h1>
+        <p class="sub">Every screen the heads ship, in a device frame. Cues stay silent here and the timers run for real, so a screen can be played through without leaving the gallery.</p>
+    </header>
+
+    <div class="duo">
+        <div class="theme-light theme-col">
+            <ScreenColumn IsDark="false" />
+        </div>
+        <div class="theme-dark theme-col">
+            <ScreenColumn IsDark="true" />
+        </div>
+    </div>
+</div>

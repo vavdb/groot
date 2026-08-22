@@ -1,0 +1,32 @@
+@* Every app screen for one theme, in the order a person meets them. The screens are the head
+   page bodies verbatim; the app bar and drawer around them come from GrootShell, which the
+   gallery already renders once, so the frames below show the body only. *@
+@using Groot.Core.Programs
+
+<span class="theme-label">@(IsDark ? "Dark" : "Light")</span>
+
+<ScreenFrame Name="Home" Note="both heads · GrootLanding" Nav="GrootDestination.Home">
+    <GrootLanding />
+</ScreenFrame>
+
+<ScreenFrame Name="Run" Note="phone head · one program, cues silent in the gallery" Nav="GrootDestination.Run">
+    <GrootRunScene Programs="CouchPrograms" ShowProgram="false" ShowAudioControls="false" />
+</ScreenFrame>
+
+<ScreenFrame Name="Run" Note="web head · program picker and voice controls, desktop width" Wide="true">
+    <GrootRunScene Programs="AllPrograms" ShowProgram="true" ShowAudioControls="true" />
+</ScreenFrame>
+
+<ScreenFrame Name="Not found" Note="both heads · GrootNotFound">
+    <GrootNotFound />
+</ScreenFrame>
+
+@code {
+    [Parameter] public bool IsDark { get; set; }
+
+    private static readonly IReadOnlyList<IntervalProgram> AllPrograms =
+        ProgramCatalog.Embedded.IntervalPrograms;
+
+    private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
+        [ ProgramCatalog.Embedded.IntervalProgram("0-to-5k") ];
+}
