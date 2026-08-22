@@ -1,6 +1,7 @@
 @* What the phone shows while a session runs, with the screen off. The run notification counts the
-   segment down; the lift notification counts the rest down and logs the next set without opening
-   the app. Same content on both platforms, drawn the way each one draws it. *@
+   segment down. The lift one has two states, because only one of them has anything to offer: while
+   the clock runs you can cut the rest short, and once it is over you can log the set you just did.
+   Same content on both platforms, drawn the way each one draws it. *@
 
 <div class="screen-head">
     <span class="screen-name">Notifications</span>
@@ -19,13 +20,20 @@
                               Percent="38"
                               Actions="@(new[] { "Pause", "Skip" })" />
 
-            <div class="caption">@platform · lift</div>
+            <div class="caption">@platform · lift, resting</div>
             <NotificationMock Platform="@platform"
                               Title="REST · 1:52"
-                              Body="Squat 65 kg · set 3 of 5 · 3 reps to go"
+                              Body="Then squat 65 kg, set 3 of 5"
                               Time="18:04"
                               Percent="64"
-                              Actions="@(new[] { "Set done", "Skip rest" })" />
+                              Actions="@(new[] { "Skip rest" })" />
+
+            <div class="caption">@platform · lift, rest over</div>
+            <NotificationMock Platform="@platform"
+                              Title="Squat 65 kg"
+                              Body="Set 3 of 5 · 3 reps"
+                              Time="18:06"
+                              Actions="@(new[] { "Set done" })" />
         </div>
     }
 </div>
