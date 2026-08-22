@@ -12,10 +12,12 @@ Works end to end, both heads: the 0→5K interval runner (`RunScreen`) and the l
 becomes). Done and unit-tested: the engines in `Groot.Core` (progression, plate math, week
 contract, intervals, program catalog, lift programs and the progression planner). The gallery
 renders every component and, on `/screens`, every screen in a device frame.
-Not started: persistence (`Groot.Data` is an empty csproj), `Groot.Api`, sync, settings,
-resource-based i18n. Nothing a session logs survives a reload, and the lifting screen's working
-weights and equipment are stand-ins until there is a store. README and research.md describe the
-planned shape; do not assume it exists.
+Not started: persistence (`Groot.Data` is an empty csproj that no head references yet),
+`Groot.Api`, sync, settings, a Progress screen, resource-based i18n. Nothing a session logs
+survives a reload; the lifting screen's working weights are a starting table and its equipment is
+`EquipmentProfile.Rack` until settings own one. Backend, decided 2026-08-23: SQLite on the device
+plus our own `Groot.Api`, no hosted backend (research.md §5.4). README and research.md describe
+the planned shape; do not assume it exists.
 
 ## Commands
 
@@ -76,7 +78,8 @@ gallery and the web head; the owner checks the app on the emulator.
 - Lives in `Groot.Core`, no framework usings. Records and small interfaces (`IProgressionRule`),
   composed, never inherited. Deterministic; the xunit tests name the behaviour.
 - Weights in kg, canonically. Bar weight comes from the equipment profile (`ActualKg`,
-  `CountsAsKg`), never from a 20 kg assumption. The unit belongs to the equipment.
+  `CountsAsKg`), never from a 20 kg assumption. The unit belongs to the equipment. Screens take an
+  `EquipmentProfile`; a proposed barbell weight is rounded to one the rack can build.
 
 ### Copy (every user-visible or spoken string)
 
