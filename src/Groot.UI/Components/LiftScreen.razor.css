@@ -81,11 +81,75 @@
 }
 
 .load-value {
-    min-width: 64px;
-    text-align: center;
     font-weight: 700;
     font-size: var(--g-text-lg);
     color: var(--g-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* The weight is a control: underlined, so it reads as one before it is tapped. */
+.load-value.editable {
+    background: none;
+    border: none;
+    padding: 2px 0;
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+    text-decoration-color: var(--g-amber-text);
+    text-underline-offset: 4px;
+    text-decoration-thickness: 2px;
+}
+
+.load-value.editable:focus-visible {
+    outline: 2px solid var(--g-amber-text);
+    outline-offset: 3px;
+    border-radius: 6px;
+}
+
+.weight-pop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding: 8px;
+    background: var(--g-bg);
+    border: 1px solid var(--g-line);
+    border-radius: 12px;
+}
+
+::deep .weight-field {
+    width: 104px;
+    flex: none;
+}
+
+.pop-hint {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+}
+
+/* One editor row per exercise, always on a single set: the one about to be taken, the one just
+   logged, or whichever circle was tapped. */
+.setrow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+.setrow-label {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}
+
+.setrow-target, .reps-of {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
     font-variant-numeric: tabular-nums;
 }
 
@@ -116,7 +180,6 @@
     display: flex;
     align-items: center;
     gap: 2px;
-    margin-left: auto;
 }
 
 .reps-count {

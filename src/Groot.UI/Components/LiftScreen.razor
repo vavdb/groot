@@ -35,20 +35,36 @@
                     <span class="ex-name">@Name(exercise.ExerciseId)</span>
                     <span class="tier">T@(exercise.Tier)</span>
                     <span class="scheme">@exercise.Scheme.Text</span>
-                    <div class="load">
-                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
-                                       aria-label="@($"Lighter, {Name(exercise.ExerciseId)}")"
-                                       Disabled="@(WeightOf(exercise) is null)"
-                                       OnClick="@(() => NudgeWeight(exercise, -1))" />
+                    @if (WeightOf(exercise) is null)
+                    {
                         <span class="load-value">@Load(exercise)</span>
-                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
-                                       aria-label="@($"Heavier, {Name(exercise.ExerciseId)}")"
-                                       Disabled="@(WeightOf(exercise) is null)"
-                                       OnClick="@(() => NudgeWeight(exercise, 1))" />
-                    </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="load-value editable"
+                                aria-expanded="@(_editingWeight == exercise.ExerciseId)"
+                                aria-label="@($"Change the weight, {Name(exercise.ExerciseId)}")"
+                                @onclick="@(() => ToggleWeightEditor(exercise))">@Load(exercise)</button>
+                    }
                 </div>
 
                 <div class="plates">@Plates(exercise)</div>
+
+                @if (_editingWeight == exercise.ExerciseId && WeightOf(exercise) is { } editing)
+                {
+                    <div class="weight-pop">
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
+                                       aria-label="Lighter" OnClick="@(() => NudgeWeight(exercise, -1))" />
+                        <MudNumericField T="decimal" Value="editing" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                         Step="@Step(exercise)" Min="0" HideSpinButtons="true" Immediate="true"
+                                         Adornment="Adornment.End" AdornmentText="kg" Class="weight-field"
+                                         ValueChanged="@(kg => SetWeight(exercise, kg))" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                       aria-label="Heavier" OnClick="@(() => NudgeWeight(exercise, 1))" />
+                        <span class="pop-hint">from set @(NextIndex(exercise) + 1) on</span>
+                        <MudButton Size="Size.Small" Variant="Variant.Text" OnClick="CloseWeightEditor">Done</MudButton>
+                    </div>
+                }
 
                 <div class="sets">
                     @foreach (var set in exercise.Sets)
@@ -58,19 +74,35 @@
                                    OnTap="@(() => ToggleAsync(exercise, set))" />
                     }
 
-                    @if (LastLogged(exercise) is { } last)
-                    {
-                        <div class="reps">
-                            <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
-                                           aria-label="One rep fewer on the set just logged"
-                                           OnClick="@(() => NudgeReps(exercise, last, -1))" />
-                            <span class="reps-count @(IsMissed(exercise, last) ? "missed" : "")">@_logged[(exercise.ExerciseId, last.Index)]</span>
-                            <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
-                                           aria-label="One rep more on the set just logged"
-                                           OnClick="@(() => NudgeReps(exercise, last, 1))" />
-                        </div>
-                    }
                 </div>
+
+                @if (InFocus(exercise) is { } focus)
+                {
+                    <div class="setrow">
+                        <span class="setrow-label">set @(focus.Index + 1)</span>
+
+                        @if (IsDone(exercise, focus))
+                        {
+                            <div class="reps">
+                                <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
+                                               aria-label="@($"One rep fewer on set {focus.Index + 1}")"
+                                               OnClick="@(() => NudgeReps(exercise, focus, -1))" />
+                                <span class="reps-count @(IsMissed(exercise, focus) ? "missed" : "")">@_logged[(exercise.ExerciseId, focus.Index)]</span>
+                                <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                               aria-label="@($"One rep more on set {focus.Index + 1}")"
+                                               OnClick="@(() => NudgeReps(exercise, focus, 1))" />
+                                <span class="reps-of">of @focus.TargetReps</span>
+                            </div>
+
+                            <MudButton Size="Size.Small" Variant="Variant.Text"
+                                       OnClick="@(() => Undo(exercise, focus))">Undo</MudButton>
+                        }
+                        else
+                        {
+                            <span class="setrow-target">@focus.TargetReps reps at @SetLoad(exercise, focus)@(focus.IsAmrap ? " or more" : "")</span>
+                        }
+                    </div>
+                }
 
                 @if (IsComplete(exercise))
                 {
@@ -152,6 +184,12 @@
     // exercise: "the second set felt easy, take the rest at 65" is one tap, not four.
     private readonly Dictionary<(string Exercise, int Set), decimal> _weights = [];
 
+    // Which set each exercise's editor row is pointing at. Tapping a circle moves it there;
+    // otherwise it follows the set about to be taken, or the last one logged.
+    private readonly Dictionary<string, int> _focus = [];
+
+    private string? _editingWeight;
+
     private CancellationTokenSource? _restLoop;
     private string? _restingExercise;
     private long _restEndsAtMs;
@@ -184,9 +222,15 @@
     private string Load(LiftExercisePlan exercise) =>
         WeightOf(exercise) is { } kg ? $"{kg:0.##} kg" : "bodyweight";
 
-    /// <summary>The weight the next set will be taken at, which is the one the stepper changes.</summary>
-    private decimal? WeightOf(LiftExercisePlan exercise) =>
-        WeightAt(exercise, NextSet(exercise)?.Index ?? exercise.Sets.Count - 1);
+    /// <summary>The weight one set is taken at, for the editor row.</summary>
+    private string SetLoad(LiftExercisePlan exercise, LiftSet set) =>
+        WeightAt(exercise, set.Index) is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+
+    /// <summary>The weight the next set will be taken at: the one the header shows and the editor changes.</summary>
+    private decimal? WeightOf(LiftExercisePlan exercise) => WeightAt(exercise, NextIndex(exercise));
+
+    /// <summary>Where a weight change lands: the next set to take, or the last one when the exercise is done.</summary>
+    private int NextIndex(LiftExercisePlan exercise) => NextSet(exercise)?.Index ?? exercise.Sets.Count - 1;
 
     /// <summary>The weight for one set: the last change at or before it, or the planned target.</summary>
     private decimal? WeightAt(LiftExercisePlan exercise, int setIndex)
@@ -208,8 +252,7 @@
     {
         if (WeightOf(exercise) is not { } current) return;
 
-        var setIndex = NextSet(exercise)?.Index ?? exercise.Sets.Count - 1;
-        _weights[(exercise.ExerciseId, setIndex)] = Math.Max(0m, current + direction * Step(exercise));
+        SetWeight(exercise, current + direction * Step(exercise));
     }
 
     private string Plates(LiftExercisePlan exercise)
@@ -278,17 +321,25 @@
         return $"next · {next.WeightKg:0.##} kg, {next.Scheme.Text} · {next.Explanation}";
     }
 
+    /// <summary>The set the editor row is on: the tapped one, else the next to take, else the last taken.</summary>
+    private LiftSet? InFocus(LiftExercisePlan exercise)
+    {
+        if (_focus.TryGetValue(exercise.ExerciseId, out var index))
+            return exercise.Sets.FirstOrDefault(set => set.Index == index);
+
+        return NextSet(exercise) ?? LastLogged(exercise);
+    }
+
+    private int SetInFocus(LiftExercisePlan exercise) => InFocus(exercise)?.Index ?? 0;
+
+    /// <summary>Tapping a set logs it at its target; tapping a logged one just moves the editor there.</summary>
     private async Task ToggleAsync(LiftExercisePlan exercise, LiftSet set)
     {
-        var key = (exercise.ExerciseId, set.Index);
+        _focus[exercise.ExerciseId] = set.Index;
 
-        if (_logged.Remove(key))
-        {
-            EndRest();
-            return;
-        }
+        if (IsDone(exercise, set)) return;
 
-        _logged[key] = set.TargetReps;
+        _logged[(exercise.ExerciseId, set.Index)] = set.TargetReps;
         StartRest(exercise);
 
         if (Finished)
@@ -297,6 +348,22 @@
             await OnFinished.InvokeAsync();
         }
     }
+
+    /// <summary>Takes a logged set back and leaves the editor on it.</summary>
+    private void Undo(LiftExercisePlan exercise, LiftSet set)
+    {
+        _logged.Remove((exercise.ExerciseId, set.Index));
+        EndRest();
+    }
+
+    private void ToggleWeightEditor(LiftExercisePlan exercise) =>
+        _editingWeight = _editingWeight == exercise.ExerciseId ? null : exercise.ExerciseId;
+
+    private void CloseWeightEditor() => _editingWeight = null;
+
+    /// <summary>Sets the weight from the next set onward. Sets already taken keep what they were taken at.</summary>
+    private void SetWeight(LiftExercisePlan exercise, decimal kg) =>
+        _weights[(exercise.ExerciseId, NextIndex(exercise))] = Math.Max(0m, kg);
 
     private void NudgeAmrap(LiftExercisePlan exercise, int delta)
     {
