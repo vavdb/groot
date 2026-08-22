@@ -19,6 +19,7 @@
     private string StateClass => State switch
     {
         SetCircleState.Done => "done",
+        SetCircleState.Missed => "missed",
         SetCircleState.Active => "active",
         _ => "pending",
     };
@@ -28,6 +29,7 @@
     private string AriaLabel => State switch
     {
         SetCircleState.Done => $"Set done, {Reps} reps",
+        SetCircleState.Missed => $"Set short of target, {Reps} reps",
         SetCircleState.Active => $"Current set, target {Reps} reps",
         _ => "Upcoming set",
     };

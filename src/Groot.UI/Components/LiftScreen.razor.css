@@ -75,6 +75,14 @@
 
 .load {
     margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.load-value {
+    min-width: 64px;
+    text-align: center;
     font-weight: 700;
     font-size: var(--g-text-lg);
     color: var(--g-ink);
@@ -104,19 +112,32 @@
     font-size: var(--g-text-md);
 }
 
-.amrap {
+.reps {
     display: flex;
     align-items: center;
     gap: 2px;
     margin-left: auto;
 }
 
-.amrap-count {
+.reps-count {
     min-width: 26px;
     text-align: center;
     font-weight: 700;
     font-size: var(--g-text-lg);
     color: var(--g-amber-text);
+    font-variant-numeric: tabular-nums;
+}
+
+/* A set short of its target. Clay carries the news; the ladder does the rest. */
+.reps-count.missed {
+    color: var(--g-clay-text);
+}
+
+.next {
+    margin-top: 10px;
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
     font-variant-numeric: tabular-nums;
 }
 

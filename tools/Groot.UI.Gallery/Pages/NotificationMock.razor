@@ -1,0 +1,54 @@
+@* A phone notification, drawn the way the platform draws it. Gallery only: the real thing is a
+   foreground-service notification on Android and a Live Activity on iOS, neither of which exists
+   yet. This is what they should say and show, at the size they appear on a lock screen. *@
+
+<div class="notif @Platform.ToLowerInvariant()">
+    <div class="notif-head">
+        <span class="notif-icon" aria-hidden="true">
+            <svg viewBox="0 0 100 100" class="notif-mark">
+                <circle class="nm-ring" cx="50" cy="50" r="34" />
+                <circle class="nm-inner" cx="50" cy="50" r="17" />
+                <circle class="nm-pith" cx="50" cy="50" r="4" />
+            </svg>
+        </span>
+        <span class="notif-app">Groot</span>
+        <span class="notif-time">@Time</span>
+    </div>
+
+    <div class="notif-title">@Title</div>
+    <div class="notif-body">@Body</div>
+
+    @if (Percent is { } percent)
+    {
+        <div class="notif-bar" role="img" aria-label="@($"{percent} percent")">
+            <span style="width: @(percent)%"></span>
+        </div>
+    }
+
+    @if (Actions.Length > 0)
+    {
+        <div class="notif-actions">
+            @foreach (var action in Actions)
+            {
+                <span class="notif-action">@action</span>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    /// <summary>Android or iOS: the two share content and differ in shape and type weight.</summary>
+    [Parameter, EditorRequired] public string Platform { get; set; } = "Android";
+
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+
+    [Parameter, EditorRequired] public string Body { get; set; } = "";
+
+    [Parameter] public string Time { get; set; } = "now";
+
+    /// <summary>Progress through the thing being timed. Null hides the bar.</summary>
+    [Parameter] public int? Percent { get; set; }
+
+    /// <summary>The buttons along the bottom, in order.</summary>
+    [Parameter] public string[] Actions { get; set; } = [];
+}

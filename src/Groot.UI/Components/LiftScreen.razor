@@ -5,6 +5,7 @@
    and how long the rest has left. *@
 @using System.Diagnostics
 @using Groot.Core.Equipment
+@using Groot.Core.Programs
 @using Groot.Core.Sessions
 @implements IDisposable
 
@@ -34,7 +35,17 @@
                     <span class="ex-name">@Name(exercise.ExerciseId)</span>
                     <span class="tier">T@(exercise.Tier)</span>
                     <span class="scheme">@exercise.Scheme.Text</span>
-                    <span class="load">@Load(exercise)</span>
+                    <div class="load">
+                        <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
+                                       aria-label="@($"Lighter, {Name(exercise.ExerciseId)}")"
+                                       Disabled="@(WeightOf(exercise) is null)"
+                                       OnClick="@(() => NudgeWeight(exercise, -1))" />
+                        <span class="load-value">@Load(exercise)</span>
+                        <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
+                                       aria-label="@($"Heavier, {Name(exercise.ExerciseId)}")"
+                                       Disabled="@(WeightOf(exercise) is null)"
+                                       OnClick="@(() => NudgeWeight(exercise, 1))" />
+                    </div>
                 </div>
 
                 <div class="plates">@Plates(exercise)</div>
@@ -47,19 +58,24 @@
                                    OnTap="@(() => ToggleAsync(exercise, set))" />
                     }
 
-                    @if (AmrapLogged(exercise) is { } amrap)
+                    @if (LastLogged(exercise) is { } last)
                     {
-                        <div class="amrap">
+                        <div class="reps">
                             <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
-                                           aria-label="One rep fewer on the last set"
-                                           OnClick="@(() => NudgeAmrap(exercise, -1))" />
-                            <span class="amrap-count">@amrap</span>
+                                           aria-label="One rep fewer on the set just logged"
+                                           OnClick="@(() => NudgeReps(exercise, last, -1))" />
+                            <span class="reps-count @(IsMissed(exercise, last) ? "missed" : "")">@_logged[(exercise.ExerciseId, last.Index)]</span>
                             <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
-                                           aria-label="One rep more on the last set"
-                                           OnClick="@(() => NudgeAmrap(exercise, 1))" />
+                                           aria-label="One rep more on the set just logged"
+                                           OnClick="@(() => NudgeReps(exercise, last, 1))" />
                         </div>
                     }
                 </div>
+
+                @if (IsComplete(exercise))
+                {
+                    <div class="next">@NextLine(exercise)</div>
+                }
 
                 @if (RestingIn(exercise) is { } remaining)
                 {
@@ -111,6 +127,12 @@
 
     [Parameter] public int Day { get; set; } = 1;
 
+    /// <summary>The program behind the plan, which is what knows where a failure leads.</summary>
+    [Parameter] public LiftProgram? Program { get; set; }
+
+    /// <summary>The rung of the fail ladder each exercise is on. Absent means the first.</summary>
+    [Parameter] public IReadOnlyDictionary<string, int> Stages { get; set; } = new Dictionary<string, int>();
+
     [Parameter] public EventCallback OnFinished { get; set; }
 
     /// <summary>A 20 kg bar, the one most racks come with.</summary>
@@ -125,6 +147,10 @@
 
     // Logged reps per set, keyed by exercise and set index. Absent means the set is not done.
     private readonly Dictionary<(string Exercise, int Set), int> _logged = [];
+
+    // Weight changes, keyed the same way. A change applies from that set to the end of the
+    // exercise: "the second set felt easy, take the rest at 65" is one tap, not four.
+    private readonly Dictionary<(string Exercise, int Set), decimal> _weights = [];
 
     private CancellationTokenSource? _restLoop;
     private string? _restingExercise;
@@ -144,7 +170,8 @@
 
     /// <summary>Reps times the weight on the bar, rounded to whole kilos; bodyweight work adds nothing.</summary>
     private decimal Volume => Math.Round(Plan.Exercises.Sum(exercise =>
-        (exercise.TargetKg ?? 0m) * exercise.Sets.Sum(set => RepsOf(exercise, set) is { } reps && IsDone(exercise, set) ? reps : 0)), 0);
+        exercise.Sets.Where(set => IsDone(exercise, set))
+            .Sum(set => (WeightAt(exercise, set.Index) ?? 0m) * _logged[(exercise.ExerciseId, set.Index)])), 0);
 
     private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
 
@@ -155,11 +182,39 @@
             : exerciseId;
 
     private string Load(LiftExercisePlan exercise) =>
-        exercise.TargetKg is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+        WeightOf(exercise) is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+
+    /// <summary>The weight the next set will be taken at, which is the one the stepper changes.</summary>
+    private decimal? WeightOf(LiftExercisePlan exercise) =>
+        WeightAt(exercise, NextSet(exercise)?.Index ?? exercise.Sets.Count - 1);
+
+    /// <summary>The weight for one set: the last change at or before it, or the planned target.</summary>
+    private decimal? WeightAt(LiftExercisePlan exercise, int setIndex)
+    {
+        var changed = _weights
+            .Where(w => w.Key.Exercise == exercise.ExerciseId && w.Key.Set <= setIndex)
+            .OrderByDescending(w => w.Key.Set)
+            .Select(w => (decimal?)w.Value)
+            .FirstOrDefault();
+
+        return changed ?? exercise.TargetKg;
+    }
+
+    /// <summary>How much one tap moves the bar: the program's increment for that exercise.</summary>
+    private decimal Step(LiftExercisePlan exercise) =>
+        Program?.TierFor(exercise.Tier).IncrementFor(exercise.ExerciseId) is { } kg and > 0m ? kg : 2.5m;
+
+    private void NudgeWeight(LiftExercisePlan exercise, int direction)
+    {
+        if (WeightOf(exercise) is not { } current) return;
+
+        var setIndex = NextSet(exercise)?.Index ?? exercise.Sets.Count - 1;
+        _weights[(exercise.ExerciseId, setIndex)] = Math.Max(0m, current + direction * Step(exercise));
+    }
 
     private string Plates(LiftExercisePlan exercise)
     {
-        if (exercise.TargetKg is not { } kg || Inventory.Count == 0) return "";
+        if (WeightOf(exercise) is not { } kg || Inventory.Count == 0) return "";
 
         var breakdown = PlateSolver.PerSideBreakdown(kg, Bar, Inventory);
         if (breakdown is null) return $"{Bar.Name} cannot be loaded to {kg:0.##} kg";
@@ -176,6 +231,7 @@
 
     private SetCircleState StateOf(LiftExercisePlan exercise, LiftSet set)
     {
+        if (IsMissed(exercise, set)) return SetCircleState.Missed;
         if (IsDone(exercise, set)) return SetCircleState.Done;
         return NextSet(exercise)?.Index == set.Index ? SetCircleState.Active : SetCircleState.Pending;
     }
@@ -188,11 +244,39 @@
         : StateOf(exercise, set) == SetCircleState.Active ? set.TargetReps
         : null;
 
-    /// <summary>Reps on a logged AMRAP set, which is the only set the stepper applies to.</summary>
-    private int? AmrapLogged(LiftExercisePlan exercise) =>
-        exercise.Sets.FirstOrDefault(set => set.IsAmrap) is { } amrap && IsDone(exercise, amrap)
-            ? _logged[(exercise.ExerciseId, amrap.Index)]
-            : null;
+    /// <summary>The set logged most recently, which is the one the reps stepper corrects.</summary>
+    private LiftSet? LastLogged(LiftExercisePlan exercise) =>
+        exercise.Sets.LastOrDefault(set => IsDone(exercise, set));
+
+    /// <summary>A set logged short of its target. Missing one is what sends a lift down the ladder.</summary>
+    private bool IsMissed(LiftExercisePlan exercise, LiftSet set) =>
+        _logged.TryGetValue((exercise.ExerciseId, set.Index), out var reps) && reps < set.TargetReps;
+
+    private void NudgeReps(LiftExercisePlan exercise, LiftSet set, int delta)
+    {
+        var key = (exercise.ExerciseId, set.Index);
+        if (!_logged.TryGetValue(key, out var reps)) return;
+
+        _logged[key] = Math.Max(0, reps + delta);
+    }
+
+    /// <summary>What this exercise did, in the terms the progression rules read.</summary>
+    private ExerciseOutcome Outcome(LiftExercisePlan exercise) =>
+        new(exercise.ExerciseId,
+            exercise.Tier,
+            WeightAt(exercise, 0) ?? 0m,
+            Stages.GetValueOrDefault(exercise.ExerciseId),
+            AllSetsCompleted: exercise.Sets.All(set => !IsMissed(exercise, set)),
+            TotalReps: exercise.Sets.Sum(set => _logged.GetValueOrDefault((exercise.ExerciseId, set.Index))));
+
+    /// <summary>Where the next session starts for this lift, once every set of it is logged.</summary>
+    private string NextLine(LiftExercisePlan exercise)
+    {
+        if (Program is null || exercise.TargetKg is null) return "";
+
+        var next = LiftProgressionPlanner.Next(Program, Outcome(exercise));
+        return $"next · {next.WeightKg:0.##} kg, {next.Scheme.Text} · {next.Explanation}";
+    }
 
     private async Task ToggleAsync(LiftExercisePlan exercise, LiftSet set)
     {

@@ -1,0 +1,35 @@
+@* What the phone shows while a session runs, with the screen off. The run notification counts the
+   segment down; the lift notification counts the rest down and logs the next set without opening
+   the app. Same content on both platforms, drawn the way each one draws it. *@
+
+<div class="screen-head">
+    <span class="screen-name">Notifications</span>
+    <span class="screen-note">lock screen, while a session runs · not built yet</span>
+</div>
+
+<div class="notif-set">
+    @foreach (var platform in Platforms)
+    {
+        <div class="notif-col">
+            <div class="caption">@platform · run</div>
+            <NotificationMock Platform="@platform"
+                              Title="RUN · 0:42 left"
+                              Body="then walk 1:30 · segment 7 of 18 · 12:40 to go"
+                              Time="18:04"
+                              Percent="38"
+                              Actions="@(new[] { "Pause", "Skip" })" />
+
+            <div class="caption">@platform · lift</div>
+            <NotificationMock Platform="@platform"
+                              Title="REST · 1:52"
+                              Body="Squat 65 kg · set 3 of 5 · 3 reps to go"
+                              Time="18:04"
+                              Percent="64"
+                              Actions="@(new[] { "Set done", "Skip rest" })" />
+        </div>
+    }
+</div>
+
+@code {
+    private static readonly string[] Platforms = ["Android", "iOS"];
+}

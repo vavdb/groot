@@ -26,6 +26,13 @@
     color: var(--g-card);
 }
 
+/* Logged, but short of the target. Outlined rather than filled: the set happened, it did not
+   land. Clay as a stroke and as a number, so it is the text-safe clay. */
+.set-circle.missed {
+    border: 2px solid var(--g-clay-text);
+    color: var(--g-clay-text);
+}
+
 /* The active number and ring are text and stroke on the card: text-safe amber. The pulse
    behind it is decorative and keeps the base amber. */
 .set-circle.active {
