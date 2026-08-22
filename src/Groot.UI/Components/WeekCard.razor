@@ -2,7 +2,7 @@
    Meter values come from Core's ContractEvaluator; jokers render as filled/hollow diamonds. *@
 @using Groot.Core.Contract
 
-<GrootPanel Title="@Title" Class="week-card">
+<GrootPanel Title="@Title" Meta="@StreakLine" Class="week-card">
     <HeaderContent>
         <MudText Typo="Typo.overline" Class="jokers">@JokerDisplay</MudText>
     </HeaderContent>
@@ -28,9 +28,24 @@
     [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];
     [Parameter] public WeekEvaluation? Evaluation { get; set; }
     [Parameter] public WeekContract Contract { get; set; } = new();
-    [Parameter] public string Title { get; set; } = "Contract · 2 lift · 2 run · 1 rest";
+    // Short on purpose: the meter below spells the contract out (LIFT 1/2, RUN 2/2, REST), and at
+    // phone width a long title pushed the streak onto its own line.
+    [Parameter] public string Title { get; set; } = "This week";
+
+    /// <summary>
+    /// Consecutive kept weeks, counted by <see cref="ContractEvaluator.StreakWeeks"/> from the
+    /// head's history. Zero says nothing rather than saying zero.
+    /// </summary>
+    [Parameter] public int Streak { get; set; }
 
     private int JokersLeft => Contract.Jokers - (Evaluation?.JokersSpent ?? 0);
+
+    private string? StreakLine => Streak switch
+    {
+        <= 0 => null,
+        1 => "1 week kept",
+        _ => $"{Streak} weeks kept",
+    };
 
     private string JokerDisplay =>
         string.Concat(Enumerable.Repeat("◆", Math.Max(0, JokersLeft)))

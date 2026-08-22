@@ -1,8 +1,9 @@
 @page "/run"
 @using Groot.Core.Programs
 @using Groot.UI.Components
+@using Groot.UI.Audio
 @using Groot.Web.Audio
-@inject WebCuePlayer Cues
+@inject ICuePlayer Cues
 
 <PageTitle>Run · Groot</PageTitle>
 
@@ -13,6 +14,9 @@
                AudioChanged="OnAudioChanged" />
 
 @code {
-    private void OnAudioChanged(GrootAudioState state) =>
-        Cues.Language = state.Language == "nl" ? "nl-NL" : "en-GB";
+    /// <summary>The browser wants a full BCP 47 tag; the programs speak two-letter codes.</summary>
+    private void OnAudioChanged(GrootAudioState state)
+    {
+        if (Cues is WebCuePlayer web) web.Language = state.Language == "nl" ? "nl-NL" : "en-GB";
+    }
 }

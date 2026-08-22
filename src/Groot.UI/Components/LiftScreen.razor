@@ -18,12 +18,6 @@
                 </MudText>
                 @HeaderAction
             </MudStack>
-            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
-                @for (var d = 1; d <= SessionsInWeek; d++)
-                {
-                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
-                }
-            </div>
         </MudStack>
 
         @ChildContent
@@ -149,10 +143,6 @@
 
     /// <summary>Content directly under the header. The owner's session editor lives here.</summary>
     [Parameter] public RenderFragment? ChildContent { get; set; }
-
-    [Parameter] public int SessionsInWeek { get; set; } = 3;
-
-    [Parameter] public int Day { get; set; } = 1;
 
     /// <summary>The program behind the plan, which is what knows where a failure leads.</summary>
     [Parameter] public LiftProgram? Program { get; set; }

@@ -22,8 +22,8 @@
     </div>
 </div>
 
-<ScreenFrame Name="Home" Note="both heads · GrootLanding" Nav="GrootDestination.Home">
-    <GrootLanding />
+<ScreenFrame Name="Home" Note="both heads · GrootLanding, with six months of sample history behind it" Nav="GrootDestination.Home">
+    <GrootLanding History="SampleWeeks" Streak="SampleStreak" Today="Today" />
 </ScreenFrame>
 
 <ScreenFrame Name="Run" Note="phone head · one program, cues silent in the gallery" Nav="GrootDestination.Run">
@@ -50,6 +50,9 @@
     private static readonly DateOnly Today = new(2026, 8, 22);
 
     private static readonly SeasonDay[] SampleWeeks = SampleHistory.Weeks(Today);
+
+    /// <summary>Kept weeks behind the sample history, counted the way the app will count them.</summary>
+    private static readonly int SampleStreak = SampleHistory.Streak(SampleWeeks, Today);
 
     private static readonly IReadOnlyList<IntervalProgram> AllPrograms =
         ProgramCatalog.Embedded.IntervalPrograms;

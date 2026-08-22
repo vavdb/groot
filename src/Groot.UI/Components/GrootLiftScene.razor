@@ -5,11 +5,7 @@
 @using Groot.Core.Sessions
 
 <div class="lift-scene">
-    <LiftScreen @key="_dayKey"
-                Plan="_plan"
-                Program="Program"
-                SessionsInWeek="Program.SessionsPerWeek"
-                Day="@(RotationIndex % Program.SessionsPerWeek + 1)">
+    <LiftScreen @key="_dayKey" Plan="_plan" Program="Program">
         <HeaderAction>
             <MudIconButton Icon="@(_editing ? Icons.Material.Filled.Check : Icons.Material.Filled.Edit)"
                            Size="Size.Small"
@@ -75,17 +71,6 @@
     {
         _dayKey = dayKey;
         Resolve();
-    }
-
-    private int RotationIndex
-    {
-        get
-        {
-            for (var index = 0; index < Program.Rotation.Count; index++)
-                if (Program.Rotation[index] == _dayKey) return index;
-
-            return 0;
-        }
     }
 
     /// <summary>The lifts of a day, so the picker reads as "A1 · squat, bench press, chin up".</summary>

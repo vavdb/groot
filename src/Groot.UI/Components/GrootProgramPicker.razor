@@ -6,7 +6,7 @@
 
 @if (ShowControls && Programs.Count > 0)
 {
-    <MudStack Spacing="2" Class="picker-controls">
+    <MudStack Spacing="2">
         @if (ShowProgram)
         {
             <GrootChoice T="string" Label="Program" Items="ProgramIds" Value="ProgramId"
