@@ -14,16 +14,6 @@ h1:focus {
     outline: none;
 }
 
-/* Home landing */
-.home {
-    padding: 24px 16px;
-    min-height: 100vh;
-}
-
-.cta {
-    border-radius: 999px;
-}
-
 #blazor-error-ui {
     color-scheme: light only;
     background: lightyellow;

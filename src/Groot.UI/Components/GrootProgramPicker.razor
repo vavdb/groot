@@ -1,38 +1,37 @@
 @* The interval-program selector: program, week, and session. Owns the selection state and
-   raises SessionChanged with the resolved RunSession whenever a value changes. *@
+   raises SelectionChanged with the resolved RunSession whenever a value changes. The owner
+   (GrootRunScene) supplies the surrounding paper; this is only the three selects. *@
 @using Groot.Core.Intervals
 @using Groot.Core.Programs
 
-<MudPaper Elevation="1" Class="picker">
-    <MudStack Spacing="3">
-        @if (ShowProgram)
+<MudStack Spacing="3">
+    @if (ShowProgram)
+    {
+        <MudSelect T="string" Label="Program" Variant="Variant.Outlined"
+                   @bind-Value="_programId" @bind-Value:after="Notify">
+            @foreach (var program in Programs)
+            {
+                <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
+            }
+        </MudSelect>
+    }
+
+    <MudSelect T="int" Label="Week" Variant="Variant.Outlined"
+               @bind-Value="_week" @bind-Value:after="OnWeekChanged">
+        @foreach (var week in SelectedProgram.WeekNumbers)
         {
-            <MudSelect T="string" Label="Program" Variant="Variant.Outlined"
-                       @bind-Value="_programId" @bind-Value:after="Notify">
-                @foreach (var program in Programs)
-                {
-                    <MudSelectItem T="string" Value="@program.Id">@program.Name</MudSelectItem>
-                }
-            </MudSelect>
+            <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
         }
+    </MudSelect>
 
-        <MudSelect T="int" Label="Week" Variant="Variant.Outlined"
-                   @bind-Value="_week" @bind-Value:after="OnWeekChanged">
-            @foreach (var week in SelectedProgram.WeekNumbers)
-            {
-                <MudSelectItem T="int" Value="@week">Week @week</MudSelectItem>
-            }
-        </MudSelect>
-
-        <MudSelect T="int" Label="Session" Variant="Variant.Outlined"
-                   @bind-Value="_day" @bind-Value:after="Notify">
-            @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
-            {
-                <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
-            }
-        </MudSelect>
-    </MudStack>
-</MudPaper>
+    <MudSelect T="int" Label="Session" Variant="Variant.Outlined"
+               @bind-Value="_day" @bind-Value:after="Notify">
+        @foreach (var day in RunSession.DaysOf(SelectedProgram, _week))
+        {
+            <MudSelectItem T="int" Value="@day">Day @day</MudSelectItem>
+        }
+    </MudSelect>
+</MudStack>
 
 @code {
     /// <summary>Interval programs to offer (empty hides the control).</summary>
@@ -70,7 +69,7 @@
         }
     }
 
-    private async void OnWeekChanged()
+    private async Task OnWeekChanged()
     {
         var days = RunSession.DaysOf(SelectedProgram, _week);
         if (days.Count > 0 && !days.Contains(_day)) _day = days[0];

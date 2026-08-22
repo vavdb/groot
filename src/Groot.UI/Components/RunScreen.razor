@@ -6,7 +6,7 @@
 @using Groot.UI.Audio
 @implements IDisposable
 
-<MudPaper Elevation="1" Class="run-screen" aria-label="@Heading">
+<section class="run-screen" aria-label="@Heading">
     <MudStack Spacing="3">
         <MudStack Row="true" AlignItems="AlignItems.Baseline" Justify="Justify.SpaceBetween" Class="run-head">
             <MudText Typo="Typo.h6" Class="g-serif">
@@ -67,7 +67,7 @@
             }
         </MudStack>
     </MudStack>
-</MudPaper>
+</section>
 
 @code {
     private const int TickMilliseconds = 250;

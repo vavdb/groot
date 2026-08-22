@@ -1,9 +1,12 @@
-@* The landing page body: serif wordmark, one-line pitch, and a primary call-to-action to /run. *@
+@* The landing page body: serif wordmark, one-line pitch, and a primary call-to-action to /run.
+   Own root <div> so the scoped styles apply; the MudButton is reached through ::deep. *@
 
-<MudStack Spacing="2" Class="groot-landing">
-    <MudText Typo="Typo.h1" Class="g-serif">Groot<span class="accent">.</span></MudText>
-    <MudText Typo="Typo.body1" Class="sub">A workout logger and habit tracker for lifters who also run.</MudText>
-    <MudButton Href="/run" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow" Class="cta">
-        Start a session
-    </MudButton>
-</MudStack>
+<div class="groot-landing">
+    <MudStack Spacing="2" AlignItems="AlignItems.Start">
+        <MudText Typo="Typo.h1" Class="g-serif">Groot<span class="accent">.</span></MudText>
+        <MudText Typo="Typo.body1" Class="sub">A workout logger and habit tracker for lifters who also run.</MudText>
+        <MudButton Href="/run" Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.PlayArrow" Class="cta">
+            Start a session
+        </MudButton>
+    </MudStack>
+</div>

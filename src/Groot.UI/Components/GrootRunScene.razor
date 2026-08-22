@@ -4,38 +4,40 @@
 @using Groot.Core.Programs
 @using Groot.UI.Audio
 
-<MudStack Row="true" Wrap="Wrap.Wrap" Spacing="6" AlignItems="AlignItems.Start" Class="run-scene">
-    <MudPaper Elevation="1" Class="picker">
-        <MudStack Spacing="3">
-            <GrootProgramPicker Programs="Programs"
-                                ShowProgram="ShowProgram"
-                                SelectionChanged="OnSelectionChanged" />
+<div class="run-scene">
+    <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="6" AlignItems="AlignItems.Start">
+        <MudPaper Elevation="1" Class="picker">
+            <MudStack Spacing="3">
+                <GrootProgramPicker Programs="Programs"
+                                    ShowProgram="ShowProgram"
+                                    SelectionChanged="OnSelectionChanged" />
 
-            @if (ShowAudioControls)
-            {
-                <GrootAudioControls @bind-Language="Language"
-                                    @bind-Sound="SoundEnabled"
-                                    ValuesChanged="OnAudioChanged" />
-            }
+                @if (ShowAudioControls)
+                {
+                    <GrootAudioControls @bind-Language="Language"
+                                        @bind-Sound="SoundEnabled"
+                                        ValuesChanged="OnAudioChanged" />
+                }
 
-            @if (_selection is { } sel)
-            {
-                <MudText Typo="Typo.caption">
-                    @sel.Session.Segments.Count segments · @Format(sel.Session.TotalSeconds) total ·
-                    @sel.Session.RunCount run blocks · @Format(sel.Session.RunSeconds) running
-                </MudText>
-            }
-        </MudStack>
-    </MudPaper>
+                @if (_selection is { } sel)
+                {
+                    <MudText Typo="Typo.caption">
+                        @sel.Session.Segments.Count segments · @Format(sel.Session.TotalSeconds) total ·
+                        @sel.Session.RunCount run blocks · @Format(sel.Session.RunSeconds) running
+                    </MudText>
+                }
+            </MudStack>
+        </MudPaper>
 
-    @if (_selection is { } selected)
-    {
-        <GrootRunPage Session="selected.Session"
-                      CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
-                      Language="Language"
-                      SessionsInWeek="selected.SessionsInWeek" />
-    }
-</MudStack>
+        @if (_selection is { } selected)
+        {
+            <GrootRunPage Session="selected.Session"
+                          CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
+                          Language="Language"
+                          SessionsInWeek="selected.SessionsInWeek" />
+        }
+    </MudStack>
+</div>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<IntervalProgram> Programs { get; set; } = [];
@@ -60,5 +62,5 @@
 
     private void OnSelectionChanged(GrootProgramSelection selection) => _selection = selection;
 
-    private async void OnAudioChanged() => await AudioChanged.InvokeAsync(new GrootAudioState(Language, SoundEnabled));
+    private Task OnAudioChanged() => AudioChanged.InvokeAsync(new GrootAudioState(Language, SoundEnabled));
 }

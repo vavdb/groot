@@ -2,7 +2,8 @@
    Meter values come from Core's ContractEvaluator; jokers render as filled/hollow diamonds. *@
 @using Groot.Core.Contract
 
-<MudCard Elevation="1" Class="week-card">
+<div class="week-card">
+<MudCard Elevation="1">
     <MudCardContent>
         <MudStack Spacing="3">
             <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
@@ -25,6 +26,7 @@
         </MudStack>
     </MudCardContent>
 </MudCard>
+</div>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];

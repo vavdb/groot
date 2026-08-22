@@ -1,24 +1,26 @@
+/* The root <div> is ours, so the scope attribute lands on it; MudBlazor children are
+   reached through ::deep. A plain .jokers rule would never match MudText's own div. */
 .week-card {
     max-width: 375px;
 }
 
-.jokers {
+::deep .jokers {
     letter-spacing: .1em;
     color: var(--g-clay);
 }
 
-.meter {
+::deep .meter {
     color: var(--g-dim);
 }
 
-.meter b {
+::deep .meter b {
     color: var(--g-ink);
 }
 
-.meter .ok {
+::deep .meter .ok {
     color: var(--g-moss);
 }
 
-.meter .warn {
+::deep .meter .warn {
     color: var(--g-clay);
 }
