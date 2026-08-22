@@ -7,6 +7,11 @@
     border-radius: 999px;
 }
 
+::deep .history {
+    padding: 14px 16px 16px;
+    border-radius: 12px;
+}
+
 /* Lifting and settings are not built yet: present, readable, and inert. */
 ::deep .soon {
     border-color: var(--g-line);

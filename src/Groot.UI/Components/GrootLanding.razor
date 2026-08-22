@@ -28,7 +28,11 @@
             </MudButton>
         </MudStack>
 
-        <SeasonGrid Days="History" Today="Today" Weeks="26" Title="History" />
+        @* Same surface as the week card above it: both are panels of logged training, and one
+           of them floating on the page background read as an accident. *@
+        <MudPaper Elevation="1" Class="history">
+            <SeasonGrid Days="History" Today="Today" Weeks="26" Title="History" />
+        </MudPaper>
     </MudStack>
 </div>
 
