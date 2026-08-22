@@ -37,6 +37,7 @@ Design mockups (interactive HTML lives in [`design/`](design/), renders below):
 
 | Path | Contents |
 |---|---|
+| `AGENTS.md` | the rules for every change, for agents and people alike (`CLAUDE.md` imports it) |
 | `research.md` | main research + decision log |
 | `design/` | current design: habit system spec, mockups (open the HTML files in a browser) |
 | `Research/` | program catalog, ads research, rejected design directions with provenance |
@@ -54,7 +55,12 @@ dotnet build src/Groot.App -f net10.0-windows10.0.19041.0   # Windows head (need
 
 Android head needs the Android SDK + JDK once:
 `dotnet build src/Groot.App -f net10.0-android -t:InstallAndroidDependencies` (or install via
-Visual Studio). iOS builds on a Mac with the maui workload.
+Visual Studio). iOS builds on a Mac with the maui workload. CI builds everything except
+`Groot.App`; the heads are verified through the web head and the component gallery
+(`dotnet run --project tools/Groot.UI.Gallery`), the app on a device or emulator.
+
+Before a commit: `dotnet test tests/Groot.Core.Tests`, `dotnet test tests/Groot.UI.Tests`
+(palette contrast), and `bash tools/check-rules.sh` (the mechanical half of `AGENTS.md`).
 
 ## Credits
 

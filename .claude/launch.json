@@ -12,6 +12,18 @@
       "runtimeExecutable": "dotnet",
       "runtimeArgs": ["run", "--project", "tools/Groot.UI.Gallery", "--launch-profile", "http"],
       "port": 5200
+    },
+    {
+      "name": "groot-web-b",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "src/Groot.Web", "--no-launch-profile", "--", "--urls", "http://localhost:5064"],
+      "port": 5064
+    },
+    {
+      "name": "groot-gallery-b",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "tools/Groot.UI.Gallery", "--no-launch-profile", "--", "--urls", "http://localhost:5201"],
+      "port": 5201
     }
   ]
 }

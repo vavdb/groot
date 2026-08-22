@@ -20,14 +20,14 @@ ORCHESTRATOR  = the DSH session (DeepSeek model)
 |-----------------|----------------------|--------------------------------------------------|-----|
 | **Implementer** | **Claude Max**       | headless `claude -p <brief> --dangerously-skip-permissions --output-format text --max-turns 80` (in-repo), or `subagent_claude_code` tool | biggest budget = workhorse; best multi-file feature work |
 | **Primary reviewer** | **Codex**        | `codex exec --skip-git-repo-check`, or `subagent_codex` tool | read-only by design (auto-cancels approvals); catches behavioral bugs (races, time-loss) |
-| **Secondary reviewer** | **GLM 5.3** via **opencode-go** | POST https://opencode.ai/zen/go/v1/chat/completions, key `OPENCODE_GO_API_KEY` in ~/.dsh/.credentials.yaml | cheapest thorough line-by-line walkthrough |
+| **Secondary reviewer** | **GLM 5.3** via **opencode-go** | POST https://opencode.ai/zen/go/v1/chat/completions, key `OPENCODE_GO_API_KEY` from the DSH credential store | cheapest thorough line-by-line walkthrough |
 | **Orchestrator** | **DeepSeek** (DSH session) | this session | coordination, verification, git/deploy glue |
 
 Budget notes:
 - Claude Max is the spend — do NOT use it for reviewing.
 - Codex: small sub, ~78k tokens per full review. Use on every change.
-- GLM 5.3: cheapest reviewer; use on features, skip on tiny fixes.
-- z.ai direct route (`ZAI_API_KEY`) is OUT OF BALANCE — use opencode-go for the same glm-5.3 model.
+- GLM 5.3: cheapest reviewer; use on features, skip on tiny fixes. Route it through opencode-go;
+  which routes have balance is day-to-day state and lives in the DSH config, not here.
 
 ## Evidence (2026-08-19, the run-session feature)
 
@@ -47,6 +47,34 @@ Budget notes:
 - Small fix: Claude implements -> Codex reviews -> fix -> ship.
 - Feature: Claude implements -> Codex + GLM 5.3 review -> Claude fixes -> ship.
 - Claude flags risk: add a second Claude review pass before shipping.
+
+## Briefs
+
+Every agent reads `AGENTS.md` first; Claude Code gets it through `CLAUDE.md`, Codex reads it
+natively, GLM gets it pasted into the brief. The rules there are the acceptance criteria
+nobody has to restate.
+
+**Implementer brief** (Claude):
+
+```
+Task: <one sentence>
+Why: <the user-visible outcome>
+Scope: <files or components expected to change; anything outside is a question, not a change>
+Acceptance: <observable checks; tests that must exist; gallery states that must render>
+Constraints: AGENTS.md applies. Do not commit. Run `dotnet test tests/Groot.Core.Tests` and
+  `bash tools/check-rules.sh` before reporting. Report what you did not do and why.
+```
+
+**Reviewer brief** (Codex, then GLM):
+
+```
+Review this diff against AGENTS.md. Diff: <path or inline>. Files to read for context: <list>.
+Previous reviewer flagged: <findings>. Verify the fixes for those; do not re-report them.
+Look for: silent failures, races around timers and cancellation, state kept in two places,
+strings or colours that bypass the token and resource rules, missing gallery states, tests
+that assert the implementation instead of the behaviour.
+Output: one line per finding, `path:line: severity: problem. fix.` No praise, no summaries.
+```
 
 ## Infrastructure
 
