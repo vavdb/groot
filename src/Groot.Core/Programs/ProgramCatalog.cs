@@ -162,8 +162,12 @@ public sealed class ProgramCatalog
             if (tier is < 1 or > 3)
                 throw new InvalidOperationException($"Lift program '{id}' day '{dayKey}' has tier {tier}; tiers are 1 to 3.");
 
-            var loading = e.TryGetProperty("loading", out var l) ? l.GetString() : null;
-            return new LiftExercise(RequiredString(e, "exercise"), tier, loading);
+            var exerciseId = RequiredString(e, "exercise");
+            var loading = e.TryGetProperty("loading", out var l)
+                ? ParseLoading(l.GetString(), id, exerciseId)
+                : LoadingKind.Barbell;
+
+            return new LiftExercise(exerciseId, tier, loading);
         }).ToArray();
 
         if (exercises.Length == 0)
@@ -171,6 +175,15 @@ public sealed class ProgramCatalog
 
         return exercises;
     }
+
+    private static LoadingKind ParseLoading(string? loading, string id, string exerciseId) => loading switch
+    {
+        "barbell" => LoadingKind.Barbell,
+        "dumbbell" => LoadingKind.Dumbbell,
+        "bodyweight" => LoadingKind.Bodyweight,
+        _ => throw new InvalidOperationException(
+            $"Lift program '{id}' loads '{exerciseId}' as '{loading}'; expected barbell, dumbbell or bodyweight."),
+    };
 
     /// <summary>Reads progression.T1 and its siblings: scheme, increments, fail ladder, reset.</summary>
     private static IReadOnlyDictionary<int, TierProgression> ParseTiers(JsonElement root, string id)

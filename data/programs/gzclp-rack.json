@@ -44,24 +44,24 @@
   },
   "days": {
     "A1": [
-      { "exercise": "squat", "tier": 1 },
-      { "exercise": "bench-press", "tier": 2 },
-      { "exercise": "chin-up", "tier": 3, "loading": "bodyweight+" }
+      { "exercise": "squat", "tier": 1, "loading": "barbell" },
+      { "exercise": "bench-press", "tier": 2, "loading": "barbell" },
+      { "exercise": "chin-up", "tier": 3, "loading": "bodyweight" }
     ],
     "B1": [
-      { "exercise": "overhead-press", "tier": 1 },
-      { "exercise": "deadlift", "tier": 2 },
-      { "exercise": "dumbbell-row", "tier": 3 }
+      { "exercise": "overhead-press", "tier": 1, "loading": "barbell" },
+      { "exercise": "deadlift", "tier": 2, "loading": "barbell" },
+      { "exercise": "dumbbell-row", "tier": 3, "loading": "dumbbell" }
     ],
     "A2": [
-      { "exercise": "bench-press", "tier": 1 },
-      { "exercise": "squat", "tier": 2 },
-      { "exercise": "dumbbell-curl", "tier": 3 }
+      { "exercise": "bench-press", "tier": 1, "loading": "barbell" },
+      { "exercise": "squat", "tier": 2, "loading": "barbell" },
+      { "exercise": "dumbbell-curl", "tier": 3, "loading": "dumbbell" }
     ],
     "B2": [
-      { "exercise": "deadlift", "tier": 1 },
-      { "exercise": "overhead-press", "tier": 2 },
-      { "exercise": "dumbbell-lateral-raise", "tier": 3 }
+      { "exercise": "deadlift", "tier": 1, "loading": "barbell" },
+      { "exercise": "overhead-press", "tier": 2, "loading": "barbell" },
+      { "exercise": "dumbbell-lateral-raise", "tier": 3, "loading": "dumbbell" }
     ]
   }
 }

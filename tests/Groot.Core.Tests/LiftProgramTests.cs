@@ -67,7 +67,18 @@ public class LiftCatalogTests
 
         Assert.Equal(["squat", "bench-press", "chin-up"], day.Exercises.Select(e => e.ExerciseId));
         Assert.Equal([1, 2, 3], day.Exercises.Select(e => e.Tier));
-        Assert.Equal("bodyweight+", day.Exercises[2].Loading);
+    }
+
+    [Fact]
+    public void every_exercise_says_how_it_is_loaded()
+    {
+        Assert.Equal(
+            [LoadingKind.Barbell, LoadingKind.Barbell, LoadingKind.Bodyweight],
+            Gzclp.Day("A1").Exercises.Select(e => e.Loading));
+
+        Assert.Equal(
+            [LoadingKind.Barbell, LoadingKind.Barbell, LoadingKind.Dumbbell],
+            Gzclp.Day("B1").Exercises.Select(e => e.Loading));
     }
 
     [Fact]
@@ -138,13 +149,31 @@ public class LiftSessionBuilderTests
     }
 
     [Fact]
-    public void weights_come_from_the_lifter_and_a_missing_one_is_left_open()
+    public void weights_come_from_the_lifter_and_a_missing_barbell_weight_is_left_open()
     {
-        var plan = LiftSessionBuilder.For(Gzclp, "A1", Weights);
+        var plan = LiftSessionBuilder.For(Gzclp, "B1", new Dictionary<string, decimal> { ["deadlift"] = 100m });
 
-        Assert.Equal(60m, plan.Exercises[0].TargetKg);
-        Assert.Equal(45m, plan.Exercises[1].TargetKg);
-        Assert.Null(plan.Exercises[2].TargetKg);
+        Assert.Null(plan.Exercises[0].TargetKg);
+        Assert.Equal(100m, plan.Exercises[1].TargetKg);
+    }
+
+    [Fact]
+    public void a_bodyweight_lift_starts_at_no_adjustment_rather_than_unknown()
+    {
+        var chinUp = LiftSessionBuilder.For(Gzclp, "A1", Weights).Exercises[2];
+
+        Assert.Equal(LoadingKind.Bodyweight, chinUp.Loading);
+        Assert.Equal(0m, chinUp.TargetKg);
+    }
+
+    [Fact]
+    public void the_plan_carries_the_loading_of_each_exercise()
+    {
+        var plan = LiftSessionBuilder.For(Gzclp, "B1", Weights);
+
+        Assert.Equal(
+            [LoadingKind.Barbell, LoadingKind.Barbell, LoadingKind.Dumbbell],
+            plan.Exercises.Select(e => e.Loading));
     }
 
     [Fact]

@@ -53,8 +53,14 @@ public sealed record TierProgression(
         : Scheme;
 }
 
+/// <summary>
+/// How an exercise is loaded, which decides what its weight means: a total on the bar, the weight
+/// in each hand, or an adjustment to bodyweight (added, or taken off by an assist).
+/// </summary>
+public enum LoadingKind { Barbell, Dumbbell, Bodyweight }
+
 /// <summary>One exercise slot on a training day: which exercise, at which tier, loaded how.</summary>
-public sealed record LiftExercise(string ExerciseId, int Tier, string? Loading = null);
+public sealed record LiftExercise(string ExerciseId, int Tier, LoadingKind Loading = LoadingKind.Barbell);
 
 /// <summary>One day of the rotation ("A1"), in the order the exercises are trained.</summary>
 public sealed record LiftDay(string Key, IReadOnlyList<LiftExercise> Exercises);

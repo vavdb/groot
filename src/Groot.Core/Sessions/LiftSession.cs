@@ -5,10 +5,15 @@ namespace Groot.Core.Sessions;
 /// <summary>One planned set: its place in the exercise, the reps to hit, and whether it is the AMRAP.</summary>
 public sealed record LiftSet(int Index, int TargetReps, bool IsAmrap);
 
-/// <summary>One exercise as it is trained today: the scheme, the weight to load, the sets, the rest.</summary>
+/// <summary>
+/// One exercise as it is trained today. What <see cref="TargetKg"/> means follows the loading: a
+/// total on the bar, the weight in each hand, or the adjustment to bodyweight, which is negative
+/// when the lift is assisted.
+/// </summary>
 public sealed record LiftExercisePlan(
     string ExerciseId,
     int Tier,
+    LoadingKind Loading,
     SetScheme Scheme,
     decimal? TargetKg,
     int RestSeconds,
@@ -49,11 +54,14 @@ public static class LiftSessionBuilder
                 .Select(index => new LiftSet(index, scheme.Reps, scheme.AmrapLast && index == scheme.Sets - 1))
                 .ToArray();
 
-            var target = workingWeightsKg.TryGetValue(exercise.ExerciseId, out var kg) ? kg : (decimal?)null;
+            var target = workingWeightsKg.TryGetValue(exercise.ExerciseId, out var kg) ? kg
+                : exercise.Loading == LoadingKind.Bodyweight ? 0m
+                : (decimal?)null;
 
             return new LiftExercisePlan(
                 exercise.ExerciseId,
                 exercise.Tier,
+                exercise.Loading,
                 scheme,
                 target,
                 program.RestSecondsFor(exercise.Tier),

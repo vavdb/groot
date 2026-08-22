@@ -37,33 +37,29 @@
                         <span class="tier">T@(exercise.Tier)</span>
                     </span>
                     <span class="scheme">@exercise.Scheme.Text</span>
-                    @if (WeightOf(exercise) is null)
-                    {
-                        <span class="load-value">@Load(exercise)</span>
-                    }
-                    else
-                    {
-                        <button type="button" class="load-value editable"
-                                aria-expanded="@(_editingWeight == exercise.ExerciseId)"
-                                aria-label="@($"Change the weight, {Name(exercise.ExerciseId)}")"
-                                @onclick="@(() => ToggleWeightEditor(exercise))">@Load(exercise)</button>
-                    }
+                    <button type="button" class="load-value editable"
+                            aria-expanded="@(_editingWeight == exercise.ExerciseId)"
+                            aria-label="@($"Change the weight, {Name(exercise.ExerciseId)}")"
+                            @onclick="@(() => ToggleWeightEditor(exercise))">@Load(exercise)</button>
                 </div>
 
                 <div class="plates">@Plates(exercise)</div>
 
-                @if (_editingWeight == exercise.ExerciseId && WeightOf(exercise) is { } editing)
+                @if (_editingWeight == exercise.ExerciseId)
                 {
+                    var editing = WeightOf(exercise) ?? 0m;
                     <div class="weight-pop">
                         <MudIconButton Icon="@Icons.Material.Filled.Remove" Size="Size.Small"
                                        aria-label="Lighter" OnClick="@(() => NudgeWeight(exercise, -1))" />
                         <MudNumericField T="decimal" Value="editing" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                         Step="@Step(exercise)" Min="0" HideSpinButtons="true" Immediate="true"
+                                         Step="@Step(exercise)" HideSpinButtons="true" Immediate="true"
                                          Adornment="Adornment.End" AdornmentText="kg" Class="weight-field"
                                          ValueChanged="@(kg => SetWeight(exercise, kg))" />
                         <MudIconButton Icon="@Icons.Material.Filled.Add" Size="Size.Small"
                                        aria-label="Heavier" OnClick="@(() => NudgeWeight(exercise, 1))" />
-                        <span class="pop-hint">from set @(NextIndex(exercise) + 1) on</span>
+                        <span class="pop-hint">
+                            @(exercise.Loading == LoadingKind.Bodyweight ? "added, or below zero for an assist · " : "")from set @(NextIndex(exercise) + 1) on
+                        </span>
                         <MudButton Size="Size.Small" Variant="Variant.Text" OnClick="CloseWeightEditor">Done</MudButton>
                     </div>
                 }
@@ -211,7 +207,15 @@
     /// <summary>Reps times the weight on the bar, rounded to whole kilos; bodyweight work adds nothing.</summary>
     private decimal Volume => Math.Round(Plan.Exercises.Sum(exercise =>
         exercise.Sets.Where(set => IsDone(exercise, set))
-            .Sum(set => (WeightAt(exercise, set.Index) ?? 0m) * _logged[(exercise.ExerciseId, set.Index)])), 0);
+            .Sum(set => Moved(exercise, WeightAt(exercise, set.Index)) * _logged[(exercise.ExerciseId, set.Index)])), 0);
+
+    /// <summary>The load one rep moves: both dumbbells, the bar, or whatever was added to bodyweight.</summary>
+    private static decimal Moved(LiftExercisePlan exercise, decimal? kg) => exercise.Loading switch
+    {
+        LoadingKind.Dumbbell => 2m * (kg ?? 0m),
+        LoadingKind.Bodyweight => Math.Max(0m, kg ?? 0m),
+        _ => kg ?? 0m,
+    };
 
     private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
 
@@ -221,12 +225,24 @@
             ? char.ToUpperInvariant(words[0]) + words[1..]
             : exerciseId;
 
-    private string Load(LiftExercisePlan exercise) =>
-        WeightOf(exercise) is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+    /// <summary>What the weight reads as, which follows how the exercise is loaded.</summary>
+    private string Load(LiftExercisePlan exercise) => Weight(exercise.Loading, WeightOf(exercise));
+
+    private static string Weight(LoadingKind loading, decimal? kg) => loading switch
+    {
+        LoadingKind.Bodyweight => kg switch
+        {
+            null or 0m => "bodyweight",
+            < 0m => $"assisted {-kg:0.##} kg",
+            _ => $"bodyweight + {kg:0.##} kg",
+        },
+        LoadingKind.Dumbbell => kg is { } perHand ? $"{perHand:0.##} kg each" : "no weight yet",
+        _ => kg is { } total ? $"{total:0.##} kg" : "no weight yet",
+    };
 
     /// <summary>The weight one set is taken at, for the editor row.</summary>
     private string SetLoad(LiftExercisePlan exercise, LiftSet set) =>
-        WeightAt(exercise, set.Index) is { } kg ? $"{kg:0.##} kg" : "bodyweight";
+        Weight(exercise.Loading, WeightAt(exercise, set.Index));
 
     /// <summary>The weight the next set will be taken at: the one the header shows and the editor changes.</summary>
     private decimal? WeightOf(LiftExercisePlan exercise) => WeightAt(exercise, NextIndex(exercise));
@@ -259,6 +275,14 @@
 
     private string Plates(LiftExercisePlan exercise)
     {
+        if (exercise.Loading == LoadingKind.Dumbbell)
+            return WeightOf(exercise) is { } perHand ? $"{2 * perHand:0.##} kg in both hands" : "";
+
+        if (exercise.Loading == LoadingKind.Bodyweight)
+            return WeightOf(exercise) is { } adjustment && adjustment != 0m
+                ? adjustment > 0m ? "belt or vest" : "band or machine assist"
+                : "";
+
         if (WeightOf(exercise) is not { } kg || Inventory.Count == 0) return "";
 
         var breakdown = PlateSolver.PerSideBreakdown(kg, Bar, Inventory);
@@ -365,7 +389,8 @@
 
     /// <summary>Sets the weight from the next set onward. Sets already taken keep what they were taken at.</summary>
     private void SetWeight(LiftExercisePlan exercise, decimal kg) =>
-        _weights[(exercise.ExerciseId, NextIndex(exercise))] = Math.Max(0m, kg);
+        _weights[(exercise.ExerciseId, NextIndex(exercise))] =
+            exercise.Loading == LoadingKind.Bodyweight ? kg : Math.Max(0m, kg);
 
     private void NudgeAmrap(LiftExercisePlan exercise, int delta)
     {

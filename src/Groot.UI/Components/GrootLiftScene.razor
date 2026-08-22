@@ -37,7 +37,11 @@
     /// <summary>Which day of the rotation to open on.</summary>
     [Parameter] public string? DayKey { get; set; }
 
-    /// <summary>A plain starting table, the weights a first week tends to begin at. Replaced by the store.</summary>
+    /// <summary>
+    /// A plain starting table, the weights a first week tends to begin at. Replaced by the store.
+    /// A barbell entry is the total on the bar, a dumbbell entry is the weight in each hand, and a
+    /// bodyweight lift is left out: it starts at bodyweight with nothing added.
+    /// </summary>
     private static readonly Dictionary<string, decimal> StarterWeights = new()
     {
         ["squat"] = 60m,
