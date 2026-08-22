@@ -98,7 +98,9 @@
     transition: stroke-dasharray 0.15s ease-out;
 }
 
-.g-pith {
+/* Scoped like the rule above it: a bare .g-pith loses to .g-boot-rings circle { fill: none }
+   and the dot never draws. */
+.g-boot-rings .g-pith {
     fill: var(--g-bark, #c49a6c);
     stroke: none;
     animation: g-pith-turn var(--g-turn) cubic-bezier(0.65, 0, 0.35, 1) infinite;
