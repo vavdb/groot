@@ -2,7 +2,7 @@
    glance: how dense the year is, and where the gaps are. Presentational only, it counts nothing
    itself; Days carries the sessions per date and anything missing is a day with none. *@
 
-<GrootPanel Title="@Title" Meta="@($"{Total} sessions · {Weeks} weeks")" Class="season-grid">
+<GrootPanel Title="@Title" Meta="@($"{_total} sessions · {Weeks} weeks")" Class="season-grid">
     <div class="cells" role="img" aria-label="@AriaLabel">
         @foreach (var date in Dates())
         {
@@ -37,12 +37,18 @@
     private DateOnly FirstMonday =>
         TodayDate.AddDays(-(((int)TodayDate.DayOfWeek + 6) % 7)).AddDays(-7 * (Weeks - 1));
 
-    private Dictionary<DateOnly, int> ByDate =>
-        Days.GroupBy(d => d.Date).ToDictionary(g => g.Key, g => g.Sum(d => d.Sessions));
+    // Built once per parameter change. As a property this rebuilt itself for every cell, and the
+    // total walked the window a second time: 26 weeks of history meant hundreds of rebuilds a render.
+    private Dictionary<DateOnly, int> _byDate = [];
+    private int _total;
 
-    private int Total => Dates().Sum(Sessions);
+    protected override void OnParametersSet()
+    {
+        _byDate = Days.GroupBy(d => d.Date).ToDictionary(g => g.Key, g => g.Sum(d => d.Sessions));
+        _total = Dates().Sum(Sessions);
+    }
 
-    private string AriaLabel => $"Training history, {Weeks} weeks, {Total} sessions.";
+    private string AriaLabel => $"Training history, {Weeks} weeks, {_total} sessions.";
 
     /// <summary>Every date in the window, column by column: each column is one week, Monday first.</summary>
     private IEnumerable<DateOnly> Dates()
@@ -54,7 +60,7 @@
         }
     }
 
-    private int Sessions(DateOnly date) => ByDate.GetValueOrDefault(date);
+    private int Sessions(DateOnly date) => _byDate.GetValueOrDefault(date);
 
     private int Level(DateOnly date) => Math.Clamp(Sessions(date), 0, 3);
 }

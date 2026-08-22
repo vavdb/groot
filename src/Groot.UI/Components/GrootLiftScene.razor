@@ -6,7 +6,7 @@
 
 <div class="lift-scene">
     <LiftScreen @key="_dayKey"
-                Plan="Plan"
+                Plan="_plan"
                 Program="Program"
                 SessionsInWeek="Program.SessionsPerWeek"
                 Day="@(RotationIndex % Program.SessionsPerWeek + 1)">
@@ -21,7 +21,7 @@
             {
                 <GrootChoice T="string" Label="Day" Items="Program.Rotation" Value="_dayKey"
                              Display="@(key => $"{key} · {Summary(key)}")"
-                             ValueChanged="@(key => _dayKey = key)" />
+                             ValueChanged="OnDayChanged" />
             }
         </ChildContent>
     </LiftScreen>
@@ -56,14 +56,37 @@
     private string _dayKey = "";
     private bool _editing;
 
-    protected override void OnParametersSet() =>
+    // Built when the day changes rather than on every render: the plan is a fresh object graph
+    // and the screen holds a parameter reference to it.
+    private LiftSessionPlan _plan = null!;
+
+    protected override void OnParametersSet()
+    {
         _dayKey = _dayKey is { Length: > 0 } && Program.Rotation.Contains(_dayKey)
             ? _dayKey
             : DayKey ?? Program.Rotation[0];
 
-    private int RotationIndex => Math.Max(0, Program.Rotation.ToList().IndexOf(_dayKey));
+        Resolve();
+    }
 
-    private LiftSessionPlan Plan => LiftSessionBuilder.For(Program, _dayKey, WorkingWeightsKg);
+    private void Resolve() => _plan = LiftSessionBuilder.For(Program, _dayKey, WorkingWeightsKg);
+
+    private void OnDayChanged(string dayKey)
+    {
+        _dayKey = dayKey;
+        Resolve();
+    }
+
+    private int RotationIndex
+    {
+        get
+        {
+            for (var index = 0; index < Program.Rotation.Count; index++)
+                if (Program.Rotation[index] == _dayKey) return index;
+
+            return 0;
+        }
+    }
 
     /// <summary>The lifts of a day, so the picker reads as "A1 · squat, bench press, chin up".</summary>
     private string Summary(string key) =>

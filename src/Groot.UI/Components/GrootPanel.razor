@@ -6,7 +6,7 @@
    the week card, the history grid and the exercise blocks now agree without each restating it. *@
 
 <section class="g-panel @(Filled ? "filled" : "") @Class">
-    @if (Title is { Length: > 0 } || HeaderContent is not null)
+    @if (Title is { Length: > 0 } || Meta is { Length: > 0 } || HeaderContent is not null)
     {
         <div class="panel-head">
             @if (Title is { Length: > 0 })

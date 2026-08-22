@@ -1,5 +1,5 @@
 ---
-status: "backlog"
+status: "done"
 tags: [UI]
 docs: none
 hook: Lift session screen — exercise name, SetCircle row, weight input; the RunScreen counterpart

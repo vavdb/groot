@@ -81,12 +81,11 @@
     private IntervalProgram SelectedProgram =>
         Programs.FirstOrDefault(p => p.Id == _programId) ?? Programs[0];
 
-    /// <summary>The session the controls currently name, resolved fresh rather than held.</summary>
-    private GrootProgramSelection? Selection =>
-        Programs.Count == 0 ? null
-        : new GrootProgramSelection(
-            RunSession.For(SelectedProgram, _week, _day),
-            SelectedProgram.Week(_week).SessionsPerWeek);
+    // Resolved when the choice changes, not on every render: building a RunSession walks the
+    // program's segments, and the markup reads it twice.
+    private GrootProgramSelection? _selection;
+
+    private GrootProgramSelection? Selection => _selection;
 
     protected override void OnParametersSet()
     {
@@ -94,7 +93,15 @@
         if (Programs.All(p => p.Id != _programId)) _programId = Programs[0].Id;
         if (!SelectedProgram.WeekNumbers.Contains(_week)) _week = SelectedProgram.WeekNumbers[0];
         if (!RunSession.DaysOf(SelectedProgram, _week).Contains(_day)) _day = RunSession.DaysOf(SelectedProgram, _week)[0];
+
+        Resolve();
     }
+
+    private void Resolve() =>
+        _selection = Programs.Count == 0 ? null
+            : new GrootProgramSelection(
+                RunSession.For(SelectedProgram, _week, _day),
+                SelectedProgram.Week(_week).SessionsPerWeek);
 
     private void ToggleEditing() => _editing = !_editing;
 
@@ -103,6 +110,7 @@
         _programId = programId;
         _week = SelectedProgram.WeekNumbers[0];
         _day = RunSession.DaysOf(SelectedProgram, _week)[0];
+        Resolve();
     }
 
     /// <summary>A week can be shorter than the one before it, so the day follows it down.</summary>
@@ -111,9 +119,14 @@
         _week = week;
         var days = RunSession.DaysOf(SelectedProgram, _week);
         if (!days.Contains(_day)) _day = days[0];
+        Resolve();
     }
 
-    private void OnDayChanged(int day) => _day = day;
+    private void OnDayChanged(int day)
+    {
+        _day = day;
+        Resolve();
+    }
 
     private Task OnAudioChanged() => AudioChanged.InvokeAsync(new GrootAudioState(Language, SoundEnabled));
 }

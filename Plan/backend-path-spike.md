@@ -1,17 +1,20 @@
 ---
-status: "backlog"
+status: "done"
 tags: [Backend]
 docs: research.md
-hook: Pick backend path — Supabase vs own ASP.NET Core API — before building sync
+hook: decided 2026-08-23: SQLite on device plus our own Groot.Api, no hosted backend
 order: 10
 ---
-# Backend path spike
+# Backend path — decided
 
-Decide Supabase (auth + Postgres + RLS solved now and later) vs own
-ASP.NET Core Minimal API + Postgres/SQLite on a VPS. Leaning Supabase per
-research.md §5.4 (owner note), needs a spike to confirm before wiring
-multi-user sync.
+SQLite on the device as the source of truth, syncing against `Groot.Api`:
+our own ASP.NET Core Minimal API, Dapper on SQLite, ASP.NET Identity with
+username and password, on the existing VPS behind Caddy. No hosted
+backend: no Supabase, no Firebase, no PocketBase.
 
-* Next step: spike Supabase auth (username/password) + RLS against the
-  habit-contract schema.
-* Links: `research.md` §5.4
+Endpoints the sync design needs: `POST /auth/register`, `POST /auth/login`,
+`POST /sync/push`, `GET /sync/pull?since=`.
+
+* Next step: `data-persistence-layer` (the device store) comes first; the
+  API is only useful once there are rows to sync.
+* Links: `research.md` §5.4, §10 decision log

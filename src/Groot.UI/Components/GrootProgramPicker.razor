@@ -4,7 +4,7 @@
 @using Groot.Core.Intervals
 @using Groot.Core.Programs
 
-@if (ShowControls)
+@if (ShowControls && Programs.Count > 0)
 {
     <MudStack Spacing="2" Class="picker-controls">
         @if (ShowProgram)
@@ -48,6 +48,7 @@
 
     private IReadOnlyList<string> ProgramIds => Programs.Select(p => p.Id).ToArray();
 
+    /// <summary>The chosen program, or the first one when the owner has not named one yet.</summary>
     private IntervalProgram Program =>
         Programs.FirstOrDefault(p => p.Id == ProgramId) ?? Programs[0];
 }

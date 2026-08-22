@@ -7,11 +7,15 @@ version that applies on every change. `bash tools/check-rules.sh` checks the mec
 
 ## State (2026-08-22)
 
-Works end to end: the 0→5K interval runner (`RunScreen`) on the web head and the MAUI head.
-Done and unit-tested: the engines in `Groot.Core` (progression, plate math, week contract,
-intervals, program catalog). Rendered in the gallery: `SetCircle`, `WeekCard`.
-Not started: lifting UI, persistence (`Groot.Data` is an empty csproj), `Groot.Api`, sync,
-resource-based i18n. README and research.md describe the planned shape; do not assume it exists.
+Works end to end, both heads: the 0→5K interval runner (`RunScreen`) and the lifting screen
+(`LiftScreen`, GZCLP: sets, plate maths, rest, AMRAP, missed sets, and what the next session
+becomes). Done and unit-tested: the engines in `Groot.Core` (progression, plate math, week
+contract, intervals, program catalog, lift programs and the progression planner). The gallery
+renders every component and, on `/screens`, every screen in a device frame.
+Not started: persistence (`Groot.Data` is an empty csproj), `Groot.Api`, sync, settings,
+resource-based i18n. Nothing a session logs survives a reload, and the lifting screen's working
+weights and equipment are stand-ins until there is a store. README and research.md describe the
+planned shape; do not assume it exists.
 
 ## Commands
 

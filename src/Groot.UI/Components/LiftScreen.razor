@@ -266,12 +266,9 @@
     private decimal Step(LiftExercisePlan exercise) =>
         Program?.TierFor(exercise.Tier).IncrementFor(exercise.ExerciseId) is { } kg and > 0m ? kg : 2.5m;
 
-    private void NudgeWeight(LiftExercisePlan exercise, int direction)
-    {
-        if (WeightOf(exercise) is not { } current) return;
-
-        SetWeight(exercise, current + direction * Step(exercise));
-    }
+    /// <summary>An exercise with no weight yet starts from zero rather than ignoring the tap.</summary>
+    private void NudgeWeight(LiftExercisePlan exercise, int direction) =>
+        SetWeight(exercise, (WeightOf(exercise) ?? 0m) + direction * Step(exercise));
 
     private string Plates(LiftExercisePlan exercise)
     {
@@ -341,7 +338,7 @@
     /// <summary>Where the next session starts for this lift, once every set of it is logged.</summary>
     private string NextLine(LiftExercisePlan exercise)
     {
-        if (Program is null || exercise.TargetKg is null) return "";
+        if (Program is null || WeightAt(exercise, 0) is null) return "";
 
         var next = LiftProgressionPlanner.Next(Program, Outcome(exercise));
         return $"next · {next.WeightKg:0.##} kg, {next.Scheme.Text} · {next.Explanation}";
@@ -392,16 +389,6 @@
         _weights[(exercise.ExerciseId, NextIndex(exercise))] =
             exercise.Loading == LoadingKind.Bodyweight ? kg : Math.Max(0m, kg);
 
-    private void NudgeAmrap(LiftExercisePlan exercise, int delta)
-    {
-        if (exercise.Sets.FirstOrDefault(set => set.IsAmrap) is not { } amrap) return;
-
-        var key = (exercise.ExerciseId, amrap.Index);
-        if (!_logged.TryGetValue(key, out var reps)) return;
-
-        _logged[key] = Math.Max(1, reps + delta);
-    }
-
     private int? RestingIn(LiftExercisePlan exercise)
     {
         if (_restingExercise != exercise.ExerciseId) return null;
@@ -449,6 +436,10 @@
         catch (OperationCanceledException)
         {
             // The rest was skipped or the screen went away; nothing to clean up beyond Dispose.
+        }
+        catch (ObjectDisposedException)
+        {
+            // EndRest cancelled and disposed the token source while this loop was between ticks.
         }
 
         if (!token.IsCancellationRequested)

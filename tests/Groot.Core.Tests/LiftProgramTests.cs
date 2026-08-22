@@ -108,6 +108,60 @@ public class LiftCatalogTests
     }
 }
 
+public class LiftProgramParsingTests
+{
+    private const string Minimal = """
+        {
+          "id": "test", "name": "Test", "type": "sets_reps",
+          "rotation": ["A"],
+          "progression": { "T1": { "scheme": "5x3+", "incrementKg": { "default": 2.5 } } },
+          "days": { "A": [ { "exercise": "squat", "tier": 1, "loading": "barbell" } ] }
+        }
+        """;
+
+    [Fact]
+    public void a_day_may_not_name_the_same_exercise_twice()
+    {
+        var json = Minimal.Replace(
+            """[ { "exercise": "squat", "tier": 1, "loading": "barbell" } ]""",
+            """[ { "exercise": "squat", "tier": 1, "loading": "barbell" }, { "exercise": "squat", "tier": 2, "loading": "barbell" } ]""");
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+
+        Assert.Contains("more than once", error.Message);
+    }
+
+    [Fact]
+    public void a_tier_that_declares_increments_must_name_a_default()
+    {
+        var json = Minimal.Replace("""{ "default": 2.5 }""", """{ "deadlift": 5.0 }""");
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+
+        Assert.Contains("without a default", error.Message);
+    }
+
+    [Fact]
+    public void an_unknown_loading_is_refused()
+    {
+        var json = Minimal.Replace("\"loading\": \"barbell\"", "\"loading\": \"kettlebell\"");
+
+        var error = Assert.Throws<InvalidOperationException>(() => ProgramCatalog.Parse([json]));
+
+        Assert.Contains("expected barbell, dumbbell or bodyweight", error.Message);
+    }
+
+    [Fact]
+    public void the_minimal_shape_parses()
+    {
+        var catalog = ProgramCatalog.Parse([Minimal]);
+
+        var program = catalog.LiftProgram("test");
+        Assert.Equal(["A"], program.Rotation);
+        Assert.Equal(2.5m, program.TierFor(1).IncrementFor("squat"));
+    }
+}
+
 public class LiftSessionBuilderTests
 {
     private static LiftProgram Gzclp => ProgramCatalog.Embedded.LiftProgram("gzclp-rack");

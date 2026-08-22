@@ -1,8 +1,9 @@
 # Groot
 
-A workout logger and habit tracker for lifters who also run. Web (Blazor WASM PWA), Android, and
-iOS from one C# codebase (.NET MAUI Blazor Hybrid, MudBlazor for UI, Dapper on SQLite,
-and a small self-hosted ASP.NET Core API for sync).
+Barbell sets and interval runs in one log, with a weekly contract that says what counts as a
+kept week. Web (Blazor WASM PWA), Android, and
+iOS from one C# codebase: .NET MAUI Blazor Hybrid, MudBlazor for UI, Dapper on SQLite for the
+device store, and our own self-hosted ASP.NET Core Minimal API for sync. No hosted backend.
 
 **Status: design + early implementation.** The design documents and mockups are the current
 visual contract; the domain engines (progression, plate math, intervals, habit contract) are

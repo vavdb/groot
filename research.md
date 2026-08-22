@@ -177,10 +177,18 @@ Gyms are concrete basements. The app must be 100 % functional offline:
 | Own ASP.NET Core Minimal API + Postgres/SQLite on VPS | ≈ €4/mo | roll your own (ASP.NET Identity) — OAuth wiring is on you | ✅ 100 % your stack | you build auth, sync endpoints, backups — fun but slower to MVP |
 | Azure (App Service free + Azure SQL free 32 GB) | genuinely free tiers exist | Entra External ID / roll your own | ✅ native | free tiers throttle/idle; pricing cliffs later |
 
-### 5.4 Recommendation
+### 5.4 Decision (2026-08-23, owner)
 
-**MVP: Supabase.** Reasons: auth solved now (username/password ≈ email/password with fake domain or anonymous+alias) *and* solved later (flip on Google + Apple providers — no OAuth code on your side, which is the expensive part); Postgres fits the relational model; Row Level Security gives per-user data isolation with zero API code; free at your scale.
-**Escape hatch:** schema is plain Postgres — if Supabase annoys, lift the schema onto a €4 Hetzner box behind your own Minimal API (`Groot.Api` project slot already reserved in the solution layout). Given 29 years of engineering you may *enjoy* owning the API — the honest trade is ~1–2 weeks of auth/sync plumbing vs. flipping switches.
+**SQLite on the device, and our own API server. No Supabase, no Firebase, no PocketBase.**
+
+The device keeps SQLite as the source of truth (§5.2) and syncs against `Groot.Api`, an ASP.NET
+Core Minimal API we write and run on the existing VPS. Auth is ASP.NET Identity with
+username and password, no PII (`Plan/auth-username-password.md`). The table above stays as the
+record of what was compared; the rows for hosted backends are history now, not options.
+
+What this costs, honestly: the one to two weeks of auth and sync plumbing a hosted backend would
+have handed over. What it buys: one stack end to end, no third-party account in the critical path,
+no free tier that pauses after a week of quiet, and a schema that is ours to change.
 
 Data model sketch (works on either):
 
@@ -248,7 +256,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 
 ## 8. Open questions
 
-1. Pick backend path after MVP spike: Supabase vs own API (see §5.4 trade).
+1. Build `Groot.Api` and the device store: SQLite plus our own Minimal API (§5.4, decided).
 2. iOS Live Activity: worth the native-extension pain, or is end-of-rest notification enough?
 3. Program engine scope for MVP: LP rules only (covers GZCLP/GreySkull/StrongLifts), or 531-style cycles too (nSuns needs them)?
 4. App distribution: Play Store + TestFlight, or sideload/APK for personal circle first?
@@ -259,7 +267,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 1. `Groot.Core`: program/progression engine + plate calc + e1RM (pure C#, unit-tested, fun part).
 2. `Groot.UI` + web head: program editor, workout runner, CSV import of your own history.
 3. MAUI head: Android first — foreground-service chronometer timer + notification actions (the moat).
-4. Supabase sync (GUIDs + updated_at + tombstones).
+4. Sync against `Groot.Api` (GUIDs + updated_at + tombstones).
 5. iOS build on the MacBook; TestFlight.
 6. Phase 2: Health Connect + HealthKit writes, RPE, 531 cycles, tree-ring viz.
 
@@ -275,7 +283,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 
 **2026-08-18 (later) — stack confirmed, backend decided, habit system designed.**
 - Stack **confirmed by owner: .NET MAUI / Blazor** (per §4 layout).
-- Backend: **self-hosted on existing Linux VPS `the VPS`** — supersedes the Supabase recommendation in §5.4. For this scale self-hosting is fine. Recommended shape: **PocketBase** (single Go binary, SQLite, built-in username/email auth + Google/Apple OAuth for later, admin UI, realtime) behind Caddy/nginx with Let's Encrypt; systemd unit; nightly SQLite backup via Litestream or restic. C# access via REST (community `pocketbase-csharp` SDK exists — verify maintenance state at build time, else thin hand-rolled client: it's ~6 endpoints for Groot). Fallback if PocketBase rules engine ever chafes: `Groot.Api` ASP.NET Core Minimal API on the same box (§5.3). Note Apple sign-in needs the $99/yr Apple dev account either way — already required for iOS distribution.
+- Backend: **self-hosted on the existing Linux VPS `the VPS`**. Shape settled on 2026-08-23 (§5.4): `Groot.Api`, our own ASP.NET Core Minimal API over SQLite, behind Caddy with Let's Encrypt, a systemd unit, and nightly backups via Litestream or restic. Apple sign-in, if it ever arrives, needs the $99/yr Apple developer account either way, which iOS distribution requires regardless.
 - **Habit system designed** — weekly contract (2×lift + 2×run + 1×rest), 2 jokers/week, week-streaks not day-streaks, per-side weight entry, 0→5K interval runner with audio cues. Full spec: `design/habit-system.md`; mockup: `design/habit-rings.html`. Viz decision: **contract card + GitHub-style season grid on Home (MVP), rings become the lifetime view** — grid for weeks, rings for years.
 
 **2026-08-18 (later still) — MVP scope pinned.**
@@ -472,6 +480,6 @@ dependencies, revisit. Tracing, if ever wanted, is a few lines of plain OpenTele
 ### 13.6 Program distribution
 
 MVP: `data/programs/*.json` compiled in as embedded resources. **MVP++: downloadable program
-definitions from the VPS** — a `programs` collection in PocketBase (or a static JSON dir behind
-Caddy) with `id` + `version`; app pulls new/updated definitions without an app update. Same JSON
-schema, so the engine doesn't care where a program came from.
+definitions from the VPS** — a `programs` endpoint on `Groot.Api` (or a static JSON directory
+behind Caddy) serving `id` + `version`; the app pulls new and updated definitions without an app
+update. Same JSON schema, so the engine does not care where a program came from.

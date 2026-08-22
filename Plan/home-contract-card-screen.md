@@ -1,8 +1,8 @@
 ---
-status: "backlog"
+status: "doing"
 tags: [UI, Contract]
 docs: design/habit-system.md
-hook: Home screen — this-week contract card + streak + mini season grid (Concept A+B)
+hook: contract card and season grid shipped; the streak line is the piece still missing
 order: 30
 ---
 # Home contract card screen

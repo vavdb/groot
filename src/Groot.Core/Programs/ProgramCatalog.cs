@@ -173,6 +173,13 @@ public sealed class ProgramCatalog
         if (exercises.Length == 0)
             throw new InvalidOperationException($"Lift program '{id}' day '{dayKey}' has no exercises.");
 
+        // A day that names the same exercise twice would share one set of logged sets and one
+        // progression outcome on the screen. Refuse it here, the way duplicate weeks are refused.
+        var duplicate = exercises.GroupBy(e => e.ExerciseId).FirstOrDefault(g => g.Count() > 1);
+        if (duplicate is not null)
+            throw new InvalidOperationException(
+                $"Lift program '{id}' day '{dayKey}' lists '{duplicate.Key}' more than once.");
+
         return exercises;
     }
 
@@ -224,6 +231,10 @@ public sealed class ProgramCatalog
                 else overrides[entry.Name] = kg;
             }
         }
+
+        if (element.TryGetProperty("incrementKg", out _) && increment == 0m)
+            throw new InvalidOperationException(
+                $"Lift program '{id}' {tierName} declares incrementKg without a default; a clean session would add nothing.");
 
         var ladder = element.TryGetProperty("failLadder", out var ladderElement)
             ? ladderElement.EnumerateArray().Select(rung => SetScheme.Parse(rung.GetString() ?? "")).ToArray()
