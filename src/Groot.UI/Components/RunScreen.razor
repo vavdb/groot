@@ -8,19 +8,19 @@
 
 <section class="run-screen" aria-label="@Heading">
     <MudStack Spacing="3">
-        <MudStack Row="true" AlignItems="AlignItems.Baseline" Justify="Justify.SpaceBetween" Class="run-head">
-            <MudText Typo="Typo.h6" Class="g-serif">
-                @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
-            </MudText>
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
-                    @for (var d = 1; d <= SessionsInWeek; d++)
-                    {
-                        <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
-                    }
-                </div>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="run-head">
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                <MudText Typo="Typo.h6" Class="g-serif">
+                    @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
+                </MudText>
                 @HeaderAction
             </MudStack>
+            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+                @for (var d = 1; d <= SessionsInWeek; d++)
+                {
+                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+                }
+            </div>
         </MudStack>
 
         @ChildContent
