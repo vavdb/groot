@@ -11,7 +11,7 @@ Works end to end: the 0→5K interval runner (`RunScreen`) on the web head and t
 Done and unit-tested: the engines in `Groot.Core` (progression, plate math, week contract,
 intervals, program catalog). Rendered in the gallery: `SetCircle`, `WeekCard`.
 Not started: lifting UI, persistence (`Groot.Data` is an empty csproj), `Groot.Api`, sync,
-resource-based i18n. README and infra/ describe the planned shape; do not assume it exists.
+resource-based i18n. README and research.md describe the planned shape; do not assume it exists.
 
 ## Commands
 
