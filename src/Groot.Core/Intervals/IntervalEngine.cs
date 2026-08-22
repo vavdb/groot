@@ -31,6 +31,13 @@ public sealed class IntervalEngine
     public IntervalEngine(IReadOnlyList<Segment> segments)
     {
         if (segments.Count == 0) throw new ArgumentException("Session needs at least one segment.", nameof(segments));
+
+        // The same guard RunSession applies. This type is public and directly constructible, and a
+        // non-positive segment makes the total negative, which turns Math.Clamp into a throw later
+        // instead of here.
+        if (segments.Any(s => s.Seconds <= 0))
+            throw new ArgumentException("Every segment needs a positive duration.", nameof(segments));
+
         _segments = segments;
         _totalSeconds = segments.Sum(s => s.Seconds);
     }

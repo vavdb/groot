@@ -9,6 +9,11 @@ public sealed record LiftSet(int Index, int TargetReps, bool IsAmrap);
 /// One exercise as it is trained today. What <see cref="TargetKg"/> means follows the loading: a
 /// total on the bar, the weight in each hand, or the adjustment to bodyweight, which is negative
 /// when the lift is assisted.
+/// <para>
+/// The per-hand reading matters when logged sets start feeding next session's targets:
+/// <see cref="SetEntry.PerHand"/> stores <c>WeightKg</c> as both hands, so a store must halve it
+/// before it comes back here, or the dumbbell weight doubles every session.
+/// </para>
 /// </summary>
 public sealed record LiftExercisePlan(
     string ExerciseId,

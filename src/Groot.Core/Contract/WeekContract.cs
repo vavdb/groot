@@ -49,10 +49,16 @@ public static class ContractEvaluator
         return new WeekEvaluation(weekStart, liftCredits, runCredits, restKept, jokersSpent, contractMet, overgrowth);
     }
 
-    /// <summary>Consecutive kept weeks counted backwards from <paramref name="latestWeekStart"/>.</summary>
+    /// <summary>
+    /// Consecutive kept weeks counted backwards from <paramref name="latestWeekStart"/>. A week
+    /// evaluated more than once in <paramref name="history"/> counts once, by its last evaluation:
+    /// re-evaluating a week is normal as sessions land in it, and the newest answer is the true one.
+    /// </summary>
     public static int StreakWeeks(IReadOnlyList<WeekEvaluation> history, DateOnly latestWeekStart)
     {
-        var byStart = history.ToDictionary(w => w.WeekStart);
+        var byStart = history
+            .GroupBy(w => w.WeekStart)
+            .ToDictionary(g => g.Key, g => g.Last());
         var streak = 0;
         for (var start = latestWeekStart; byStart.TryGetValue(start, out var week) && week.ContractMet; start = start.AddDays(-7))
             streak++;

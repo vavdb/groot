@@ -37,26 +37,46 @@ public static class PlateSolver
         return atOrAbove.Length > 0 ? atOrAbove.Min() : achievableTotals.Max();
     }
 
-    /// <summary>Greedy per-side breakdown for a total; null when the total is not buildable.</summary>
+    /// <summary>
+    /// Per-side breakdown for a total, heaviest plate first; null when the inventory cannot build
+    /// it. Every total <see cref="AchievableTotals"/> reports is buildable here: a greedy pass
+    /// alone breaks that promise, because taking the heaviest plate that fits can strand the
+    /// remainder (4 + 3 + 3 loads 10 a side, greedy takes the 4 first and cannot finish 6 with 3s).
+    /// So the pass backtracks.
+    /// </summary>
     public static IReadOnlyList<decimal>? PerSideBreakdown(decimal totalKg, Equipment bar, IReadOnlyList<PlatePair> inventory)
     {
         var perSide = (totalKg - bar.EffectiveBarKg) / 2m;
         if (perSide < 0m) return null;
         if (perSide == 0m) return Array.Empty<decimal>();
 
-        var result = new List<decimal>();
-        var remaining = perSide;
-        foreach (var plate in inventory.OrderByDescending(p => p.Kg))
+        var plates = inventory.Where(p => p.Kg > 0m && p.Pairs > 0).OrderByDescending(p => p.Kg).ToArray();
+        var chosen = new List<decimal>();
+
+        return Load(plates, 0, perSide, chosen) ? chosen : null;
+    }
+
+    /// <summary>
+    /// Depth-first over the denominations, most plates of the heaviest first, so the first
+    /// solution found is also the one with the fewest plates to lift.
+    /// </summary>
+    private static bool Load(PlatePair[] plates, int index, decimal remaining, List<decimal> chosen)
+    {
+        if (remaining == 0m) return true;
+        if (index >= plates.Length) return false;
+
+        var (kg, pairs) = (plates[index].Kg, plates[index].Pairs);
+        var most = (int)Math.Min(pairs, Math.Floor(remaining / kg));
+
+        for (var count = most; count >= 0; count--)
         {
-            var used = 0;
-            while (used < plate.Pairs && remaining >= plate.Kg)
-            {
-                result.Add(plate.Kg);
-                remaining -= plate.Kg;
-                used++;
-            }
+            for (var i = 0; i < count; i++) chosen.Add(kg);
+
+            if (Load(plates, index + 1, remaining - count * kg, chosen)) return true;
+
+            chosen.RemoveRange(chosen.Count - count, count);
         }
 
-        return remaining == 0m ? result : null;
+        return false;
     }
 }

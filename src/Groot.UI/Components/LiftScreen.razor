@@ -141,11 +141,8 @@
     /// <summary>The day to train. Replacing it needs an <c>@key</c> so the log does not carry over.</summary>
     [Parameter, EditorRequired] public LiftSessionPlan Plan { get; set; } = null!;
 
-    /// <summary>The bar every barbell lift is loaded on. Its unit and counts-as weight come with it.</summary>
-    [Parameter] public Equipment Bar { get; set; } = DefaultBar;
-
-    /// <summary>The plates on hand, in pairs. Empty hides the per-side breakdown.</summary>
-    [Parameter] public IReadOnlyList<PlatePair> Inventory { get; set; } = DefaultInventory;
+    /// <summary>What is available to load: the bar and the plates. Never a bar-weight assumption.</summary>
+    [Parameter] public EquipmentProfile Equipment { get; set; } = EquipmentProfile.Rack;
 
     /// <summary>A control beside the session dots, for whatever the owner puts there (the session pencil).</summary>
     [Parameter] public RenderFragment? HeaderAction { get; set; }
@@ -164,16 +161,6 @@
     [Parameter] public IReadOnlyDictionary<string, int> Stages { get; set; } = new Dictionary<string, int>();
 
     [Parameter] public EventCallback OnFinished { get; set; }
-
-    /// <summary>A 20 kg bar, the one most racks come with.</summary>
-    private static readonly Equipment DefaultBar =
-        new("bar", "Barbell", EquipmentKind.Bar, WeightUnit.Kg, ActualKg: 20m, CountsAsKg: 20m);
-
-    /// <summary>A common home set: pairs of 20, 15, 10, 5, 2.5 and 1.25 kg.</summary>
-    private static readonly PlatePair[] DefaultInventory =
-    [
-        new(20m, 2), new(15m, 1), new(10m, 2), new(5m, 2), new(2.5m, 2), new(1.25m, 2),
-    ];
 
     // Logged reps per set, keyed by exercise and set index. Absent means the set is not done.
     private readonly Dictionary<(string Exercise, int Set), int> _logged = [];
@@ -280,13 +267,13 @@
                 ? adjustment > 0m ? "belt or vest" : "band or machine assist"
                 : "";
 
-        if (WeightOf(exercise) is not { } kg || Inventory.Count == 0) return "";
+        if (WeightOf(exercise) is not { } kg || Equipment.Plates.Count == 0) return "";
 
-        var breakdown = PlateSolver.PerSideBreakdown(kg, Bar, Inventory);
-        if (breakdown is null) return $"{Bar.Name} cannot be loaded to {kg:0.##} kg";
-        if (breakdown.Count == 0) return $"{Bar.Name} alone";
+        var breakdown = Equipment.PerSide(kg);
+        if (breakdown is null) return $"{Equipment.Bar.Name} cannot be loaded to {kg:0.##} kg";
+        if (breakdown.Count == 0) return $"{Equipment.Bar.Name} alone";
 
-        return $"{Bar.EffectiveBarKg:0.##} + {string.Join(" + ", breakdown.Select(p => $"{p:0.##}"))} per side";
+        return $"{Equipment.Bar.EffectiveBarKg:0.##} + {string.Join(" + ", breakdown.Select(p => $"{p:0.##}"))} per side";
     }
 
     private bool IsDone(LiftExercisePlan exercise, LiftSet set) =>

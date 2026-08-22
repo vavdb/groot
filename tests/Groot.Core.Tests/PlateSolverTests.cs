@@ -54,4 +54,51 @@ public class PlateSolverTests
         var totals = PlateSolver.AchievableTotals(AtxBar, Inventory);
         Assert.Contains(10m, totals);
     }
+
+    /// <summary>
+    /// Racks with more than one pair of a plate lighter than another denomination. A greedy pass
+    /// strands the remainder on these: 10 a side off 4 + 3 + 3 starts with the 4 and cannot finish.
+    /// </summary>
+    public static TheoryData<string, decimal, PlatePair[]> Racks => new()
+    {
+        { "home rack", 20m, [new(20m, 2), new(15m, 1), new(10m, 2), new(5m, 2), new(2.5m, 2), new(1.25m, 2)] },
+        { "no fives", 20m, [new(20m, 2), new(15m, 2), new(10m, 2), new(2.5m, 2), new(1.25m, 2)] },
+        { "starter", 20m, [new(15m, 1), new(10m, 1), new(2.5m, 3)] },
+        { "odd metric", 20m, [new(4m, 1), new(3m, 2)] },
+        { "one denomination", 15m, [new(2.5m, 6)] },
+    };
+
+    [Theory]
+    [MemberData(nameof(Racks))]
+    public void Every_achievable_total_can_actually_be_built(string rack, decimal barKg, PlatePair[] inventory)
+    {
+        var bar = new Equipment.Equipment(rack, rack, EquipmentKind.Bar, WeightUnit.Kg, ActualKg: barKg, CountsAsKg: barKg);
+
+        foreach (var total in PlateSolver.AchievableTotals(bar, inventory))
+        {
+            var breakdown = PlateSolver.PerSideBreakdown(total, bar, inventory);
+
+            Assert.NotNull(breakdown);
+            Assert.Equal(total, bar.EffectiveBarKg + 2m * breakdown.Sum());
+        }
+    }
+
+    [Fact]
+    public void A_total_the_rack_cannot_build_is_null()
+    {
+        var bar = new Equipment.Equipment("bar", "Bar", EquipmentKind.Bar, WeightUnit.Kg, ActualKg: 20m, CountsAsKg: 20m);
+        PlatePair[] inventory = [new(20m, 1)];
+
+        Assert.Null(PlateSolver.PerSideBreakdown(41m, bar, inventory));
+        Assert.Null(PlateSolver.PerSideBreakdown(19m, bar, inventory));
+    }
+
+    [Fact]
+    public void Breakdown_loads_the_heaviest_plates_first()
+    {
+        var bar = new Equipment.Equipment("bar", "Bar", EquipmentKind.Bar, WeightUnit.Kg, ActualKg: 20m, CountsAsKg: 20m);
+        PlatePair[] inventory = [new(10m, 2), new(5m, 2), new(2.5m, 2)];
+
+        Assert.Equal([10m, 5m, 2.5m], PlateSolver.PerSideBreakdown(55m, bar, inventory));
+    }
 }
