@@ -3,15 +3,18 @@
    Pair with the matching #app markup — see Groot.Web/wwwroot/index.html for the reference
    block: a .g-boot wrapper around a .g-boot-rings <svg>.
 
-   The mark turns. Face on it reads as concentric rings, the view down the end of a loaded bar:
-   the pith is the bar end, the two ring sizes are the plates. It then rotates a quarter turn to
-   the side view, where every plate lands edge on at its own place along the shaft (the big
-   plates near the middle, the small ones outboard) and the pith stretches into the bar itself.
-   Each plate is drawn twice, once per side, so the side view is loaded symmetrically.
+   The mark turns, one full revolution about its vertical axis. Face on it reads as concentric
+   rings, the view down the end of a loaded bar: the pith is the bar end, the two ring sizes are
+   the plates. A quarter turn later every plate stands edge on at its own place along the shaft
+   (big plates near the middle, small ones outboard) and the pith has stretched into the bar. It
+   keeps going the same way: face on again at half a revolution, the bar again at three quarters
+   with the sides swapped, then home. Each plate is drawn twice, once per side, so the side view
+   is loaded symmetrically.
 
-   The rotation is faked with the two transforms a quarter turn about the vertical axis produces:
-   scaleX(cos) squashes the circle to an edge, translateX(depth * sin) walks it out to its place
-   on the shaft. The keyframes below sample cos and sin at 0, 45, and 90 degrees.
+   The rotation is faked with the two transforms a turn about the vertical axis produces:
+   scaleX(cos) squashes the circle to an edge and flips it past 90 degrees, translateX(depth *
+   sin) walks it out to its place on the shaft and across to the other side. The keyframes sample
+   every 22.5 degrees, which is close enough to the real arc that no step shows.
 
    The outer track and progress circle never turn: they are the load indicator, driven by
    --blazor-load-percentage, and stay a readable ring around the mark the whole way. */
@@ -36,8 +39,8 @@
     height: 9rem;
     overflow: visible;
 
-    /* One cycle: face on, turn, hold the barbell, turn back. */
-    --g-turn: 5.4s;
+    /* One revolution: face on, barbell, face on, barbell mirrored, back to the start. */
+    --g-turn: 8.4s;
 }
 
 .g-boot-rings circle {
@@ -66,9 +69,6 @@
     vector-effect: non-scaling-stroke;
     animation: g-plate-turn var(--g-turn) cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
-
-/* The plates on the far side of the bar sit back a little. */
-.g-far { opacity: 0.7; }
 
 .g-ring-2.g-near { --g-depth: 14px; }
 .g-ring-2.g-far { --g-depth: -14px; }
@@ -105,27 +105,40 @@
 }
 
 @keyframes g-plate-turn {
-    /* face on, the rings concentric */
-    0%, 22% { transform: translateX(0) scaleX(1); }
-    /* halfway: 45 degrees */
-    29% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    /* edge on, every plate at its place on the shaft */
-    36%, 64% { transform: translateX(var(--g-depth)) scaleX(0.02); }
-    71% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    78%, 100% { transform: translateX(0) scaleX(1); }
+    0%, 10% { transform: translateX(0) scaleX(1); }
+    13% { transform: translateX(calc(var(--g-depth) * 0.383)) scaleX(0.924); }
+    16% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
+    19% { transform: translateX(calc(var(--g-depth) * 0.924)) scaleX(0.383); }
+    22%, 38% { transform: translateX(var(--g-depth)) scaleX(0.02); }
+    41% { transform: translateX(calc(var(--g-depth) * 0.924)) scaleX(-0.383); }
+    44% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(-0.707); }
+    47% { transform: translateX(calc(var(--g-depth) * 0.383)) scaleX(-0.924); }
+    50%, 60% { transform: translateX(0) scaleX(-1); }
+    63% { transform: translateX(calc(var(--g-depth) * -0.383)) scaleX(-0.924); }
+    66% { transform: translateX(calc(var(--g-depth) * -0.707)) scaleX(-0.707); }
+    69% { transform: translateX(calc(var(--g-depth) * -0.924)) scaleX(-0.383); }
+    72%, 88% { transform: translateX(calc(var(--g-depth) * -1)) scaleX(-0.02); }
+    91% { transform: translateX(calc(var(--g-depth) * -0.924)) scaleX(0.383); }
+    94% { transform: translateX(calc(var(--g-depth) * -0.707)) scaleX(0.707); }
+    97% { transform: translateX(calc(var(--g-depth) * -0.383)) scaleX(0.924); }
+    100% { transform: translateX(0) scaleX(1); }
 }
 
 @keyframes g-bar-extend {
-    0%, 26% { transform: scaleX(0); opacity: 0; }
-    38%, 64% { transform: scaleX(1); opacity: 1; }
-    74%, 100% { transform: scaleX(0); opacity: 0; }
+    0%, 14% { transform: scaleX(0); opacity: 0; }
+    22%, 38% { transform: scaleX(1); opacity: 1; }
+    46%, 64% { transform: scaleX(0); opacity: 0; }
+    72%, 88% { transform: scaleX(1); opacity: 1; }
+    96%, 100% { transform: scaleX(0); opacity: 0; }
 }
 
-/* The bar end, face on. It hands over to the shaft as the mark turns. */
+/* The bar end, face on. It hands over to the shaft twice a revolution. */
 @keyframes g-pith-turn {
-    0%, 22% { opacity: 0.85; transform: scale(1); }
-    33%, 67% { opacity: 0; transform: scale(0.5); }
-    78%, 100% { opacity: 0.85; transform: scale(1); }
+    0%, 10% { opacity: 0.85; transform: scale(1); }
+    18%, 42% { opacity: 0; transform: scale(0.5); }
+    50%, 60% { opacity: 0.85; transform: scale(1); }
+    68%, 92% { opacity: 0; transform: scale(0.5); }
+    100% { opacity: 0.85; transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {

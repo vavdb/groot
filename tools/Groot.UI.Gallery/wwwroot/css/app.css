@@ -235,62 +235,11 @@
 
 .screen-frame.wide .screen-body { padding: 24px; }
 
-/* Boot mark preview. The real one fills the viewport; here it fills the frame instead.
-   --blazor-load-percentage is a fixed sample so the progress ring reads as a ring. */
+/* Boot mark preview. The real one fills the viewport; here it fills the frame instead. */
 .g-boot-demo {
     height: 100%;
     display: grid;
     place-items: center;
-}
-
-/* Boot lab: the same mark with the quarter turn sampled at more angles. What ships samples
-   three (0, 45, 90); every keyframe segment carries its own ease, so fewer samples means a
-   coarser arc and a more stepped turn. Fold the winner into boot-loader.css, drop the rest. */
-.g-turn-4 .g-plate { animation-name: g-plate-turn-4; }
-.g-turn-5 .g-plate { animation-name: g-plate-turn-5; }
-.g-turn-smooth .g-plate { animation-name: g-plate-turn-smooth; }
-
-/* Smooth samples every 15 degrees and eases the cycle as a whole instead of per segment. */
-.g-turn-smooth .g-plate,
-.g-turn-smooth .g-bar,
-.g-turn-smooth .g-pith { animation-timing-function: linear; }
-
-@keyframes g-plate-turn-4 {
-    0%, 22% { transform: translateX(0) scaleX(1); }
-    26.67% { transform: translateX(calc(var(--g-depth) * 0.500)) scaleX(0.866); }
-    31.33% { transform: translateX(calc(var(--g-depth) * 0.866)) scaleX(0.500); }
-    36%, 64% { transform: translateX(var(--g-depth)) scaleX(0.02); }
-    68.67% { transform: translateX(calc(var(--g-depth) * 0.866)) scaleX(0.500); }
-    73.33% { transform: translateX(calc(var(--g-depth) * 0.500)) scaleX(0.866); }
-    78%, 100% { transform: translateX(0) scaleX(1); }
-}
-
-@keyframes g-plate-turn-5 {
-    0%, 22% { transform: translateX(0) scaleX(1); }
-    25.5% { transform: translateX(calc(var(--g-depth) * 0.383)) scaleX(0.924); }
-    29% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    32.5% { transform: translateX(calc(var(--g-depth) * 0.924)) scaleX(0.383); }
-    36%, 64% { transform: translateX(var(--g-depth)) scaleX(0.02); }
-    67.5% { transform: translateX(calc(var(--g-depth) * 0.924)) scaleX(0.383); }
-    71% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    74.5% { transform: translateX(calc(var(--g-depth) * 0.383)) scaleX(0.924); }
-    78%, 100% { transform: translateX(0) scaleX(1); }
-}
-
-@keyframes g-plate-turn-smooth {
-    0%, 22% { transform: translateX(0) scaleX(1); }
-    24.33% { transform: translateX(calc(var(--g-depth) * 0.259)) scaleX(0.966); }
-    26.67% { transform: translateX(calc(var(--g-depth) * 0.500)) scaleX(0.866); }
-    29% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    31.33% { transform: translateX(calc(var(--g-depth) * 0.866)) scaleX(0.500); }
-    33.67% { transform: translateX(calc(var(--g-depth) * 0.966)) scaleX(0.259); }
-    36%, 64% { transform: translateX(var(--g-depth)) scaleX(0.02); }
-    66.33% { transform: translateX(calc(var(--g-depth) * 0.966)) scaleX(0.259); }
-    68.67% { transform: translateX(calc(var(--g-depth) * 0.866)) scaleX(0.500); }
-    71% { transform: translateX(calc(var(--g-depth) * 0.707)) scaleX(0.707); }
-    73.33% { transform: translateX(calc(var(--g-depth) * 0.500)) scaleX(0.866); }
-    75.67% { transform: translateX(calc(var(--g-depth) * 0.259)) scaleX(0.966); }
-    78%, 100% { transform: translateX(0) scaleX(1); }
 }
 
 /* The preview ring is the Blazor load meter. Nothing is loading here, so sweep it instead of
@@ -302,26 +251,10 @@
 }
 
 .g-boot-demo {
-    animation: g-demo-load 5.4s linear infinite;
+    animation: g-demo-load 8.4s linear infinite;
 }
 
 @keyframes g-demo-load {
     0% { --blazor-load-percentage: 0%; }
     80%, 100% { --blazor-load-percentage: 100%; }
 }
-
-/* Boot lab layout. */
-.lab {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
-.lab-cell {
-    border: 1px solid var(--g-line);
-    border-radius: 16px;
-    padding: 12px 12px 4px;
-    width: 190px;
-}
-
-.lab-cell .g-boot-demo { height: 170px; }
