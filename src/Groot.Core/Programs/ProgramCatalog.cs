@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text.Json;
 using Groot.Core.Intervals;
+using Groot.Core.Sessions;
 
 namespace Groot.Core.Programs;
 
@@ -13,12 +14,18 @@ namespace Groot.Core.Programs;
 public sealed class ProgramCatalog
 {
     private readonly IReadOnlyDictionary<string, IntervalProgram> _intervalPrograms;
+    private readonly IReadOnlyDictionary<string, LiftProgram> _liftPrograms;
 
-    private ProgramCatalog(IReadOnlyList<ProgramSummary> programs, IReadOnlyList<IntervalProgram> intervalPrograms)
+    private ProgramCatalog(
+        IReadOnlyList<ProgramSummary> programs,
+        IReadOnlyList<IntervalProgram> intervalPrograms,
+        IReadOnlyList<LiftProgram> liftPrograms)
     {
         Programs = programs;
         IntervalPrograms = intervalPrograms;
+        LiftPrograms = liftPrograms;
         _intervalPrograms = intervalPrograms.ToDictionary(p => p.Id);
+        _liftPrograms = liftPrograms.ToDictionary(p => p.Id);
     }
 
     /// <summary>The catalog shipped inside Groot.Core. Parsed once.</summary>
@@ -28,15 +35,23 @@ public sealed class ProgramCatalog
 
     public IReadOnlyList<IntervalProgram> IntervalPrograms { get; }
 
+    public IReadOnlyList<LiftProgram> LiftPrograms { get; }
+
     public IntervalProgram IntervalProgram(string id) =>
         _intervalPrograms.TryGetValue(id, out var program)
             ? program
             : throw new KeyNotFoundException($"No interval program with id '{id}'.");
 
+    public LiftProgram LiftProgram(string id) =>
+        _liftPrograms.TryGetValue(id, out var program)
+            ? program
+            : throw new KeyNotFoundException($"No lift program with id '{id}'.");
+
     public static ProgramCatalog Parse(IEnumerable<string> jsonDocuments)
     {
         var summaries = new List<ProgramSummary>();
         var intervals = new List<IntervalProgram>();
+        var lifts = new List<LiftProgram>();
 
         foreach (var json in jsonDocuments)
         {
@@ -51,11 +66,14 @@ public sealed class ProgramCatalog
 
             if (type == ProgramType.Intervals)
                 intervals.Add(ParseIntervalProgram(root, id, name, version));
+            else
+                lifts.Add(ParseLiftProgram(root, id, name, version));
         }
 
         return new ProgramCatalog(
             summaries.OrderBy(p => p.Id, StringComparer.Ordinal).ToArray(),
-            intervals.OrderBy(p => p.Id, StringComparer.Ordinal).ToArray());
+            intervals.OrderBy(p => p.Id, StringComparer.Ordinal).ToArray(),
+            lifts.OrderBy(p => p.Id, StringComparer.Ordinal).ToArray());
     }
 
     private static ProgramCatalog LoadEmbedded()
@@ -99,6 +117,101 @@ public sealed class ProgramCatalog
             throw new InvalidOperationException($"Interval program '{id}' declares week {duplicateWeek.Key} more than once.");
 
         return new IntervalProgram(id, name, version, defaults, weeks);
+    }
+
+
+    private static LiftProgram ParseLiftProgram(JsonElement root, string id, string name, int version)
+    {
+        if (!root.TryGetProperty("days", out var daysElement) || daysElement.ValueKind != JsonValueKind.Object)
+            throw new InvalidOperationException($"Lift program '{id}' has no days object.");
+
+        var days = daysElement.EnumerateObject()
+            .Select(day => new LiftDay(day.Name, ParseLiftExercises(day.Value, id, day.Name)))
+            .ToArray();
+
+        if (days.Length == 0)
+            throw new InvalidOperationException($"Lift program '{id}' has no days.");
+
+        var rotation = root.TryGetProperty("rotation", out var rotationElement)
+            ? rotationElement.EnumerateArray().Select(r => r.GetString() ?? "").ToArray()
+            : days.Select(d => d.Key).ToArray();
+
+        var unknownDay = rotation.FirstOrDefault(key => days.All(d => d.Key != key));
+        if (unknownDay is not null)
+            throw new InvalidOperationException($"Lift program '{id}' rotates through '{unknownDay}', which is not a day.");
+
+        var sessions = root.TryGetProperty("sessionsPerWeek", out var s) ? s.GetInt32() : 3;
+        if (sessions <= 0)
+            throw new InvalidOperationException($"Lift program '{id}' has {sessions} sessionsPerWeek; must be positive.");
+
+        return new LiftProgram(
+            id, name, version, sessions, rotation,
+            ParseSchemes(root, id),
+            ParseRestSeconds(root, id),
+            days);
+    }
+
+    private static IReadOnlyList<LiftExercise> ParseLiftExercises(JsonElement element, string id, string dayKey)
+    {
+        if (element.ValueKind != JsonValueKind.Array)
+            throw new InvalidOperationException($"Lift program '{id}' day '{dayKey}' is not an array.");
+
+        var exercises = element.EnumerateArray().Select(e =>
+        {
+            var tier = e.GetProperty("tier").GetInt32();
+            if (tier is < 1 or > 3)
+                throw new InvalidOperationException($"Lift program '{id}' day '{dayKey}' has tier {tier}; tiers are 1 to 3.");
+
+            var loading = e.TryGetProperty("loading", out var l) ? l.GetString() : null;
+            return new LiftExercise(RequiredString(e, "exercise"), tier, loading);
+        }).ToArray();
+
+        if (exercises.Length == 0)
+            throw new InvalidOperationException($"Lift program '{id}' day '{dayKey}' has no exercises.");
+
+        return exercises;
+    }
+
+    /// <summary>Reads the scheme each tier starts on, from progression.T1.scheme and its siblings.</summary>
+    private static IReadOnlyDictionary<int, SetScheme> ParseSchemes(JsonElement root, string id)
+    {
+        if (!root.TryGetProperty("progression", out var progression) || progression.ValueKind != JsonValueKind.Object)
+            throw new InvalidOperationException($"Lift program '{id}' has no progression object.");
+
+        var schemes = new Dictionary<int, SetScheme>();
+        foreach (var tier in progression.EnumerateObject())
+        {
+            if (tier.Name.Length != 2 || tier.Name[0] != 'T' || !int.TryParse(tier.Name[1..], out var number))
+                throw new InvalidOperationException($"Lift program '{id}' has a progression key '{tier.Name}'; expected T1, T2 or T3.");
+
+            schemes[number] = SetScheme.Parse(RequiredString(tier.Value, "scheme"));
+        }
+
+        if (schemes.Count == 0)
+            throw new InvalidOperationException($"Lift program '{id}' declares no tier schemes.");
+
+        return schemes;
+    }
+
+    private static IReadOnlyDictionary<int, int> ParseRestSeconds(JsonElement root, string id)
+    {
+        if (!root.TryGetProperty("restSeconds", out var element) || element.ValueKind != JsonValueKind.Object)
+            return new Dictionary<int, int>();
+
+        var rest = new Dictionary<int, int>();
+        foreach (var tier in element.EnumerateObject())
+        {
+            if (!int.TryParse(tier.Name, out var number))
+                throw new InvalidOperationException($"Lift program '{id}' has a restSeconds key '{tier.Name}'; expected a tier number.");
+
+            var seconds = tier.Value.GetInt32();
+            if (seconds < 0)
+                throw new InvalidOperationException($"Lift program '{id}' rests {seconds}s at tier {number}.");
+
+            rest[number] = seconds;
+        }
+
+        return rest;
     }
 
     private static CueDefaults ParseCueDefaults(JsonElement root)
