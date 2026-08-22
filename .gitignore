@@ -21,6 +21,9 @@ appsettings.local.json
 *.secrets.json
 .env
 
+# per-machine Claude Code overrides (the shared settings.json is committed)
+.claude/settings.local.json
+
 # OS noise
 Thumbs.db
 .DS_Store

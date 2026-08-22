@@ -1,0 +1,10 @@
+# One line ending everywhere. Sessions run on Windows and Linux against the same branch;
+# without this, autocrlf churns diffs and warns on every touched file.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
+*.ttf binary
+*.apk binary
+*.aab binary
