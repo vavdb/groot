@@ -2,15 +2,12 @@
    Meter values come from Core's ContractEvaluator; jokers render as filled/hollow diamonds. *@
 @using Groot.Core.Contract
 
-<div class="week-card">
-<MudCard Elevation="0">
-    <MudCardContent>
+<GrootPanel Title="@Title" Class="week-card">
+    <HeaderContent>
+        <MudText Typo="Typo.overline" Class="jokers">@JokerDisplay</MudText>
+    </HeaderContent>
+    <ChildContent>
         <MudStack Spacing="3">
-            <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                <MudText Typo="Typo.overline">@Title</MudText>
-                <MudText Typo="Typo.overline" Class="jokers">@JokerDisplay</MudText>
-            </MudStack>
-
             <DaySlots Days="Days" />
 
             @if (Evaluation is { } eval)
@@ -24,9 +21,8 @@
                 </MudStack>
             }
         </MudStack>
-    </MudCardContent>
-</MudCard>
-</div>
+    </ChildContent>
+</GrootPanel>
 
 @code {
     [Parameter, EditorRequired] public IReadOnlyList<DaySlot> Days { get; set; } = [];

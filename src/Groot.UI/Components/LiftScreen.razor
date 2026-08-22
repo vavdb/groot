@@ -30,7 +30,7 @@
 
         @foreach (var exercise in Plan.Exercises)
         {
-            <div class="exercise @(IsComplete(exercise) ? "complete" : "")">
+            <GrootPanel Filled="true" Class="@($"exercise{(IsComplete(exercise) ? " complete" : "")}")">
                 <div class="ex-head">
                     <span class="ex-title">
                         <span class="ex-name">@Name(exercise.ExerciseId)</span>
@@ -120,15 +120,15 @@
                         <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="EndRest">Skip</MudButton>
                     </div>
                 }
-            </div>
+            </GrootPanel>
         }
 
         @if (Finished)
         {
-            <MudPaper Elevation="0" Class="summary">
+            <GrootPanel Filled="true" Class="summary">
                 <MudText Typo="Typo.h5" Class="g-serif big">Done · @TotalReps reps</MudText>
                 <MudText Typo="Typo.caption" Class="subt">@Plan.TotalSets sets · @Volume kg lifted</MudText>
-            </MudPaper>
+            </GrootPanel>
         }
 
         <MudStack Row="true" Justify="Justify.SpaceBetween" Class="liftmeta">

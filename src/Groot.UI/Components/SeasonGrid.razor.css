@@ -1,21 +1,3 @@
-.season-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-::deep .count {
-    color: var(--g-dim);
-    font-variant-numeric: tabular-nums;
-}
-
 /* Weeks run left to right, days top to bottom: seven rows, one column per week. */
 .cells {
     display: grid;

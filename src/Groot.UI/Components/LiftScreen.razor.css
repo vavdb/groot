@@ -34,15 +34,9 @@
     box-shadow: inset 0 0 0 2px var(--g-bg), 0 0 0 2px color-mix(in srgb, var(--g-amber) 25%, transparent);
 }
 
-.exercise {
-    background: var(--g-card);
-    border: 1px solid var(--g-line);
-    border-radius: 18px;
-    padding: 12px 12px 14px;
-}
-
-/* A finished exercise steps back so the one still to do is the one you see. */
-.exercise.complete {
+/* A finished exercise steps back so the one still to do is the one you see. The border, radius
+   and padding come from GrootPanel; only the finished tone is this screen's business. */
+::deep .exercise.complete {
     background: color-mix(in srgb, var(--g-moss) 8%, var(--g-card));
     border-color: color-mix(in srgb, var(--g-moss) 35%, var(--g-line));
 }
@@ -231,10 +225,7 @@
 }
 
 ::deep .summary {
-    background: var(--g-card);
-    border: 1px solid var(--g-moss);
-    border-radius: 18px;
-    padding: 14px 16px;
+    border-color: var(--g-moss);
     text-align: center;
 }
 

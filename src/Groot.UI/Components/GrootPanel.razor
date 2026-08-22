@@ -1,0 +1,44 @@
+@* The surface every block of the app sits on: a hairline border, one radius, one padding, and an
+   optional header of a label on the left and something small on the right. Outlined by default;
+   Filled adds the card tone for blocks that are being worked through, like the sets of a lift.
+
+   This is not a wrapper around MudPaper. It carries Groot's own surface language, which is why
+   the week card, the history grid and the exercise blocks now agree without each restating it. *@
+
+<section class="g-panel @(Filled ? "filled" : "") @Class">
+    @if (Title is { Length: > 0 } || HeaderContent is not null)
+    {
+        <div class="panel-head">
+            @if (Title is { Length: > 0 })
+            {
+                <MudText Typo="Typo.overline">@Title</MudText>
+            }
+            @if (Meta is { Length: > 0 })
+            {
+                <MudText Typo="Typo.caption" Class="panel-meta">@Meta</MudText>
+            }
+            @HeaderContent
+        </div>
+    }
+
+    @ChildContent
+</section>
+
+@code {
+    /// <summary>The label on the left of the header. Empty leaves the header out.</summary>
+    [Parameter] public string? Title { get; set; }
+
+    /// <summary>A short reading on the right of the header: a count, a total, a state.</summary>
+    [Parameter] public string? Meta { get; set; }
+
+    /// <summary>Anything else the header carries, after the label and the reading.</summary>
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+
+    /// <summary>Card tone instead of the page. For blocks being worked through, not for reading.</summary>
+    [Parameter] public bool Filled { get; set; }
+
+    /// <summary>Extra classes from the owner, for width and spacing it owns.</summary>
+    [Parameter] public string? Class { get; set; }
+
+    [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
+}

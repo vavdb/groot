@@ -2,14 +2,7 @@
    glance: how dense the year is, and where the gaps are. Presentational only, it counts nothing
    itself; Days carries the sessions per date and anything missing is a day with none. *@
 
-<div class="season-grid">
-    @* Same MudText roles the week card's header uses, so the two labels are one typeface, one
-       weight and one tracking rather than two things that nearly match. *@
-    <div class="head">
-        <MudText Typo="Typo.overline">@Title</MudText>
-        <MudText Typo="Typo.caption" Class="count">@Total sessions · @Weeks weeks</MudText>
-    </div>
-
+<GrootPanel Title="@Title" Meta="@($"{Total} sessions · {Weeks} weeks")" Class="season-grid">
     <div class="cells" role="img" aria-label="@AriaLabel">
         @foreach (var date in Dates())
         {
@@ -25,7 +18,7 @@
         <div class="cell level-3"></div>
         <span>three</span>
     </div>
-</div>
+</GrootPanel>
 
 @code {
     /// <summary>Sessions per date. Dates outside the window are ignored, missing dates count as none.</summary>
