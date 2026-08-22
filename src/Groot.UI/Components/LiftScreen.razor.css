@@ -47,12 +47,23 @@
     border-color: color-mix(in srgb, var(--g-moss) 35%, var(--g-line));
 }
 
+/* Three across: what it is, how it is done, how heavy. Spaced apart rather than in fixed
+   columns, so a long name keeps its line instead of wrapping into two. */
 .ex-head {
     display: flex;
     align-items: baseline;
-    gap: 8px;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 10px;
 }
+
+.ex-title {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+
 
 .ex-name {
     font-weight: 700;
@@ -73,12 +84,7 @@
     padding: 1px 6px;
 }
 
-.load {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 2px;
-}
+
 
 .load-value {
     font-weight: 700;

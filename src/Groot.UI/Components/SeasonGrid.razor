@@ -3,9 +3,11 @@
    itself; Days carries the sessions per date and anything missing is a day with none. *@
 
 <div class="season-grid">
+    @* Same MudText roles the week card's header uses, so the two labels are one typeface, one
+       weight and one tracking rather than two things that nearly match. *@
     <div class="head">
-        <span class="title">@Title</span>
-        <span class="count">@Total sessions · @Weeks weeks</span>
+        <MudText Typo="Typo.overline">@Title</MudText>
+        <MudText Typo="Typo.caption" Class="count">@Total sessions · @Weeks weeks</MudText>
     </div>
 
     <div class="cells" role="img" aria-label="@AriaLabel">

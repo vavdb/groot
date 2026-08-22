@@ -4,6 +4,11 @@
     max-width: 375px;
 }
 
+/* Unshaded: the card is structure, not a surface. The day slots carry their own fills. */
+::deep .mud-card {
+    background: transparent;
+}
+
 ::deep .jokers {
     letter-spacing: .1em;
     color: var(--g-clay-text);

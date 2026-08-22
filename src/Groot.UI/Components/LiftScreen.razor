@@ -32,8 +32,10 @@
         {
             <div class="exercise @(IsComplete(exercise) ? "complete" : "")">
                 <div class="ex-head">
-                    <span class="ex-name">@Name(exercise.ExerciseId)</span>
-                    <span class="tier">T@(exercise.Tier)</span>
+                    <span class="ex-title">
+                        <span class="ex-name">@Name(exercise.ExerciseId)</span>
+                        <span class="tier">T@(exercise.Tier)</span>
+                    </span>
                     <span class="scheme">@exercise.Scheme.Text</span>
                     @if (WeightOf(exercise) is null)
                     {

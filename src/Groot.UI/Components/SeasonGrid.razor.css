@@ -11,18 +11,9 @@
     gap: 12px;
 }
 
-.title {
-    font-size: var(--g-text-xs);
-    font-weight: 700;
-    letter-spacing: var(--g-track-caps);
-    text-transform: uppercase;
+::deep .count {
     color: var(--g-dim);
-}
-
-.count {
-    font-size: var(--g-text-2xs);
-    letter-spacing: var(--g-track-wide);
-    color: var(--g-dim);
+    font-variant-numeric: tabular-nums;
 }
 
 /* Weeks run left to right, days top to bottom: seven rows, one column per week. */
