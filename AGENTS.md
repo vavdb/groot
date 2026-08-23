@@ -89,8 +89,6 @@ gallery and the web head; the owner checks the app on the emulator.
 - No plant or tree language, no character, no mascot, no catchphrase. Abstract rings and cells
   only. Palette token names (moss, bark) are internal and stay.
 
-  and stay.
-
 ### Every commit
 
 - `dotnet test tests/Groot.Core.Tests` and `bash tools/check-rules.sh` pass.

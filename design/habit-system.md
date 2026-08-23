@@ -264,7 +264,7 @@ readability, hardest to render well. Archive in Research/UI if ever revisited.
 
 **Recommendation: A + B on the home screen (MVP), C as the "Growth" tab (MVP-lite: static rings,
 animate later).** A answers *today*, B answers *lately*, C answers *who have I become* — three
-time horizons, one metaphor, no tree character anywhere.
+time horizons, one metaphor, no character anywhere.
 
 **UPDATE (2026-08-21): metaphor swap, owner decision.** Concept C is now a barbell loaded with
 plates, viewed head-on — not a tree cross-section. Concentric rings read as plates stacked on the
@@ -322,7 +322,7 @@ settings: jokers_per_week (default 2), week_start (default: locale FirstDayOfWee
 ## 6b. Terminology update (2026-08-18): plant references removed
 
 Owner decision: keep the design language (palette, Fraunces/Public Sans, layout, warmth), drop the
-botanical metaphors. Also further shrinks any a character reading ("groot" = big, no tree needed).
+botanical metaphors. "groot" is simply the Dutch word for big; no tree is needed to carry it.
 
 | Was | Now |
 |---|---|
@@ -339,7 +339,8 @@ botanical metaphors. Also further shrinks any a character reading ("groot" = big
 Palette color *names* (moss/bark/amber) are internal CSS tokens — invisible to users, keep.
 
 **UPDATE (same day): decision reopened.** Owner likes the plants ("strong like a tree is cool") —
-the actual conflict is the *combination* plants + the name "Groot", which reads as a character. Both variants now exist for comparison:
+the actual conflict is the *combination* of plants and the name, which reads as a character rather
+than as a system. Both variants now exist for comparison:
 - `design/habit-rings.html` — neutral (geometric icons, year rings)
 - `design/habit-rings-plants.html` — plant identity (leaves, vine, tree age, droplet jokers)
 
@@ -360,7 +361,7 @@ Recommendation was option 2 ("Stam"); **owner DECIDED otherwise, 2026-08-18: opt
 "Groot" stays, plant/tree language goes.** Neutral variant (`design/habit-rings.html`) is canonical;
 plant variant archived at `Research/UI/habit-rings-plants.html`. Palette (moss/bark/amber tokens),
 Fraunces, rings-as-abstract-data-viz all stay. No tree words, no leaves, no mascots — which also
-settles the trademark question permanently: name without imagery is the safe lane.
+settles the identity question permanently: name without imagery is the lane.
 
 ## 7. Open questions
 

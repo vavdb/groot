@@ -14,7 +14,7 @@ and as a record of directions considered and rejected.
 | 2026-08-18 | `04-growth-rings-v1-dutch.html` | **winner** (v1, Dutch copy) → superseded by `../../design/growth-rings.html` (v2, English-first) |
 | 2026-08-18 | Decision | Growth Rings; English default UI; translations first-class (en + nl at minimum) |
 | 2026-08-18 | `habit-rings-plants.html` | plant-language variant of the habit-system mockup — explored, **rejected** |
-| 2026-08-18 | Final identity decision | **Name "Groot" stays; all plant/tree language removed.** Neutral variant (`../../design/habit-rings.html`) is canonical. Rename candidates (Stam, Eik, Kernhout, Jaarring) considered and rejected. Name without imagery is the safe lane; the §"one real risk" mitigation (no tree character, no character copy) remains binding. |
+| 2026-08-18 | Final identity decision | **Name "Groot" stays; all plant/tree language removed.** Neutral variant (`../../design/habit-rings.html`) is canonical. Rename candidates (Stam, Eik, Kernhout, Jaarring) considered and rejected. Name without imagery is the lane; the §"the name" mitigation (no character, no mascot copy) remains binding. |
 
 ## Copyright / IP position
 
@@ -36,14 +36,14 @@ All safe by construction:
   trademark weight ("StrongLifts" certainly, "GreySkull LP" is trademarked by its author). Ship
   generic descriptors or user-created program names; do not market Groot as "a StrongLifts app".
 
-## ⚠ The one real risk: the name "Groot"
+## The name "Groot"
 
-The name is a plain Dutch word. "Groot" as a
-plain Dutch word for a Dutch-made fitness app in a different trademark class is defensible, BUT:
+"Groot" is a plain Dutch word, used here for a Dutch-made fitness app. The identity rules that
+follow are binding regardless:
 
-1. **Never** use a humanoid tree *character*/mascot — a figure is not the identity.
-   The tree-*rings* identity (abstract growth rings, botanical, no face, no limbs) is exactly the
-   safe lane. The rejected pastel direction's "sprout mascot" idea dies here — documented as rejected.
-2. Avoid character copy (catchphrases, talking-tree jokes) anywhere in the product or store listing.
-3. If the app ever goes commercial/store-wide, do a proper trademark search (Benelux/EUIPO class 9/41/42)
-   or keep "Groot" as working title and rename at launch.
+1. **Never** a character or mascot with a face or limbs. The identity is abstract rings and cells,
+   no figure of any kind. The rejected pastel direction's "sprout mascot" idea dies here —
+   documented as rejected.
+2. No catchphrases, no talking-object copy, anywhere in the product or a store listing.
+3. Before the app goes commercial or store-wide, run a trademark search (Benelux/EUIPO
+   class 9/41/42), or keep "Groot" as a working title and rename at launch.

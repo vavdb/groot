@@ -279,7 +279,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - Winner: Growth Rings (§7.2 #4). Live mockup: `design/growth-rings.html` (v2 — English, light+dark side by side).
 - Language: **English default UI, translations first-class from day 1** (en + nl minimum). All strings via resource keys (`IStringLocalizer`/.resx or JSON), locale drives number/date/unit formatting — nothing hard-coded in components. v1 Dutch render kept as the nl reference.
 - Rejected directions archived with provenance + IP notes in `Research/UI/` (README.md documents the copyright position: hand-authored code, OFL fonts, MIT/public-domain exercise media, methodology-name trademark cautions).
-- **Naming guardrail**: "Groot" as a Dutch word is defensible, but identity stays abstract rings and never a tree character or mascot; trademark search (EUIPO/Benelux) before any commercial launch.
+- **Naming guardrail**: identity stays abstract rings, never a character or mascot; trademark search (EUIPO/Benelux) before any commercial launch.
 
 **2026-08-18 (later) — stack confirmed, backend decided, habit system designed.**
 - Stack **confirmed by owner: .NET MAUI / Blazor** (per §4 layout).
@@ -291,7 +291,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - **TTS voice cues in MVP**: cue points on interval segments (`{at, key, args}`), text through the i18n pipeline, spoken by platform TTS (Android `TextToSpeech` with audio-focus ducking; iOS `AVSpeechSynthesizer` with `DuckOthers`). Offline, free, locale-matched. Implementation sketch in `design/habit-system.md` §3.2.
 - **Gemini free tier ships in MVP** (§11 architecture: `IAdvisor`, BYOK, off until key entered).
 - **Health Connect moves up, including READ**: owner tracks sleep in Google's ecosystem. Read `SleepSessionRecord` (+ optionally `WeightRecord`, `StepsRecord`) for recovery context; write workouts as before. Read effort ≈ write effort (same binding, extra permission declarations). Slot: right after MVP core loop works — "MVP+1", not phase 2. Details §6.1.
-- **Identity DECIDED (2026-08-18): name "Groot" stays, plant/tree language removed.** Neutral variant canonical (`design/habit-rings.html`); plant variant + all rejected directions archived in `Research/UI/`. Rename candidates (Stam/Eik/Kernhout/Jaarring) documented in habit-system.md §6b as considered-and-rejected. Palette/type/rings stay; zero botanical wording, so the adjacency is closed.
+- **Identity DECIDED (2026-08-18): name "Groot" stays, plant/tree language removed.** Neutral variant canonical (`design/habit-rings.html`); plant variant + all rejected directions archived in `Research/UI/`. Rename candidates (Stam/Eik/Kernhout/Jaarring) documented in habit-system.md §6b as considered-and-rejected. Palette/type/rings stay; zero botanical wording.
 - **Week start is a user setting, not ISO**: default from locale `FirstDayOfWeek` (Mon EU, Sun US), overridable; contract math/grid/`weeks` table all key off it (spec §1.1 rule 1 updated; table keyed by `week_start_date`).
 - **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP.
 - **Copy voice rule added** (habit-system.md §5b): user-facing strings pass the humanizer checklist — the first mockups didn't (negative parallelisms, aphorisms, em dashes in cues), owner caught it.
