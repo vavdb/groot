@@ -113,8 +113,6 @@ gallery and the web head; the owner checks the app on the emulator.
 - MudBlazor `Color.Primary` as text or outline (`Variant.Text`, `Variant.Outlined`) is amber on
   the page: 2.5:1 in the light theme. Use `Variant.Filled` for primary actions until a
   text-variant mapping exists.
-- Both heads load Fraunces and Public Sans from Google Fonts; the MAUI app has no self-hosted
-  copy, so it falls back to system fonts offline.
 - The gallery's page chrome is raw markup by design. Product heads stay component-only.
 
 ## Working in this repo (several sessions run in parallel on `main`)

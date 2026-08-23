@@ -74,6 +74,14 @@ for file in "${boot_files[@]}"; do
     fi
 done
 
+# Typefaces ship with the app. A remote font means the installed app cannot render its own
+# wordmark offline, and tells a third party who opened Groot and when.
+if grep -rn --exclude-dir=obj --exclude-dir=bin --exclude=fonts.css \
+        -E '(link|@import|url\().*fonts\.(googleapis|gstatic)\.com' \
+        src tools --include='*.html' --include='*.css' --include='*.razor' 2>/dev/null; then
+    fail "remote font reference; Fraunces and Public Sans are served from src/Groot.UI/wwwroot/fonts"
+fi
+
 # The palette is the single source, including for the files CSS cannot reach: the web manifest's
 # colours and the MAUI icon and splash colours are the dark background, written by hand.
 bg_dark=$(grep -oE 'new\("bg",\s*"#[0-9a-fA-F]{6}",\s*"#[0-9a-fA-F]{6}"' src/Groot.UI/Theme/GrootPalette.cs | grep -oE '#[0-9a-fA-F]{6}' | tail -1)
