@@ -264,7 +264,7 @@ readability, hardest to render well. Archive in Research/UI if ever revisited.
 
 **Recommendation: A + B on the home screen (MVP), C as the "Growth" tab (MVP-lite: static rings,
 animate later).** A answers *today*, B answers *lately*, C answers *who have I become* — three
-time horizons, one metaphor, no a character tree-man anywhere.
+time horizons, one metaphor, no tree character anywhere.
 
 **UPDATE (2026-08-21): metaphor swap, owner decision.** Concept C is now a barbell loaded with
 plates, viewed head-on — not a tree cross-section. Concentric rings read as plates stacked on the
@@ -322,7 +322,7 @@ settings: jokers_per_week (default 2), week_start (default: locale FirstDayOfWee
 ## 6b. Terminology update (2026-08-18): plant references removed
 
 Owner decision: keep the design language (palette, Fraunces/Public Sans, layout, warmth), drop the
-botanical metaphors. Also further shrinks any character adjacency ("groot" = big, no tree needed).
+botanical metaphors. Also further shrinks any a character reading ("groot" = big, no tree needed).
 
 | Was | Now |
 |---|---|
@@ -339,14 +339,13 @@ botanical metaphors. Also further shrinks any character adjacency ("groot" = big
 Palette color *names* (moss/bark/amber) are internal CSS tokens — invisible to users, keep.
 
 **UPDATE (same day): decision reopened.** Owner likes the plants ("strong like a tree is cool") —
-the actual conflict is the *combination* plants + the name "Groot", which together evoke the a character
-character. Both variants now exist for comparison:
+the actual conflict is the *combination* plants + the name "Groot", which reads as a character. Both variants now exist for comparison:
 - `design/habit-rings.html` — neutral (geometric icons, year rings)
 - `design/habit-rings-plants.html` — plant identity (leaves, vine, tree age, droplet jokers)
 
 The fork in the road (pick one):
-1. **Keep "Groot" → neutral variant.** Zero a character adjacency, palette/rings keep most of the warmth.
-2. **Keep plants → rename the app.** Cleanest overall: identity the owner actually loves, a character
+1. **Keep "Groot" → neutral variant.** Zero character adjacency, palette/rings keep most of the warmth.
+2. **Keep plants → rename the app.** Cleanest overall: identity the owner actually loves, trademark
    worry dies permanently. Dutch candidates with tree-strength meaning:
    - **Stam** — trunk *and* tribe/lineage; 4 letters; doubles nicely if social features ever come
    - **Eik** — oak; strength *symbol* only — CORRECTION (owner caught it): "zo sterk als een eik"
@@ -361,7 +360,7 @@ Recommendation was option 2 ("Stam"); **owner DECIDED otherwise, 2026-08-18: opt
 "Groot" stays, plant/tree language goes.** Neutral variant (`design/habit-rings.html`) is canonical;
 plant variant archived at `Research/UI/habit-rings-plants.html`. Palette (moss/bark/amber tokens),
 Fraunces, rings-as-abstract-data-viz all stay. No tree words, no leaves, no mascots — which also
-settles the a character question permanently: name without imagery is the safe lane.
+settles the trademark question permanently: name without imagery is the safe lane.
 
 ## 7. Open questions
 

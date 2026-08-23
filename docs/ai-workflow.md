@@ -10,7 +10,7 @@ ORCHESTRATOR  = the DSH session (DeepSeek model)
   2. launches IMPLEMENTER
   3. launches REVIEWER(s)
   4. triages findings (dedupe, kill false positives) -> feeds back to implementer
-  5. verifies (tests + builds + CI), commits/pushes, ships (APK -> the Windows box -> emulator)
+  5. verifies (tests + builds + CI), commits/pushes, ships (APK -> Windows box -> emulator)
   6. escalates only on real blockers or preference calls
 ```
 
@@ -107,6 +107,6 @@ them (nothing to regenerate). Modeled on the Vindicator project's board.
 
 ## Infrastructure
 
-- Harness: the VPS (this machine) runs the DSH web. Agent preset `code-claude` exposes `subagent_claude_code` + `subagent_codex` (both enabled; profile patch + ~/.dsh/.agent-presets/code-claude/).
-- Android: emulator + SDK live on the Windows box (P:\Groot dev checkout; APK at P:\Groot\src\Groot.App\bin\Release\net10.0-android\). the VPS has no KVM — emulator stays on the Windows box.
+- Harness: this machine runs the DSH web. Agent preset `code-claude` exposes `subagent_claude_code` + `subagent_codex` (both enabled; profile patch + ~/.dsh/.agent-presets/code-claude/).
+- Android: emulator + SDK live on the Windows box (dev checkout there; APK under `src/Groot.App/bin/Release/net10.0-android/`). The Linux box has no KVM, so the emulator stays on Windows.
 - Repo sync: git bundle over scp (the Windows box has no GitHub creds): `git bundle create /tmp/groot-main.bundle main` -> scp -> `git pull <bundle> main`.

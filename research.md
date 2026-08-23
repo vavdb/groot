@@ -279,11 +279,11 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - Winner: Growth Rings (§7.2 #4). Live mockup: `design/growth-rings.html` (v2 — English, light+dark side by side).
 - Language: **English default UI, translations first-class from day 1** (en + nl minimum). All strings via resource keys (`IStringLocalizer`/.resx or JSON), locale drives number/date/unit formatting — nothing hard-coded in components. v1 Dutch render kept as the nl reference.
 - Rejected directions archived with provenance + IP notes in `Research/UI/` (README.md documents the copyright position: hand-authored code, OFL fonts, MIT/public-domain exercise media, methodology-name trademark cautions).
-- **Naming guardrail**: "Groot" as Dutch word defensible, but a character looms — identity stays abstract rings/botany, never a tree character/mascot; trademark search (EUIPO/Benelux) before any commercial launch.
+- **Naming guardrail**: "Groot" as a Dutch word is defensible, but identity stays abstract rings and never a tree character or mascot; trademark search (EUIPO/Benelux) before any commercial launch.
 
 **2026-08-18 (later) — stack confirmed, backend decided, habit system designed.**
 - Stack **confirmed by owner: .NET MAUI / Blazor** (per §4 layout).
-- Backend: **self-hosted on the existing Linux VPS `the VPS`**. Shape settled on 2026-08-23 (§5.4): `Groot.Api`, our own ASP.NET Core Minimal API over SQLite, behind Caddy with Let's Encrypt, a systemd unit, and nightly backups via Litestream or restic. Apple sign-in, if it ever arrives, needs the $99/yr Apple developer account either way, which iOS distribution requires regardless.
+- Backend: **self-hosted on the existing Linux VPS**. Shape settled on 2026-08-23 (§5.4): `Groot.Api`, our own ASP.NET Core Minimal API over SQLite, behind Caddy with Let's Encrypt, a systemd unit, and nightly backups via Litestream or restic. Apple sign-in, if it ever arrives, needs the $99/yr Apple developer account either way, which iOS distribution requires regardless.
 - **Habit system designed** — weekly contract (2×lift + 2×run + 1×rest), 2 jokers/week, week-streaks not day-streaks, per-side weight entry, 0→5K interval runner with audio cues. Full spec: `design/habit-system.md`; mockup: `design/habit-rings.html`. Viz decision: **contract card + GitHub-style season grid on Home (MVP), rings become the lifetime view** — grid for weeks, rings for years.
 
 **2026-08-18 (later still) — MVP scope pinned.**
@@ -291,7 +291,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - **TTS voice cues in MVP**: cue points on interval segments (`{at, key, args}`), text through the i18n pipeline, spoken by platform TTS (Android `TextToSpeech` with audio-focus ducking; iOS `AVSpeechSynthesizer` with `DuckOthers`). Offline, free, locale-matched. Implementation sketch in `design/habit-system.md` §3.2.
 - **Gemini free tier ships in MVP** (§11 architecture: `IAdvisor`, BYOK, off until key entered).
 - **Health Connect moves up, including READ**: owner tracks sleep in Google's ecosystem. Read `SleepSessionRecord` (+ optionally `WeightRecord`, `StepsRecord`) for recovery context; write workouts as before. Read effort ≈ write effort (same binding, extra permission declarations). Slot: right after MVP core loop works — "MVP+1", not phase 2. Details §6.1.
-- **Identity DECIDED (2026-08-18): name "Groot" stays, plant/tree language removed.** Neutral variant canonical (`design/habit-rings.html`); plant variant + all rejected directions archived in `Research/UI/`. Rename candidates (Stam/Eik/Kernhout/Jaarring) documented in habit-system.md §6b as considered-and-rejected. Palette/type/rings stay; zero botanical wording → a character adjacency closed.
+- **Identity DECIDED (2026-08-18): name "Groot" stays, plant/tree language removed.** Neutral variant canonical (`design/habit-rings.html`); plant variant + all rejected directions archived in `Research/UI/`. Rename candidates (Stam/Eik/Kernhout/Jaarring) documented in habit-system.md §6b as considered-and-rejected. Palette/type/rings stay; zero botanical wording, so the adjacency is closed.
 - **Week start is a user setting, not ISO**: default from locale `FirstDayOfWeek` (Mon EU, Sun US), overridable; contract math/grid/`weeks` table all key off it (spec §1.1 rule 1 updated; table keyed by `week_start_date`).
 - **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP.
 - **Copy voice rule added** (habit-system.md §5b): user-facing strings pass the humanizer checklist — the first mockups didn't (negative parallelisms, aphorisms, em dashes in cues), owner caught it.
@@ -463,7 +463,7 @@ Electron is a Chromium+Node shell — the wrong tool for C#. The stack already c
   equivalent of Electron, minus the bundled browser and the second runtime. Notification timers on
   Windows ride Windows App SDK notifications (nice-to-have, not MVP).
 - **Web**: `Groot.Web` (Blazor WASM PWA) is static files — host on the VPS behind Caddy
-  (`the app host`, gzip + cache headers, done). PWA install gives the desktop-app feel
+  (gzip + cache headers, done). PWA install gives the desktop-app feel
   on any OS. No server-side Blazor, no SignalR to babysit.
 - **macOS (dev bonus)**: Mac Catalyst target exists in MAUI; useful for testing on the MacBook,
   not a shipping priority.

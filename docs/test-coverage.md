@@ -1,11 +1,11 @@
 # What the tests cover
 
-276 tests across three projects. This file is the map: what is proven, what a failure would
+277 tests across three projects. This file is the map: what is proven, what a failure would
 mean, and what is not covered yet. Regenerate the counts with
 
 ```
 dotnet test tests/Groot.Core.Tests    # 163
-dotnet test tests/Groot.Data.Tests    #  45
+dotnet test tests/Groot.Data.Tests    #  46
 dotnet test tests/Groot.UI.Tests      #  68
 ```
 
@@ -163,6 +163,22 @@ Nothing stores a working weight. These are the spec for recomputing it.
 | `A_scheme_with_no_amrap_set_cannot_clear_an_amrap_threshold` | A straight 3x10 progresses on an AMRAP rule |  |
 | `a_t3_climbs_only_once_its_last_set_reaches_the_threshold` | The same boundary, through the planner and the real program |  |
 | `the retired total-reps threshold`, in the failure table | A program file with the old key silently loses its T3 rule |  |
+
+### Six months · `SixMonthGzclpTests`
+
+78 sessions, 26 weeks, the full rotation, planned and validated one session at a time the same way
+`GzclpBlockTests` validates seven. Squat T1 misses its top set three sessions running — the
+minimum that exhausts GZCLP's two-rung fail ladder (5x3+ → 6x2+ → 10x1+) and forces the 90%-of-last
+reset, the deepest path the program has and the one the seven-session block never reaches.
+
+| Test | What a failure would mean |
+|---|---|
+| `Six_months_of_gzclp_runs_clean_through_a_ladder_reset` | The rotation stays valid every session; squat's reset lands at exactly `round(72.5 × 0.9, 1) = 65.2`, matching the formula rather than a guess; the reset restarts at stage 0; every clean lift is higher after six months than it started; squat is climbing again past its reset floor, not stuck there; every final weight the rack can actually build with the owner's plate set |
+
+Ended at (26 weeks, one scripted reset on squat T1): squat 95.2, bench 92.5/80.0 (T1/T2), overhead
+press 80.0/67.5, deadlift 165.0/100.0, chin-up +0, row 22.5, curl 12.5, lateral raise 7.5. Squat's
+detour cost it three sessions of climbing and nothing else — every other lift is unaffected,
+confirmed by the per-slot independence tests above.
 
 ### The seven-session block · `GzclpBlockTests`
 

@@ -86,8 +86,10 @@ gallery and the web head; the owner checks the app on the emulator.
 
 - Humanizer pass, design/habit-system.md §5b: say the concrete thing, numbers over adjectives,
   no em dashes (a TTS pause is a comma or a period), no aphorisms, no negative parallelisms.
-- No plant or tree language, nothing adjacent to the a character character. Abstract rings and
-  cells only. Palette token names (moss, bark) are internal and stay.
+- No plant or tree language, no character, no mascot, no catchphrase. Abstract rings and cells
+  only. Palette token names (moss, bark) are internal and stay.
+
+  and stay.
 
 ### Every commit
 
