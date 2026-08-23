@@ -1,2 +1,0 @@
-[     552ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5201/favicon.ico:0
-[     738ms] [INFO] Debugging hotkey: Shift+Alt+D (when application has focus) @ http://localhost:5201/_framework/blazor.webassembly.js:0

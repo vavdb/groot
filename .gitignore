@@ -36,3 +36,6 @@ mockups/
 
 # Screenshots taken while verifying UI work. The keepers live in docs/screenshots/.
 /*.png
+
+# Playwright MCP scratch output (console logs, page snapshots)
+.playwright-mcp/
