@@ -248,7 +248,14 @@ public sealed class ProgramCatalog
             if (reset.TryGetProperty("bumpKg", out var bump)) resetBump = bump.GetDecimal();
         }
 
-        int? threshold = element.TryGetProperty("progressAtTotalReps", out var reps) ? reps.GetInt32() : null;
+        // The key was progressAtTotalReps until the rule was corrected to read the AMRAP set
+        // alone. Ignoring the old spelling would leave a T3 with no threshold at all, which
+        // fails as a silently different program rather than as a broken file.
+        if (element.TryGetProperty("progressAtTotalReps", out _))
+            throw new InvalidOperationException(
+                $"Lift program '{id}' {tierName} uses 'progressAtTotalReps'; the threshold now reads the AMRAP set, so the key is 'progressAtAmrapReps'.");
+
+        int? threshold = element.TryGetProperty("progressAtAmrapReps", out var reps) ? reps.GetInt32() : null;
 
         return new TierProgression(scheme, increment, overrides, ladder, resetPct, resetBump, threshold);
     }

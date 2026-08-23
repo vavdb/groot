@@ -27,8 +27,8 @@
     /// <summary>The program to train. Defaults to the one program in the catalog that has days.</summary>
     [Parameter] public LiftProgram Program { get; set; } = ProgramCatalog.Embedded.LiftPrograms[0];
 
-    /// <summary>Working weights per exercise id, in kg. Missing exercises show as bodyweight.</summary>
-    [Parameter] public IReadOnlyDictionary<string, decimal> WorkingWeightsKg { get; set; } = StarterWeights;
+    /// <summary>Where each lift stands, per exercise and tier. Missing slots show as bodyweight.</summary>
+    [Parameter] public IReadOnlyDictionary<ExerciseSlot, ExerciseState> ExerciseStates { get; set; } = StarterWeights;
 
     /// <summary>Which day of the rotation to open on.</summary>
     [Parameter] public string? DayKey { get; set; }
@@ -36,17 +36,22 @@
     /// <summary>
     /// A plain starting table, the weights a first week tends to begin at. Replaced by the store.
     /// A barbell entry is the total on the bar, a dumbbell entry is the weight in each hand, and a
-    /// bodyweight lift is left out: it starts at bodyweight with nothing added.
+    /// bodyweight lift is left out: it starts at bodyweight with nothing added. The heavy lifts
+    /// appear twice because GZCLP trains them twice: squat is T1 at 60 and T2 at 40.
     /// </summary>
-    private static readonly Dictionary<string, decimal> StarterWeights = new()
+    private static readonly Dictionary<ExerciseSlot, ExerciseState> StarterWeights = new()
     {
-        ["squat"] = 60m,
-        ["bench-press"] = 45m,
-        ["overhead-press"] = 30m,
-        ["deadlift"] = 70m,
-        ["dumbbell-row"] = 22.5m,
-        ["dumbbell-curl"] = 12.5m,
-        ["dumbbell-lateral-raise"] = 7.5m,
+        [new("squat", 1)] = ExerciseState.Starting(60m),
+        [new("squat", 2)] = ExerciseState.Starting(40m),
+        [new("bench-press", 1)] = ExerciseState.Starting(45m),
+        [new("bench-press", 2)] = ExerciseState.Starting(30m),
+        [new("overhead-press", 1)] = ExerciseState.Starting(30m),
+        [new("overhead-press", 2)] = ExerciseState.Starting(20m),
+        [new("deadlift", 1)] = ExerciseState.Starting(70m),
+        [new("deadlift", 2)] = ExerciseState.Starting(50m),
+        [new("dumbbell-row", 3)] = ExerciseState.Starting(22.5m),
+        [new("dumbbell-curl", 3)] = ExerciseState.Starting(12.5m),
+        [new("dumbbell-lateral-raise", 3)] = ExerciseState.Starting(7.5m),
     };
 
     private string _dayKey = "";
@@ -65,7 +70,7 @@
         Resolve();
     }
 
-    private void Resolve() => _plan = LiftSessionBuilder.For(Program, _dayKey, WorkingWeightsKg);
+    private void Resolve() => _plan = LiftSessionBuilder.For(Program, _dayKey, ExerciseStates);
 
     private void OnDayChanged(string dayKey)
     {

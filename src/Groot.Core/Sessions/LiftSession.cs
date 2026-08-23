@@ -2,6 +2,14 @@ using Groot.Core.Programs;
 
 namespace Groot.Core.Sessions;
 
+/// <summary>
+/// An exercise at a tier — the unit a working weight belongs to. GZCLP trains squat as T1 (5x3+,
+/// heavy) on A1 and as T2 (3x10, lighter) on A2, and the two climb on their own increments and
+/// their own fail ladders. Keying weights by exercise alone would show the 5x3 weight for a set
+/// of ten.
+/// </summary>
+public sealed record ExerciseSlot(string ExerciseId, int Tier);
+
 /// <summary>One planned set: its place in the exercise, the reps to hit, and whether it is the AMRAP.</summary>
 public sealed record LiftSet(int Index, int TargetReps, bool IsAmrap);
 
@@ -39,27 +47,33 @@ public sealed record LiftSessionPlan(
 }
 
 /// <summary>
-/// Turns a program day plus the lifter's working weights into the sets to perform. Pure: it reads
-/// the program and the weights and returns a plan. An exercise with no known weight comes back
-/// with a null target, which is the screen's cue to ask for one.
+/// Turns a program day plus where each lift currently stands into the sets to perform. Pure: it
+/// reads the program and the state and returns a plan. An exercise with no state comes back with
+/// a null target, which is the screen's cue to ask for one.
 /// </summary>
 public static class LiftSessionBuilder
 {
     public static LiftSessionPlan For(
         LiftProgram program,
         string dayKey,
-        IReadOnlyDictionary<string, decimal> workingWeightsKg)
+        IReadOnlyDictionary<ExerciseSlot, ExerciseState> state)
     {
         var day = program.Day(dayKey);
 
         var exercises = day.Exercises.Select(exercise =>
         {
-            var scheme = program.SchemeFor(exercise.Tier);
+            var slot = new ExerciseSlot(exercise.ExerciseId, exercise.Tier);
+            var current = state.GetValueOrDefault(slot);
+
+            // The scheme follows the rung of the fail ladder, not the tier's opening scheme: a
+            // missed 5x3+ comes back as 6x2+ at the same weight, and showing five sets of three
+            // again would quietly undo the drop the progression rules just made.
+            var scheme = program.TierFor(exercise.Tier).SchemeAt(current?.Stage ?? 0);
             var sets = Enumerable.Range(0, scheme.Sets)
                 .Select(index => new LiftSet(index, scheme.Reps, scheme.AmrapLast && index == scheme.Sets - 1))
                 .ToArray();
 
-            var target = workingWeightsKg.TryGetValue(exercise.ExerciseId, out var kg) ? kg
+            var target = current is { } known ? known.WorkingWeightKg
                 : exercise.Loading == LoadingKind.Bodyweight ? 0m
                 : (decimal?)null;
 

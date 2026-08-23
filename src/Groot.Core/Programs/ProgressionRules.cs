@@ -1,10 +1,18 @@
 namespace Groot.Core.Programs;
 
-/// <summary>Result of one exercise in one session, as progression rules see it.</summary>
-public sealed record SessionResult(bool AllSetsCompleted, int TotalReps);
+/// <summary>
+/// Result of one exercise in one session, as progression rules see it. <paramref name="AmrapReps"/>
+/// is the last set's reps when the scheme ends in one, and null otherwise — a straight 3x10 has
+/// no AMRAP set to read.
+/// </summary>
+public sealed record SessionResult(bool AllSetsCompleted, int TotalReps, int? AmrapReps = null);
 
 /// <summary>Rolling progression state for one exercise inside a program instance.</summary>
-public sealed record ExerciseState(decimal WorkingWeightKg, int Stage, decimal LastBaseWeightKg);
+public sealed record ExerciseState(decimal WorkingWeightKg, int Stage, decimal LastBaseWeightKg)
+{
+    /// <summary>A lift not yet trained: the weight it opens at, on the tier's own scheme.</summary>
+    public static ExerciseState Starting(decimal weightKg) => new(weightKg, Stage: 0, weightKg);
+}
 
 public sealed record ProgressionDecision(decimal NextWeightKg, int NextStage, string Explanation);
 
@@ -56,12 +64,17 @@ public sealed record FailLadderBump(int Stages, decimal BumpKg) : IProgressionRu
     }
 }
 
-/// <summary>T3-style: progress only when total reps reach the threshold.</summary>
-public sealed record AmrapThreshold(int TotalReps, decimal Kg) : IProgressionRule
+/// <summary>
+/// T3-style: progress when the AMRAP set alone reaches the threshold. GZCL's rule is 25 or more
+/// reps on the last set, not across the session — a 3x15+ finished at exactly fifteen adds up to
+/// 45 and would clear any session total worth setting, so counting the session would add weight
+/// every time.
+/// </summary>
+public sealed record AmrapSetThreshold(int Reps, decimal Kg) : IProgressionRule
 {
     public ProgressionDecision? Evaluate(ExerciseState state, SessionResult result) =>
-        result.TotalReps >= TotalReps
-            ? new(state.WorkingWeightKg + Kg, state.Stage, $"{result.TotalReps} reps, +{Kg} kg")
+        result.AmrapReps >= Reps
+            ? new(state.WorkingWeightKg + Kg, state.Stage, $"{result.AmrapReps} on the last set, +{Kg} kg")
             : new(state.WorkingWeightKg, state.Stage, "below threshold, same weight");
 }
 

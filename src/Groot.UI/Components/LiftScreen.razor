@@ -310,7 +310,10 @@
             WeightAt(exercise, 0) ?? 0m,
             Stages.GetValueOrDefault(exercise.ExerciseId),
             AllSetsCompleted: exercise.Sets.All(set => !IsMissed(exercise, set)),
-            TotalReps: exercise.Sets.Sum(set => _logged.GetValueOrDefault((exercise.ExerciseId, set.Index))));
+            TotalReps: exercise.Sets.Sum(set => _logged.GetValueOrDefault((exercise.ExerciseId, set.Index))),
+            AmrapReps: exercise.Sets.LastOrDefault(set => set.IsAmrap) is { } amrap
+                ? _logged.GetValueOrDefault((exercise.ExerciseId, amrap.Index))
+                : null);
 
     /// <summary>Where the next session starts for this lift, once every set of it is logged.</summary>
     private string NextLine(LiftExercisePlan exercise)

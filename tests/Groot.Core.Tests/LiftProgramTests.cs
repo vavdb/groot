@@ -166,10 +166,12 @@ public class LiftSessionBuilderTests
 {
     private static LiftProgram Gzclp => ProgramCatalog.Embedded.LiftProgram("gzclp-rack");
 
-    private static readonly Dictionary<string, decimal> Weights = new()
+    // Keyed by exercise and tier: A1 trains squat as T1 and bench as T2, and the same two lifts
+    // come back at the other tier on A2 with weights of their own.
+    private static readonly Dictionary<ExerciseSlot, ExerciseState> Weights = new()
     {
-        ["squat"] = 60m,
-        ["bench-press"] = 45m,
+        [new("squat", 1)] = ExerciseState.Starting(60m),
+        [new("bench-press", 2)] = ExerciseState.Starting(45m),
     };
 
     [Fact]
@@ -205,7 +207,7 @@ public class LiftSessionBuilderTests
     [Fact]
     public void weights_come_from_the_lifter_and_a_missing_barbell_weight_is_left_open()
     {
-        var plan = LiftSessionBuilder.For(Gzclp, "B1", new Dictionary<string, decimal> { ["deadlift"] = 100m });
+        var plan = LiftSessionBuilder.For(Gzclp, "B1", new Dictionary<ExerciseSlot, ExerciseState> { [new("deadlift", 2)] = ExerciseState.Starting(100m) });
 
         Assert.Null(plan.Exercises[0].TargetKg);
         Assert.Equal(100m, plan.Exercises[1].TargetKg);
@@ -307,13 +309,18 @@ public class LiftProgressionPlannerTests
         Assert.Equal(0, next.Stage);
     }
 
+    // The threshold is 25 on the last set, not across the session: three sets of fifteen is 45
+    // reps and stays put, while 25 on the AMRAP earns the increment.
     [Theory]
-    [InlineData(25, 22.5)]
-    [InlineData(45, 22.5)]
-    [InlineData(24, 20.0)]
-    public void a_t3_climbs_only_once_the_reps_add_up(int totalReps, double expected)
+    [InlineData(45, 15, 20.0)]
+    [InlineData(54, 24, 20.0)]
+    [InlineData(55, 25, 22.5)]
+    [InlineData(65, 35, 22.5)]
+    public void a_t3_climbs_only_once_its_last_set_reaches_the_threshold(
+        int totalReps, int amrapReps, double expected)
     {
-        var outcome = new ExerciseOutcome("dumbbell-row", Tier: 3, WeightKg: 20m, Stage: 0, AllSetsCompleted: true, totalReps);
+        var outcome = new ExerciseOutcome(
+            "dumbbell-row", Tier: 3, WeightKg: 20m, Stage: 0, AllSetsCompleted: true, totalReps, amrapReps);
 
         Assert.Equal((decimal)expected, LiftProgressionPlanner.Next(Gzclp, outcome).WeightKg);
     }

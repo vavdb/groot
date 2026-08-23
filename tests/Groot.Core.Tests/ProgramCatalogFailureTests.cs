@@ -46,6 +46,7 @@ public class ProgramCatalogFailureTests
         { "a tier out of range", "\"tier\": 1", "\"tier\": 4", "tiers are 1 to 3" },
         { "an unknown loading", "\"loading\": \"barbell\"", "\"loading\": \"kettlebell\"", "expected barbell, dumbbell or bodyweight" },
         { "a scheme that is not a scheme", "\"scheme\": \"5x3+\"", "\"scheme\": \"five by three\"", "" },
+        { "the retired total-reps threshold", "\"incrementKg\"", "\"progressAtTotalReps\": 25, \"incrementKg\"", "progressAtAmrapReps" },
     };
 
     [Theory]

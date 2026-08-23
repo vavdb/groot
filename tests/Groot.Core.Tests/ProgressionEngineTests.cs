@@ -42,15 +42,39 @@ public class ProgressionEngineTests
     }
 
     [Fact]
-    public void T3_amrap_threshold_progresses_at_25_reps()
+    public void T3_progresses_when_the_amrap_set_reaches_25_reps()
     {
-        var rules = new IProgressionRule[] { new AmrapThreshold(25, 2.5m) };
+        var rules = new IProgressionRule[] { new AmrapSetThreshold(25, 2.5m) };
         var state = new ExerciseState(40m, 0, 40m);
 
-        var below = ProgressionEngine.Advance(rules, state, new SessionResult(true, 24));
-        var at = ProgressionEngine.Advance(rules, state, new SessionResult(true, 25));
+        var below = ProgressionEngine.Advance(rules, state, new SessionResult(true, TotalReps: 54, AmrapReps: 24));
+        var at = ProgressionEngine.Advance(rules, state, new SessionResult(true, TotalReps: 55, AmrapReps: 25));
 
         Assert.Equal(40m, below.NextWeightKg);
         Assert.Equal(42.5m, at.NextWeightKg);
+    }
+
+    [Fact]
+    public void A_high_session_total_does_not_stand_in_for_the_amrap_set()
+    {
+        // 3x15+ finished at exactly fifteen is 45 reps. Reading the session total would clear a
+        // 25-rep threshold every time and add weight to a lift that never earned it.
+        var rules = new IProgressionRule[] { new AmrapSetThreshold(25, 2.5m) };
+        var state = new ExerciseState(40m, 0, 40m);
+
+        var decision = ProgressionEngine.Advance(rules, state, new SessionResult(true, TotalReps: 45, AmrapReps: 15));
+
+        Assert.Equal(40m, decision.NextWeightKg);
+    }
+
+    [Fact]
+    public void A_scheme_with_no_amrap_set_cannot_clear_an_amrap_threshold()
+    {
+        var rules = new IProgressionRule[] { new AmrapSetThreshold(25, 2.5m) };
+        var state = new ExerciseState(40m, 0, 40m);
+
+        var decision = ProgressionEngine.Advance(rules, state, new SessionResult(true, TotalReps: 30, AmrapReps: null));
+
+        Assert.Equal(40m, decision.NextWeightKg);
     }
 }

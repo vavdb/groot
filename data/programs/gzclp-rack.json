@@ -33,9 +33,9 @@
     "T3": {
       "scheme": "3x15+",
       "amrapLastSet": true,
-      "progressAtTotalReps": 25,
+      "progressAtAmrapReps": 25,
       "incrementKg": { "default": 2.5 },
-      "bodyweightVariant": { "progressAtTotalReps": 25, "then": "add-weight" }
+      "bodyweightVariant": { "progressAtAmrapReps": 25, "then": "add-weight" }
     }
   },
   "startingWeights": {

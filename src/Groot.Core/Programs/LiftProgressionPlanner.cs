@@ -2,7 +2,8 @@ namespace Groot.Core.Programs;
 
 /// <summary>
 /// What one exercise did in one session: the weight it was trained at, the rung of the fail
-/// ladder it was on, whether every set hit its target, and the reps that were actually logged.
+/// ladder it was on, whether every set hit its target, the reps that were actually logged, and
+/// what the AMRAP set reached when the scheme ends in one.
 /// </summary>
 public sealed record ExerciseOutcome(
     string ExerciseId,
@@ -10,7 +11,8 @@ public sealed record ExerciseOutcome(
     decimal WeightKg,
     int Stage,
     bool AllSetsCompleted,
-    int TotalReps);
+    int TotalReps,
+    int? AmrapReps = null);
 
 /// <summary>Where the next session starts: the weight, the scheme, the rung, and why.</summary>
 public sealed record NextSession(decimal WeightKg, SetScheme Scheme, int Stage, string Explanation);
@@ -26,7 +28,7 @@ public static class LiftProgressionPlanner
     {
         var tier = program.TierFor(outcome.Tier);
         var state = new ExerciseState(outcome.WeightKg, outcome.Stage, LastBaseWeightKg: outcome.WeightKg);
-        var result = new SessionResult(outcome.AllSetsCompleted, outcome.TotalReps);
+        var result = new SessionResult(outcome.AllSetsCompleted, outcome.TotalReps, outcome.AmrapReps);
 
         var decision = ProgressionEngine.Advance(RulesFor(tier, outcome.ExerciseId), state, result);
 
@@ -34,7 +36,7 @@ public static class LiftProgressionPlanner
     }
 
     /// <summary>
-    /// Tiers that climb on total reps (T3) use the threshold; tiers with a ladder (T1, T2) add
+    /// Tiers that climb on the AMRAP set (T3) use the threshold; tiers with a ladder (T1, T2) add
     /// weight on a clean session and drop a rung on a failure. How the ladder ends is the tier's
     /// own business: a percentage reset, or a bump and a restart.
     /// </summary>
@@ -42,8 +44,8 @@ public static class LiftProgressionPlanner
     {
         var increment = tier.IncrementFor(exerciseId);
 
-        if (tier.ProgressAtTotalReps is { } threshold)
-            return [new AmrapThreshold(threshold, increment)];
+        if (tier.ProgressAtAmrapReps is { } threshold)
+            return [new AmrapSetThreshold(threshold, increment)];
 
         var rules = new List<IProgressionRule> { new LinearIncrement(increment) };
 
