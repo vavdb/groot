@@ -9,4 +9,4 @@ order: 38
 
 Feature-matrix MVP row (research.md §3.4): exercise database, own dataset
 (not licensed animations). No code yet — needs a source dataset decision
-and a place to live once `data-persistence-layer` exists.
+and a place to live once `sqlite-store-implementation` exists.

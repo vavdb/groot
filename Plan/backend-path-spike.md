@@ -15,6 +15,6 @@ backend: no Supabase, no Firebase, no PocketBase.
 Endpoints the sync design needs: `POST /auth/register`, `POST /auth/login`,
 `POST /sync/push`, `GET /sync/pull?since=`.
 
-* Next step: `data-persistence-layer` (the device store) comes first; the
+* Next step: `sqlite-store-implementation` (the device store) comes first; the
   API is only useful once there are rows to sync.
 * Links: `research.md` §5.4, §10 decision log

@@ -19,7 +19,7 @@ Two related things missing:
 2. **Notes on runs** — `SetEntry` (lift sets) already carries `Notes`;
    run/interval sessions have no equivalent field.
 
-* Next step: extend the session model (see `data-persistence-layer`,
+* Next step: extend the session model (see `sqlite-store-implementation`,
   `csv-import-strong-format` cards) so a run session can be duration-only
   and carry a note, without requiring the full interval segment log.
 * Links: `data/log.csv`, `src/Groot.Core/Sessions/SetEntry.cs`,
