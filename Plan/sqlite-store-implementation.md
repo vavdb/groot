@@ -71,8 +71,35 @@ screen can only guess at the ladder stage today.
 - No raw SQL outside `Groot.Data`; no `DateTime.Now` in a store (times come
   in as parameters, so the tests can pin them).
 
-* Next step: `schema.sql` plus the connection factory and `SessionStore`,
-  wired into `LiftScreen` behind a store interface the scene owns. One
-  aggregate at a time; the lifting session is the one that hurts most.
+## Built (2026-08-23)
+
+`schema.v1.sql`, `GrootDatabase`, and stores for sessions, equipment, settings
+and users. Working weights are not stored: `LiftProgressionHistory` replays the
+logged sessions, so `exercise_state` never got built. `weeks`, `programs` and a
+sync cursor are not there either, for the same reason: nothing writes them yet.
+
+Two write paths per aggregate. `Save` is unconditional, because a local write is
+the newest thing that happened on this device; `Merge` is last-write-wins on
+`(updated_at, device_id)` and refuses a row that claims a different owner.
+
+## Decided later, on purpose
+
+- **Program versioning.** A session records `program_id` and `day_key`, not which
+  version of the program it was performed under, and `data/programs/*.json` is
+  editable. Editing a shipped program rewrites every historical working weight it
+  touches. The fix is a `program_version` column plus a catalog that keeps old
+  versions; until then, a shipped program is not edited in place.
+- **Materialised `weeks`.** The contract is evaluated live from sessions, which is
+  right, but it reads `week_start_day` and `jokers_per_week` from settings. Change
+  either and closed weeks reshape. habit-system.md §6 said "materialised at week
+  close" for exactly this; it lands with the week-close flow.
+- **A stored weight override.** A lifter who corrects a working weight without
+  training has nowhere to put it: the replay only knows what was logged. That is an
+  input, not a projection, and it arrives with the settings screen.
+- **The pull cursor.** `updated_at` resolves conflicts; it must not also be the sync
+  cursor. A server-assigned `server_seq` lands with `Groot.Api`.
+
+* Next step: wire a head to the store. `GrootLiftScene` and `GrootRunScene` still
+  use their in-memory defaults, so nothing the app logs is written yet.
 * Links: `design/habit-system.md` §6, `research.md` §5.2 and §5.4,
   `Plan/backend-path-spike.md`, `Plan/web-offline-indexeddb.md`

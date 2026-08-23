@@ -47,6 +47,7 @@ gallery and the web head; the owner checks the app on the emulator.
 | Heads: they compose components and nothing else | `src/Groot.Web/Pages`, `src/Groot.App/Components/Pages` |
 | Gallery: every component, every state, light and dark | `tools/Groot.UI.Gallery/Pages/GalleryColumn.razor` |
 | Decisions, habit spec, copy voice, IP position | `research.md` §10, `design/habit-system.md` (§5b is copy), `Research/UI/README.md` |
+| What the tests cover, and what they do not | `docs/test-coverage.md` |
 | Multi-model implement/review loop | `docs/ai-workflow.md` |
 
 ## Done means
