@@ -3,6 +3,7 @@
    Interval maths comes from Groot.Core's RunSession. *@
 @using System.Diagnostics
 @using Groot.Core.Intervals
+@using Groot.UI.Theme
 @using Groot.UI.Audio
 @implements IDisposable
 
@@ -157,7 +158,7 @@
 
     private static string Label(Segment segment) => segment.Label ?? (segment.Kind == SegmentKind.Run ? "run" : "walk");
 
-    private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+    private static string Clock(int seconds) => GrootFormat.Clock(seconds);
 
     private async Task StartAsync()
     {

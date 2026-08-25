@@ -6,6 +6,7 @@
 @using System.Diagnostics
 @using Groot.Core.Equipment
 @using Groot.Core.Programs
+@using Groot.UI.Theme
 @using Groot.Core.Sessions
 @implements IDisposable
 
@@ -194,7 +195,7 @@
         _ => kg ?? 0m,
     };
 
-    private static string Clock(int seconds) => $"{seconds / 60}:{seconds % 60:00}";
+    private static string Clock(int seconds) => GrootFormat.Clock(seconds);
 
     /// <summary>"bench-press" reads as "Bench press" until there are resource strings to look up.</summary>
     private static string Name(string exerciseId) =>
@@ -210,11 +211,11 @@
         LoadingKind.Bodyweight => kg switch
         {
             null or 0m => "bodyweight",
-            < 0m => $"assisted {-kg:0.##} kg",
-            _ => $"bodyweight + {kg:0.##} kg",
+            < 0m => $"assisted {GrootFormat.Kilograms(-kg.Value)}",
+            _ => $"bodyweight + {GrootFormat.Kilograms(kg.Value)}",
         },
-        LoadingKind.Dumbbell => kg is { } perHand ? $"{perHand:0.##} kg each" : "no weight yet",
-        _ => kg is { } total ? $"{total:0.##} kg" : "no weight yet",
+        LoadingKind.Dumbbell => kg is { } perHand ? $"{GrootFormat.Kilograms(perHand)} each" : "no weight yet",
+        _ => kg is { } total ? GrootFormat.Kilograms(total) : "no weight yet",
     };
 
     /// <summary>The weight one set is taken at, for the editor row.</summary>
@@ -250,7 +251,7 @@
     private string Plates(LiftExercisePlan exercise)
     {
         if (exercise.Loading == LoadingKind.Dumbbell)
-            return WeightOf(exercise) is { } perHand ? $"{2 * perHand:0.##} kg in both hands" : "";
+            return WeightOf(exercise) is { } perHand ? $"{GrootFormat.Kilograms(2 * perHand)} in both hands" : "";
 
         if (exercise.Loading == LoadingKind.Bodyweight)
             return WeightOf(exercise) is { } adjustment && adjustment != 0m
@@ -260,10 +261,10 @@
         if (WeightOf(exercise) is not { } kg || Equipment.Plates.Count == 0) return "";
 
         var breakdown = Equipment.PerSide(kg);
-        if (breakdown is null) return $"{Equipment.Bar.Name} cannot be loaded to {kg:0.##} kg";
+        if (breakdown is null) return $"{Equipment.Bar.Name} cannot be loaded to {GrootFormat.Kilograms(kg)}";
         if (breakdown.Count == 0) return $"{Equipment.Bar.Name} alone";
 
-        return $"{Equipment.Bar.EffectiveBarKg:0.##} + {string.Join(" + ", breakdown.Select(p => $"{p:0.##}"))} per side";
+        return $"{GrootFormat.Number(Equipment.Bar.EffectiveBarKg)} + {string.Join(" + ", breakdown.Select(GrootFormat.Number))} per side";
     }
 
     private bool IsDone(LiftExercisePlan exercise, LiftSet set) =>
@@ -321,7 +322,7 @@
         if (Program is null || WeightAt(exercise, 0) is null) return "";
 
         var next = LiftProgressionPlanner.Next(Program, Outcome(exercise));
-        return $"next · {next.WeightKg:0.##} kg, {next.Scheme.Text} · {next.Explanation}";
+        return $"next · {GrootFormat.Kilograms(next.WeightKg)}, {next.Scheme.Text} · {next.Explanation}";
     }
 
     /// <summary>The set the editor row is on: the tapped one, else the next to take, else the last taken.</summary>
