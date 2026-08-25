@@ -342,7 +342,7 @@ Palette color *names* (moss/bark/amber) are internal CSS tokens — invisible to
 the actual conflict is the *combination* of plants and the name, which reads as a character rather
 than as a system. Both variants now exist for comparison:
 - `design/habit-rings.html` — neutral (geometric icons, year rings)
-- `design/habit-rings-plants.html` — plant identity (leaves, vine, tree age, droplet jokers)
+- `Research/UI/habit-rings-plants.html` (archived there when it was rejected) — plant identity
 
 The fork in the road (pick one):
 1. **Keep "Groot" → neutral variant.** Zero character adjacency, palette/rings keep most of the warmth.

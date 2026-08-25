@@ -1,7 +1,17 @@
 # What the tests cover
 
-277 tests across three projects. This file is the map: what is proven, what a failure would
-mean, and what is not covered yet. Regenerate the counts with
+277 tests across three projects.
+
+This file maps the work that needed arguing: the store, the progression replay, and the GZCLP
+rules that turned out to be wrong. The older Core suites that predate it are not listed class by
+class, because their names already say what they hold: `ContractEvaluatorTests`,
+`IntervalEngineTests`, `PlateSolverTests`, `EquipmentTests`, `RunSessionTests`, `SetEntryTests`,
+`ProgramCatalogTests`, and the parsing and catalog suites in `LiftProgramTests.cs`. On the UI
+side the same goes for `PaletteContrastTests`, `BottomNavTests`, `ShellNavigationTests` and
+`RegressionTests`.
+
+What every section below does say is what a failure would mean, and the last one says what is
+not covered at all. Regenerate the counts with
 
 ```
 dotnet test tests/Groot.Core.Tests    # 163
@@ -154,7 +164,7 @@ Nothing stores a working weight. These are the spec for recomputing it.
 | `A_T3_that_reaches_25_on_its_last_set_climbs` | T3 never climbs |  |
 | `A_T3_abandoned_after_one_set_does_not_progress_on_that_set` | The set a lifter stopped at is read as the AMRAP, so an abandoned session adds weight | bug |
 
-### Progression rules · `ProgressionEngineTests`, `LiftProgramTests`, `ProgramCatalogFailureTests`
+### Progression rules · `ProgressionEngineTests`, `LiftProgressionPlannerTests`, `ProgramCatalogFailureTests`
 
 | Test | What a failure would mean | |
 |---|---|---|
@@ -167,7 +177,7 @@ Nothing stores a working weight. These are the spec for recomputing it.
 ### Six months · `SixMonthGzclpTests`
 
 78 sessions, 26 weeks, the full rotation, planned and validated one session at a time the same way
-`GzclpBlockTests` validates seven. Squat T1 misses its top set three sessions running — the
+`GzclpBlockTests` validates seven. Squat T1 misses its top set three sessions running, the
 minimum that exhausts GZCLP's two-rung fail ladder (5x3+ → 6x2+ → 10x1+) and forces the 90%-of-last
 reset, the deepest path the program has and the one the seven-session block never reaches.
 
@@ -177,7 +187,7 @@ reset, the deepest path the program has and the one the seven-session block neve
 
 Ended at (26 weeks, one scripted reset on squat T1): squat 95.2, bench 92.5/80.0 (T1/T2), overhead
 press 80.0/67.5, deadlift 165.0/100.0, chin-up +0, row 22.5, curl 12.5, lateral raise 7.5. Squat's
-detour cost it three sessions of climbing and nothing else — every other lift is unaffected,
+detour cost it three sessions of climbing and nothing else. Every other lift is unaffected,
 confirmed by the per-slot independence tests above.
 
 ### The seven-session block · `GzclpBlockTests`

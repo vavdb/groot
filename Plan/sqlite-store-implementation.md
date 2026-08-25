@@ -1,16 +1,18 @@
 ---
-status: "backlog"
+status: "doing"
 tags: [Data, Core]
 docs: design/habit-system.md
-hook: Groot.Data implementation — SQLite schema, Dapper repositories, and the heads writing to it
+hook: Groot.Data is built and tested; the heads still have to read and write it
 order: 11
 ---
 # SQLite store: the implementation
 
 Backend decided (`backend-path-spike`): SQLite on the device, our own
-`Groot.Api` for sync. This card is the device half — the point at which a
-session survives a reload. Everything on the screens is component state
-today: log five sets, refresh, they are gone.
+`Groot.Api` for sync. This card is the device half, the point at which a
+session survives a reload.
+
+The store is built and tested. What is left is the wiring: the screens are
+still component state, so five sets logged and a refresh still loses them.
 
 ## Schema (habit-system.md §6)
 
@@ -57,7 +59,7 @@ screen can only guess at the ladder stage today.
 - `EquipmentProfile.Rack` becomes a row the settings screen edits, which
   is what retires the last hardcoded rack in the UI.
 - `progress-year-rings-screen`, `csv-import-strong-format`,
-  `manual-run-entries-and-notes` — all need somewhere to write.
+  `manual-run-entries-and-notes`, all need somewhere to write.
 
 ## Done means
 

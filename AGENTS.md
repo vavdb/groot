@@ -5,26 +5,32 @@ rule says why it exists; most were missed at least once. Decisions and rationale
 research.md (section 10 is the decision log) and design/habit-system.md; this is the short
 version that applies on every change. `bash tools/check-rules.sh` checks the mechanical ones.
 
-## State (2026-08-22)
+## State (2026-08-25)
 
 Works end to end, both heads: the 0→5K interval runner (`RunScreen`) and the lifting screen
 (`LiftScreen`, GZCLP: sets, plate maths, rest, AMRAP, missed sets, and what the next session
 becomes). Done and unit-tested: the engines in `Groot.Core` (progression, plate math, week
 contract, intervals, program catalog, lift programs and the progression planner). The gallery
-renders every component and, on `/screens`, every screen in a device frame.
-Not started: persistence (`Groot.Data` is an empty csproj that no head references yet),
-`Groot.Api`, sync, settings, a Progress screen, resource-based i18n. Nothing a session logs
-survives a reload; the lifting screen's working weights are a starting table and its equipment is
-`EquipmentProfile.Rack` until settings own one. Backend, decided 2026-08-23: SQLite on the device
-plus our own `Groot.Api`, no hosted backend (research.md §5.4). README and research.md describe
-the planned shape; do not assume it exists.
+renders every component, every screen in a device frame on `/screens`, and the Progress
+candidates on `/progress`.
+
+`Groot.Data` is built and tested: SQLite on the device, sessions and their sets, equipment,
+settings, applied from an embedded `schema.v1.sql` behind a `user_version` check. Working weights
+are not stored; `LiftProgressionHistory` replays the logged sessions.
+
+Not wired: no head reads the store, so nothing a session logs survives a reload yet, and the
+lifting screen still opens on a starting table with `EquipmentProfile.Rack` for equipment. Not
+started: `Groot.Api`, sync, a settings screen, a Progress screen, resource-based i18n. Backend,
+decided 2026-08-23: SQLite on the device plus our own `Groot.Api`, no hosted backend
+(research.md §5.4). README and research.md describe the planned shape; do not assume it exists.
 
 ## Commands
 
 | What | Command |
 |---|---|
 | Domain tests, under a second; run before every commit | `dotnet test tests/Groot.Core.Tests` |
-| Palette contrast and type-scale tests | `dotnet test tests/Groot.UI.Tests` |
+| Store tests, against a real SQLite file in a temp directory | `dotnet test tests/Groot.Data.Tests` |
+| Palette contrast, type scale, components rendered with bUnit | `dotnet test tests/Groot.UI.Tests` |
 | Rule checks, the same ones CI runs | `bash tools/check-rules.sh` |
 | Build the component library; regenerates `tokens.css` | `dotnet build src/Groot.UI` |
 | Build the web head, the gallery | `dotnet build src/Groot.Web`, `dotnet build tools/Groot.UI.Gallery` |
@@ -39,6 +45,8 @@ gallery and the web head; the owner checks the app on the emulator.
 | Thing | Path |
 |---|---|
 | Engines: pure functions, tests are the spec | `src/Groot.Core/{Programs,Contract,Equipment,Intervals,Sessions}`, `tests/Groot.Core.Tests` |
+| Store: schema, connection factory, one repository per aggregate | `src/Groot.Data`, `tests/Groot.Data.Tests` |
+| Number formatting, one place for every weight and clock | `src/Groot.UI/Theme/GrootFormat.cs` |
 | Components: one `.razor`, its `.razor.css`, a state record | `src/Groot.UI/Components` |
 | Design tokens, single source | `src/Groot.UI/Theme/GrootPalette.cs`: `All` colours, `Scale` fonts and sizes, `MudRoles` MudBlazor mapping. Generated: `wwwroot/tokens.css` |
 | MudBlazor theme (C# side of the same roles), app shell | `src/Groot.UI/Theme/GrootTheme.cs`, `GrootShell.razor` |
@@ -91,7 +99,8 @@ gallery and the web head; the owner checks the app on the emulator.
 
 ### Every commit
 
-- `dotnet test tests/Groot.Core.Tests` and `bash tools/check-rules.sh` pass.
+- `dotnet test tests/Groot.Core.Tests`, `dotnet test tests/Groot.Data.Tests` and
+  `bash tools/check-rules.sh` pass.
 - `tokens.css` regenerated and committed whenever `GrootPalette.cs` changed; CI diffs it.
 - Conventional commit subject: `feat(ui): …`, `fix(run): …`, `test(core): …`, `docs: …`,
   `chore: …`, `ci: …`. One change per commit.
