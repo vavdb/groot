@@ -23,5 +23,5 @@ public sealed record EquipmentProfile(Equipment Bar, IReadOnlyList<PlatePair> Pl
     /// </summary>
     public static EquipmentProfile Rack { get; } = new(
         new Equipment("atx", "ATX Professional 30mm", EquipmentKind.Bar, WeightUnit.Kg, ActualKg: 11m, CountsAsKg: 10m),
-        [new(20m, 2), new(15m, 1), new(10m, 2), new(5m, 2), new(2.5m, 2), new(1.25m, 2)]);
+        [new(25m, 2), new(20m, 2), new(15m, 1), new(10m, 2), new(5m, 2), new(2.5m, 2), new(1.25m, 2)]);
 }

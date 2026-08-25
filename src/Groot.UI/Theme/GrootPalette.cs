@@ -44,6 +44,17 @@ public static class GrootPalette
         new("run-ink",   "#241c08", "#241c08"),
         new("walk-ink",  "#f2f5ec", "#151a12"),
         new("shadow",    "0 18px 60px rgba(38, 48, 31, .14)", "0 18px 60px rgba(0, 0, 0, .5)"),
+        // Olympic plate colours (IWF coding), the same in both themes because a plate does not
+        // change colour with the lighting. Fills only, never text: the 5 kg is off-white and the
+        // 1.25 kg is chrome, so both need plate-edge around them to read on either card.
+        new("plate-25",   "#c0392b", "#c0392b"),
+        new("plate-20",   "#2b6cb0", "#2b6cb0"),
+        new("plate-15",   "#e0a91b", "#e0a91b"),
+        new("plate-10",   "#2e8b57", "#2e8b57"),
+        new("plate-5",    "#f2f0e8", "#f2f0e8"),
+        new("plate-2-5",  "#c0392b", "#c0392b"),
+        new("plate-1-25", "#b8bcc0", "#b8bcc0"),
+        new("plate-edge", "#26301f", "#e8ead9"),
     ];
 
     /// <summary>
