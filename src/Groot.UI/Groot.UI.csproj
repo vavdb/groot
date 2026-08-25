@@ -26,6 +26,13 @@
           BeforeTargets="CoreCompile"
           Inputs="$(MSBuildProjectDirectory)/Theme/GrootPalette.cs;$(MSBuildProjectDirectory)/../../tools/Groot.Palette.Generator/Program.cs"
           Outputs="$(MSBuildProjectDirectory)/obj/$(Configuration)/tokens.stamp">
+    <!-- Restore first, in its own MSBuild call: on a fresh clone the generator has no
+         project.assets.json, and Build alone fails with NETSDK1004 before it can produce one.
+         Restore and Build cannot share a call, because Restore has to finish its own evaluation
+         before Build can read what it wrote. -->
+    <MSBuild Projects="$(MSBuildProjectDirectory)/../../tools/Groot.Palette.Generator/Groot.Palette.Generator.csproj"
+             Targets="Restore"
+             Properties="Configuration=$(Configuration)" />
     <MSBuild Projects="$(MSBuildProjectDirectory)/../../tools/Groot.Palette.Generator/Groot.Palette.Generator.csproj"
              Targets="Build"
              Properties="Configuration=$(Configuration)" />

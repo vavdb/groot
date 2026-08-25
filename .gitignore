@@ -39,3 +39,6 @@ mockups/
 
 # Playwright MCP scratch output (console logs, page snapshots)
 .playwright-mcp/
+
+# DSH updater scratch (downloaded tarballs, not ours)
+.dsh-update/
