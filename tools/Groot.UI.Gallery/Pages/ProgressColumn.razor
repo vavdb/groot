@@ -1,0 +1,123 @@
+@using Groot.UI.Theme
+@* The four Progress concepts for one theme, in the order they are argued in the page above.
+   These live in the gallery, not in Groot.UI: they are sketches to choose between, and only the
+   one that wins should become a component. *@
+
+<span class="theme-label">@(IsDark ? "Dark" : "Light")</span>
+
+<ConceptCard Name="A. Loaded bar, side on"
+             Tag="the metaphor"
+             Note="One bar per year, one scale. The plates are denominations the rack owns, so the load reads as a count of real plates. Length runs from a common left edge, and the marks sit where the year earned them.">
+    @foreach (var year in Years)
+    {
+        <div class="bar-row">
+            <span class="year">@year.Year</span>
+            <div class="bar">
+                <div class="sleeve"></div>
+                <div class="plates">
+                    @foreach (var plate in year.Plates)
+                    {
+                        <span class="plate p@(plate)"></span>
+                    }
+                    @if (year.HasGap)
+                    {
+                        <span class="notch" title="a week that broke"></span>
+                    }
+                    @if (year.HasJoker)
+                    {
+                        <span class="collar" title="a joker week"></span>
+                    }
+                    @if (year.HasPersonalRecord)
+                    {
+                        <span class="chalk" title="a record"></span>
+                    }
+                </div>
+            </div>
+            <span class="kilos">@Kg(year.Kilos)</span>
+        </div>
+    }
+</ConceptCard>
+
+<ConceptCard Name="B. Head on"
+             Tag="on the card today"
+             Note="Looking down the bar, drawn fairly: every disc is the plate's real diameter, largest first. 2023 moved a third of what 2027 did and the two are nearly the same picture, because duplicates hide behind each other and only the widest plate reads.">
+    <div class="discs">
+        @foreach (var year in Years)
+        {
+            <div class="disc-cell">
+                <div class="disc">
+                    @foreach (var plate in year.Plates.OrderByDescending(p => p))
+                    {
+                        <i class="d@(plate)"></i>
+                    }
+                </div>
+                <span class="disc-label">@year.Year · @Kg(year.Kilos)</span>
+            </div>
+        }
+    </div>
+</ConceptCard>
+
+<ConceptCard Name="C. Plate column"
+             Tag="the fastest read"
+             Note="The same plates stacked flat, the way they sit on the floor. Heights compare on one baseline and the shape survives a phone. It gives up the barbell silhouette, so it reads as a chart about plates rather than as lifting.">
+    <div class="columns">
+        @foreach (var year in Years)
+        {
+            <div class="column-cell">
+                <div class="stack">
+                    @foreach (var plate in year.Plates)
+                    {
+                        <span class="lie l@(plate)"></span>
+                    }
+                </div>
+                <span class="column-label">@year.Year<br />@Kg(year.Kilos)</span>
+            </div>
+        }
+    </div>
+</ConceptCard>
+
+<ConceptCard Name="D. Year strip"
+             Tag="no second metaphor"
+             Note="The season grid from Home, one row per year, 52 weeks across. The only concept that keeps when things happened: the gap sits on the weeks it cost, and the joker and the record land on their own week.">
+    @foreach (var year in Years)
+    {
+        <div class="strip-row">
+            <span class="year">@year.Year</span>
+            <div class="cells">
+                @for (var week = 0; week < 52; week++)
+                {
+                    <span class="cell @WeekClass(year, week)"></span>
+                }
+            </div>
+        </div>
+    }
+</ConceptCard>
+
+<SessionRecap />
+
+@code {
+    [Parameter] public bool IsDark { get; set; }
+
+    [Parameter] public IReadOnlyList<YearLoad> Years { get; set; } = YearLoad.Sample;
+
+    /// <summary>
+    /// A week's shade. Deterministic rather than random so the two theme columns draw the same
+    /// year, and so a screenshot taken twice is the same screenshot.
+    /// </summary>
+    private static string Kg(int kilos) => GrootFormat.Kilograms(kilos);
+
+    private static string WeekClass(YearLoad year, int week)
+    {
+        if (year.HasGap && week is > 18 and < 34) return "";
+        if (year.HasJoker && week == 41) return "joker";
+        if (year.HasPersonalRecord && week == 47) return "record";
+
+        var density = year.Kilos / 400_000.0;
+        var roll = (week * 37 + year.Year) % 100 / 100.0;
+
+        return roll < density * 0.55 ? "three"
+            : roll < density * 0.90 ? "two"
+            : roll < density * 1.15 ? "one"
+            : "";
+    }
+}

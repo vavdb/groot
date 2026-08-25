@@ -1,0 +1,32 @@
+/* Scoped to SessionRecap: these are its elements. Appending them to ProgressColumn's stylesheet
+   silently does nothing, which is the same trap the week card fell into once already. */
+
+.recaps { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 18px; align-items: start; }
+
+.recap-head { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+
+.recap-title {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-ink);
+}
+
+.recap-sub { font-size: var(--g-text-2xs); color: var(--g-dim); }
+
+.figures { margin: 0; display: grid; gap: 10px; }
+.figures div { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+
+.figures dt {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+}
+
+.figures dd {
+    margin: 0;
+    font-family: var(--g-font-display);
+    font-size: var(--g-text-lg);
+    font-variant-numeric: tabular-nums;
+    color: var(--g-ink);
+}

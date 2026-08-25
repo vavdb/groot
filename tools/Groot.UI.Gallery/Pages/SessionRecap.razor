@@ -1,0 +1,63 @@
+@* The plate column from concept C, moved to where it fits: the end of a session. A session's
+   plates are bounded and real, so nothing has to be scaled or invented. Two ways to count them,
+   side by side, because they answer different questions. *@
+@using Groot.Core.Equipment
+@using Groot.Core.Programs
+@using Groot.Core.Sessions
+@using Groot.UI.Theme
+
+<ConceptCard Name="E. Session recap"
+             Tag="C, after a session"
+             Note="@Note">
+    <div class="recaps">
+        <div class="recap">
+            <div class="recap-head">
+                <span class="recap-title">What you loaded</span>
+                <span class="recap-sub">once per bar</span>
+            </div>
+            <PlateStack Plates="Loaded" />
+        </div>
+
+        <div class="recap">
+            <div class="recap-head">
+                <span class="recap-title">What you handled</span>
+                <span class="recap-sub">once per set</span>
+            </div>
+            <PlateStack Plates="Handled" />
+        </div>
+
+        <div class="recap totals">
+            <div class="recap-head">
+                <span class="recap-title">@Plan.DayKey</span>
+                <span class="recap-sub">GZCLP</span>
+            </div>
+            <dl class="figures">
+                <div><dt>moved</dt><dd>@Kg(Volume)</dd></div>
+                <div><dt>sets</dt><dd>@Plan.TotalSets</dd></div>
+                <div><dt>plates carried</dt><dd>@Handled.Sum(p => p.Count)</dd></div>
+            </dl>
+        </div>
+    </div>
+</ConceptCard>
+
+@code {
+    [Parameter] public LiftSessionPlan Plan { get; set; } = SampleSession.A1;
+
+    private EquipmentProfile Rack => EquipmentProfile.Rack;
+
+    private IReadOnlyList<PlateCount> Loaded => SessionPlates.Loaded(Plan, Rack);
+
+    private IReadOnlyList<PlateCount> Handled => SessionPlates.Handled(Plan, Rack);
+
+    private decimal Volume => SessionPlates.Volume(Plan);
+
+    private const string Note =
+        "The same stack as C, drawn for one day instead of one year. Every plate here comes from "
+        + "PlateSolver against the owner's rack, so the picture is what the bar actually held. "
+        + "Loaded counts each plate once, which is what came off the rack. Handled counts it once "
+        + "per set, which grows with the work. Bodyweight lifts put nothing on a bar and so add "
+        + "nothing to either stack. The weights are a few months in, because opening weights land "
+        + "on one plate a side and a first session cannot show the colour coding at all.";
+
+    private static string Kg(decimal kilos) => GrootFormat.Kilograms(kilos);
+}

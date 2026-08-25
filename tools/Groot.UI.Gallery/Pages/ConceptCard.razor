@@ -1,0 +1,19 @@
+@* One concept: its name, what it is for, and the drawing itself. *@
+
+<section class="concept">
+    <header class="concept-head">
+        <h3 class="concept-name g-serif">@Name</h3>
+        <span class="concept-tag">@Tag</span>
+    </header>
+    <p class="concept-note">@Note</p>
+    <div class="concept-body">
+        @ChildContent
+    </div>
+</section>
+
+@code {
+    [Parameter, EditorRequired] public string Name { get; set; } = "";
+    [Parameter] public string Tag { get; set; } = "";
+    [Parameter] public string Note { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}

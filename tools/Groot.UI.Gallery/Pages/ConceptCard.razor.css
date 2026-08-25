@@ -1,0 +1,35 @@
+/* The card around one concept. Separate from ProgressColumn.razor.css because Blazor puts the
+   scope attribute on the component that renders the element, and these are ConceptCard's. */
+
+.concept {
+    background: var(--g-card);
+    border: 1px solid var(--g-line);
+    border-radius: 16px;
+    padding: 18px 18px 20px;
+    margin-top: 14px;
+}
+
+.concept-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.concept-name { font-size: var(--g-text-xl); font-weight: 700; margin: 0; }
+
+.concept-tag {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-amber-text);
+    white-space: nowrap;
+}
+
+.concept-note {
+    font-size: var(--g-text-xs);
+    color: var(--g-dim);
+    line-height: 1.55;
+    margin: 6px 0 16px;
+}
+

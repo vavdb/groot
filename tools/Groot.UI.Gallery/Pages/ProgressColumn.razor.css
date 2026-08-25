@@ -1,0 +1,110 @@
+/* Concept sketches for the Progress screen. Tokens only, same rule the component library
+   follows, so a concept that graduates into Groot.UI carries no literals with it.
+   The card chrome lives in ConceptCard.razor.css: Blazor scopes a stylesheet to the component
+   that renders the markup, and .concept is ConceptCard's element, not this one's. */
+
+/* A, loaded bar */
+.bar-row {
+    display: grid;
+    grid-template-columns: 46px 1fr 86px;
+    align-items: center;
+    gap: 10px;
+    margin: 9px 0;
+}
+
+.year { font-size: var(--g-text-xs); color: var(--g-dim); letter-spacing: var(--g-track-wide); }
+
+.kilos {
+    font-size: var(--g-text-xs);
+    color: var(--g-dim);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.bar { position: relative; height: 32px; display: flex; align-items: center; }
+
+.sleeve {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 5px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--g-ring) 45%, transparent);
+}
+
+.plates { position: relative; display: flex; align-items: center; gap: 2px; }
+
+.plate {
+    border-radius: 2px;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g-plate-edge) 30%, transparent);
+}
+
+.p25 { width: 13px; height: 32px; background: var(--g-plate-25); }
+.p20 { width: 11px; height: 27px; background: var(--g-plate-20); }
+.p15 { width: 9px;  height: 22px; background: var(--g-plate-15); }
+.p10 { width: 8px;  height: 17px; background: var(--g-plate-10); }
+.p5  { width: 7px;  height: 12px; background: var(--g-plate-5); }
+
+.notch { width: 10px; }
+.collar { width: 5px; height: 15px; border-radius: 2px; background: var(--g-dim); margin-left: 3px; }
+.chalk { width: 3px; height: 36px; border-radius: 2px; background: var(--g-ink); margin-left: 4px; }
+
+/* B, head on */
+.discs { display: flex; gap: 14px; align-items: flex-end; }
+.disc-cell { text-align: center; }
+.disc { position: relative; width: 76px; height: 76px; }
+
+.disc i {
+    position: absolute;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g-plate-edge) 30%, transparent);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    display: block;
+}
+
+.d25 { width: 76px; height: 76px; background: var(--g-plate-25); }
+.d20 { width: 63px; height: 63px; background: var(--g-plate-20); }
+.d15 { width: 50px; height: 50px; background: var(--g-plate-15); }
+.d10 { width: 38px; height: 38px; background: var(--g-plate-10); }
+.d5  { width: 26px; height: 26px; background: var(--g-plate-5); }
+
+.disc-label { display: block; font-size: var(--g-text-2xs); color: var(--g-dim); margin-top: 8px; }
+
+/* C, plate column */
+.columns { display: flex; gap: 20px; align-items: flex-end; min-height: 150px; }
+.column-cell { text-align: center; }
+.stack { display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; }
+
+.lie {
+    border-radius: 3px;
+    display: block;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--g-plate-edge) 30%, transparent);
+}
+
+.l25 { width: 52px; height: 15px; background: var(--g-plate-25); }
+.l20 { width: 46px; height: 13px; background: var(--g-plate-20); }
+.l15 { width: 40px; height: 11px; background: var(--g-plate-15); }
+.l10 { width: 34px; height: 9px;  background: var(--g-plate-10); }
+.l5  { width: 27px; height: 7px;  background: var(--g-plate-5); }
+
+.column-label { display: block; font-size: var(--g-text-2xs); color: var(--g-dim); margin-top: 8px; }
+
+/* D, year strip */
+.strip-row { display: grid; grid-template-columns: 46px 1fr; gap: 10px; align-items: center; margin: 7px 0; }
+.cells { display: grid; grid-template-columns: repeat(52, 1fr); gap: 2px; }
+
+.cell { aspect-ratio: 1; border-radius: 2px; background: var(--g-wither); }
+.cell.one { background: color-mix(in srgb, var(--g-moss) 35%, transparent); }
+.cell.two { background: color-mix(in srgb, var(--g-moss) 65%, transparent); }
+.cell.three { background: var(--g-moss); }
+.cell.joker { background: var(--g-amber); }
+.cell.record { background: var(--g-clay); }
+
+.theme-label {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}

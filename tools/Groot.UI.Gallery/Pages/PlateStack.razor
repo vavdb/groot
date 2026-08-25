@@ -1,0 +1,36 @@
+@using Groot.UI.Theme
+@* A stack of plates, heaviest on the floor, the way they end up beside the rack. *@
+
+<div class="plate-stack">
+    @if (Plates.Count == 0)
+    {
+        <span class="empty">nothing on the bar</span>
+    }
+    else
+    {
+        <div class="stack-body">
+            @foreach (var plate in Plates)
+            {
+                @for (var n = 0; n < plate.Count; n++)
+                {
+                    <span class="lie w@(Slug(plate.Kg))"></span>
+                }
+            }
+        </div>
+        <div class="legend">
+            @foreach (var plate in Plates)
+            {
+                <span class="legend-item"><b>@plate.Count</b>&nbsp;× @Kg(plate.Kg)</span>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<PlateCount> Plates { get; set; } = [];
+
+    /// <summary>A class-safe form of the denomination: 2.5 becomes 2-5.</summary>
+    private static string Slug(decimal kg) => kg.ToString("0.#").Replace('.', '-');
+
+    private static string Kg(decimal kg) => GrootFormat.Kilograms(kg);
+}
