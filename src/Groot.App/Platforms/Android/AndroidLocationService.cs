@@ -1,3 +1,4 @@
+using Groot.Core.Health;
 using Groot.UI.Health;
 
 namespace Groot.App.Platforms.Android;
@@ -27,17 +28,25 @@ public sealed class AndroidLocationService : ILocationService
     public LocationFix? Latest { get; private set; }
 
     /// <inheritdoc />
+    public string? Trouble { get; private set; }
+
+    /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
+        // Idempotent. Starting a session while the fix is already good must not tear it down and
+        // go back to searching, which is what the run screen would otherwise do every time Start
+        // is pressed. A real retry goes through Stop first; the run screen's chip does that.
         if (_listening) return;
 
         if (!await RequestPermissionAsync())
         {
             State = SensorState.Denied;
+            Trouble = "Groot needs the Location permission to record where you ran.";
             return;
         }
 
         State = SensorState.Searching;
+        Trouble = null;
 
         try
         {
@@ -48,13 +57,24 @@ public sealed class AndroidLocationService : ILocationService
                 new GeolocationListeningRequest(GeolocationAccuracy.Best, Interval));
 
             _listening = started;
-            if (!started) State = SensorState.Off;
+
+            if (!started)
+            {
+                State = SensorState.Off;
+                Trouble = "Android would not start location updates.";
+            }
         }
-        catch (Exception)
+        catch (FeatureNotEnabledException)
         {
-            // A phone with location switched off system-wide throws rather than refusing.
             State = SensorState.Off;
             _listening = false;
+            Trouble = "Location is switched off on this phone.";
+        }
+        catch (Exception exception)
+        {
+            State = SensorState.Off;
+            _listening = false;
+            Trouble = $"Location failed to start: {exception.GetType().Name}.";
         }
     }
 
@@ -92,6 +112,12 @@ public sealed class AndroidLocationService : ILocationService
             ++_sequence);
 
         State = SensorState.Live;
+
+        // A fix can be real and still too vague to draw. Saying so beats an empty map: a first
+        // fix indoors is often 50 m or worse and settles within a minute of being outside.
+        Trouble = location.Accuracy is { } accuracy && accuracy > RouteFix.WorstUsableAccuracyMetres
+            ? $"The fix is only good to {accuracy:0} m, so nothing is drawn yet."
+            : null;
     }
 
     private void OnListeningFailed(object? sender, GeolocationListeningFailedEventArgs e)

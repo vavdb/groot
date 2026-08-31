@@ -200,11 +200,21 @@
             <div class="caption">trouble · one watch stopped sharing, and location was refused</div>
             <SourceChips HeartRateEnabled="true" LocationEnabled="true"
                          LocationState="SensorState.Denied"
+                         LocationTrouble="Groot needs the Location permission to record where you ran."
                          Devices="@(new HeartRateDevice[]
                          {
                              new("a", "Amazfit", SensorState.Lost, null),
                              new("b", "Fitbit Air", SensorState.Searching, null),
                          })" />
+        </div>
+        <div>
+            <div class="caption">
+                the radio is off · without this line the chip reads exactly like "no watch in range",
+                and someone walks outside to test a radio that was never switched on
+            </div>
+            <SourceChips HeartRateEnabled="true" LocationEnabled="true"
+                         LocationState="SensorState.Searching"
+                         HeartRateTrouble="Bluetooth is switched off." />
         </div>
     </div>
 </section>

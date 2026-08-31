@@ -54,8 +54,28 @@
     border-color: var(--g-amber-text);
 }
 
+/* The dot pulses while the radio is actually looking. A still dot beside "looking for a monitor"
+   reads as stuck, which is exactly how the first build was described. Opacity only, so it costs
+   no layout, and it never fades all the way out: the dot stays a dot. */
 .chip.waiting .dot {
     background: var(--g-amber-text);
+    animation: searching 1.4s ease-in-out infinite;
+}
+
+@keyframes searching {
+    0%, 100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: .25;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .chip.waiting .dot {
+        animation: none;
+    }
 }
 
 .chip.denied {
@@ -69,4 +89,13 @@
 
 .chip.off {
     opacity: .72;
+}
+
+/* Why nothing is arriving, when there is more to say than "still looking". Clay rather than dim:
+   this is the line that stops someone walking outside to test a radio that was never switched on. */
+.trouble {
+    font-size: var(--g-text-sm);
+    line-height: 1.45;
+    color: var(--g-clay-text);
+    margin: 7px 0 0;
 }

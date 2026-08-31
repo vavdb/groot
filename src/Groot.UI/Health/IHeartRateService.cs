@@ -38,6 +38,17 @@ public interface IHeartRateService
 
     /// <summary>Stops listening and drops every connection.</summary>
     Task StopAsync();
+
+    /// <summary>
+    /// One short sentence about why nothing is arriving, or null when there is nothing to say.
+    /// <para>
+    /// This exists because "no reading" has several causes that look identical on screen: the
+    /// radio is off, the permission was refused, the scan itself was rejected, or there is simply
+    /// no watch broadcasting yet. Only the last is normal, and a runner standing in the cold
+    /// needs to be told which one they are looking at.
+    /// </para>
+    /// </summary>
+    string? Trouble { get; }
 }
 
 /// <summary>The heart rate service for a head that has no Bluetooth, such as the web one.</summary>
@@ -48,6 +59,8 @@ public sealed class NoHeartRateService : IHeartRateService
     public SensorState State => SensorState.Off;
 
     public IReadOnlyList<HeartRateDevice> Devices => [];
+
+    public string? Trouble => null;
 
     public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

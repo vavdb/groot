@@ -82,6 +82,8 @@
                          LocationEnabled="ShowRoute"
                          LocationState="@(Location?.State ?? SensorState.Off)"
                          DistanceKm="_route.DistanceMetres / 1000"
+                         HeartRateTrouble="@(HeartRate?.Trouble)"
+                         LocationTrouble="@(Location?.Trouble)"
                          OnRetry="RetryAsync" />
         }
 
@@ -105,6 +107,9 @@
 
 @code {
     private const int TickMilliseconds = 250;
+
+    /// <summary>How often the source chips refresh while the session is not running.</summary>
+    private const int ChipTickMilliseconds = 1000;
 
     /// <summary>
     /// The session being run. Replacing the instance (a new program/week/day) requires an
@@ -148,6 +153,7 @@
 
     private ICuePlayer? _cuePlayer;
     private CancellationTokenSource? _loop;
+    private CancellationTokenSource? _chipLoop;
 
     // One recorder per monitor, keyed by device id, plus the route. Built when the session
     // starts, because the trace's bucket count depends on how long the session is.
@@ -204,6 +210,53 @@
     {
         // Segment durations are validated in RunSession's constructor; a session here is always playable.
         _cuePlayer = CuePlayer;
+    }
+
+    /// <summary>
+    /// The radios come on when the screen opens, not when Start is pressed. A watch takes tens
+    /// of seconds to be found and a first GPS fix can take a minute, so waiting for Start meant
+    /// the chip read "looking for a monitor" while nothing was looking, and the first minute of
+    /// every run went unmeasured.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        await StartSensorsAsync();
+        StartChipLoop();
+    }
+
+    /// <summary>
+    /// Keeps the chips honest while the session is not running. The session's own loop redraws
+    /// four times a second, but before Start and while paused nothing else would, and a chip that
+    /// never changes is what "stuck on looking for a monitor" looked like.
+    /// </summary>
+    private void StartChipLoop()
+    {
+        var cts = new CancellationTokenSource();
+        _chipLoop = cts;
+        _ = ChipLoopAsync(cts.Token);
+    }
+
+    private async Task ChipLoopAsync(CancellationToken token)
+    {
+        using var timer = new PeriodicTimer(TimeSpan.FromMilliseconds(ChipTickMilliseconds));
+        try
+        {
+            while (await timer.WaitForNextTickAsync(token))
+            {
+                // Only when the session loop is not already redrawing, so the two never fight.
+                if (!_running) await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // The screen went away.
+        }
+        catch (ObjectDisposedException)
+        {
+            // Cancelled and disposed between ticks.
+        }
     }
 
     /// <summary>Whether there is a heart rate strip to draw: a supported service, switched on.</summary>
@@ -403,15 +456,38 @@
         switch (kind)
         {
             case SourceChips.SourceKind.HeartRate when HeartRate is { IsSupported: true }:
-                _heartRateOn = !_heartRateOn || HeartRate.State is not SensorState.Live;
-                if (_heartRateOn) await Try(() => HeartRate.StartAsync());
-                else await Try(HeartRate.StopAsync);
+                // Off, and the tap switches it on. On, and the tap is a retry, which is what a
+                // watch that has only just had its broadcast toggle turned on needs. Reading the
+                // state to decide would make the tap a no-op in exactly that case.
+                if (_heartRateOn && HeartRate.State is SensorState.Live)
+                {
+                    _heartRateOn = false;
+                    await Try(HeartRate.StopAsync);
+                }
+                else
+                {
+                    // Stop first: StartAsync is idempotent, so without this a retry on a service
+                    // that is already listening and deaf would do nothing at all.
+                    _heartRateOn = true;
+                    await Try(HeartRate.StopAsync);
+                    await Try(() => HeartRate.StartAsync());
+                }
+
                 break;
 
             case SourceChips.SourceKind.Location when Location is { IsSupported: true }:
-                _routeOn = !_routeOn || Location.State is not SensorState.Live;
-                if (_routeOn) await Try(() => Location.StartAsync());
-                else await Try(Location.StopAsync);
+                if (_routeOn && Location.State is SensorState.Live)
+                {
+                    _routeOn = false;
+                    await Try(Location.StopAsync);
+                }
+                else
+                {
+                    _routeOn = true;
+                    await Try(Location.StopAsync);
+                    await Try(() => Location.StartAsync());
+                }
+
                 break;
         }
     }
@@ -501,6 +577,9 @@
     public void Dispose()
     {
         StopLoop();
+        _chipLoop?.Cancel();
+        _chipLoop?.Dispose();
+        _chipLoop = null;
 
         // Leaving the screen must release the radios, or a GPS the size of a session keeps
         // running after the session is gone. Fire and forget: Dispose cannot await, and neither

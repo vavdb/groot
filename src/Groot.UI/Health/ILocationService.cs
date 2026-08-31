@@ -33,6 +33,9 @@ public interface ILocationService
 
     /// <summary>Stops following, and lets the radio go back to sleep.</summary>
     Task StopAsync();
+
+    /// <summary>One short sentence about why there is no fix, or null when there is nothing to say.</summary>
+    string? Trouble { get; }
 }
 
 /// <summary>The location service for a head that cannot produce one, such as the web head.</summary>
@@ -43,6 +46,8 @@ public sealed class NoLocationService : ILocationService
     public SensorState State => SensorState.Off;
 
     public LocationFix? Latest => null;
+
+    public string? Trouble => null;
 
     public Task StartAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 

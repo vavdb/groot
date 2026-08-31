@@ -17,6 +17,11 @@
     }
 </div>
 
+@foreach (var line in Troubles())
+{
+    <p class="trouble" role="status">@line</p>
+}
+
 @code {
     /// <summary>Which source a chip stands for, so the owner knows what was tapped.</summary>
     public enum SourceKind
@@ -45,6 +50,18 @@
 
     /// <summary>Raised when a chip is tapped: switch the source on, or try it again.</summary>
     [Parameter] public EventCallback<SourceKind> OnRetry { get; set; }
+
+    /// <summary>Why no heart rate is arriving, when there is something to say beyond "still looking".</summary>
+    [Parameter] public string? HeartRateTrouble { get; set; }
+
+    /// <summary>Why there is no fix, when there is something to say beyond "still looking".</summary>
+    [Parameter] public string? LocationTrouble { get; set; }
+
+    private IEnumerable<string> Troubles()
+    {
+        if (HeartRateEnabled && !string.IsNullOrWhiteSpace(HeartRateTrouble)) yield return HeartRateTrouble;
+        if (LocationEnabled && !string.IsNullOrWhiteSpace(LocationTrouble)) yield return LocationTrouble;
+    }
 
     private sealed record Chip(SourceKind Kind, string Text, string Class);
 

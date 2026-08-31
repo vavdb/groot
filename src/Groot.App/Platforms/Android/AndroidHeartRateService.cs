@@ -79,25 +79,51 @@ public sealed class AndroidHeartRateService : IHeartRateService
         (Application.Context.GetSystemService(Context.BluetoothService) as BluetoothManager)?.Adapter;
 
     /// <inheritdoc />
+    public string? Trouble { get; private set; }
+
+    /// <inheritdoc />
     public async Task StartAsync(CancellationToken cancellationToken = default)
     {
+        // Idempotent. Starting a session while a monitor is already connected must not drop it
+        // and reconnect, which costs the first ten seconds of readings. A real retry goes through
+        // Stop first; the run screen's chip does that.
         if (_listening) return;
 
-        if (Adapter is not { IsEnabled: true } adapter)
+        if (Adapter is not { IsEnabled: true })
         {
-            // The radio is off, or the phone has none. Nothing to do but say so.
             _listening = true;
             _denied = false;
+            Trouble = Adapter is null
+                ? "This phone has no Bluetooth."
+                : "Bluetooth is switched off.";
             return;
         }
 
         _denied = !await BluetoothPermissions.EnsureGrantedAsync();
         _listening = true;
-        if (_denied) return;
+
+        if (_denied)
+        {
+            Trouble = "Groot needs the Nearby devices permission to find your watch.";
+            return;
+        }
+
+        // Re-read the adapter after the permission round trip: it is a suspension point, and the
+        // radio can be switched off while the dialog is up.
+        if (Adapter is not { IsEnabled: true } adapter)
+        {
+            Trouble = "Bluetooth is switched off.";
+            return;
+        }
 
         _scanner = adapter.BluetoothLeScanner;
-        if (_scanner is null) return;
+        if (_scanner is null)
+        {
+            Trouble = "This phone cannot scan for Bluetooth Low Energy devices.";
+            return;
+        }
 
+        Trouble = null;
         _scanCallback = new Scanner(this);
 
         // Filtering on the service uuid rather than sniffing every advertisement in range: on a
@@ -310,6 +336,25 @@ public sealed class AndroidHeartRateService : IHeartRateService
             foreach (var result in results ?? [])
                 if (result.Device is { } device)
                     owner.Found(device);
+        }
+
+        /// <summary>
+        /// A scan that never started. Without this the failure is silent and reads on screen as
+        /// "no watch in range", which sends the runner outside to test a radio that was never on.
+        /// The common one is ApplicationRegistrationFailed: a previous scan is still registered,
+        /// which happens when the app was killed mid-session.
+        /// </summary>
+        public override void OnScanFailed(ScanFailure errorCode)
+        {
+            owner.Trouble = errorCode switch
+            {
+                ScanFailure.AlreadyStarted => "Already scanning.",
+                ScanFailure.ApplicationRegistrationFailed =>
+                    "Bluetooth is holding an old scan. Switch Bluetooth off and on again.",
+                ScanFailure.FeatureUnsupported => "This phone cannot scan for heart rate monitors.",
+                ScanFailure.InternalError => "Bluetooth reported an internal error.",
+                _ => $"Bluetooth refused the scan ({errorCode}).",
+            };
         }
     }
 }
