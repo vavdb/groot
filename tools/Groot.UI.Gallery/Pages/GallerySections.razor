@@ -100,6 +100,42 @@
 </section>
 
 <section class="section">
+    <h2>HeartRateTrace</h2>
+    <div class="caption">
+        the line is the heart rate, its colour is the zone, the bands are the run and walk blocks ·
+        SegmentBar sits under each one to show the two stay aligned
+    </div>
+    <div class="stack">
+        <div>
+            <div class="caption">one device · 19 minutes into a 30 minute session</div>
+            <HeartRateTrace Trace="MidSession.View()" Segments="RunSegments" ElapsedSeconds="1140" />
+            <SegmentBar Segments="RunSegments" SegmentIndex="11" Started="true" />
+        </div>
+        <div>
+            <div class="caption">two devices · the dashed line is the second one</div>
+            <HeartRateTrace Trace="MidSession.View()" Second="SecondDevice.View()"
+                            Segments="RunSegments" ElapsedSeconds="1140" />
+            <SegmentBar Segments="RunSegments" SegmentIndex="11" Started="true" />
+        </div>
+        <div>
+            <div class="caption">connected, no reading yet · bands only, and the strip keeps its height</div>
+            <HeartRateTrace Trace="HeartRateTraceView.Empty(48)" Segments="RunSegments" ElapsedSeconds="0" />
+            <SegmentBar Segments="RunSegments" SegmentIndex="0" />
+        </div>
+        <div>
+            <div class="caption">session finished · every zone the run passed through</div>
+            <HeartRateTrace Trace="WholeSession.View()" Segments="RunSegments" ElapsedSeconds="1800" />
+            <SegmentBar Segments="RunSegments" SegmentIndex="17" Started="true" Finished="true" />
+        </div>
+        <div>
+            <div class="caption">a hard session · the top two zones, which is where clay and pulse-peak have to separate</div>
+            <HeartRateTrace Trace="HardSession.View()" Segments="RunSegments" ElapsedSeconds="1800" />
+            <SegmentBar Segments="RunSegments" SegmentIndex="17" Started="true" Finished="true" />
+        </div>
+    </div>
+</section>
+
+<section class="section">
     <h2>WeekCard</h2>
     <div class="stack">
         <div>
@@ -118,6 +154,61 @@
 </section>
 
 @code {
+    // ---- HeartRateTrace samples -------------------------------------------------
+    // A 0→5K week 1 session: five minutes of warmup, eight run blocks, five of cooldown.
+
+    private const int SessionSeconds = 1800;
+
+    /// <summary>The same segment list the trace bands and the segment bar are both drawn from.</summary>
+    private static readonly Segment[] RunSegments =
+    [
+        new(SegmentKind.Walk, 300, "warmup"),
+        .. Enumerable.Range(0, 8).SelectMany(_ => new[]
+        {
+            new Segment(SegmentKind.Run, 60),
+            new Segment(SegmentKind.Walk, 90),
+        }),
+        new(SegmentKind.Walk, 300, "cooldown"),
+    ];
+
+    /// <summary>Walks settle towards a floor, runs climb towards a ceiling, and the whole thing drifts up.</summary>
+    private static int SampleBpm(int second, int lift)
+    {
+        var at = 0;
+        foreach (var segment in RunSegments)
+        {
+            at += segment.Seconds;
+            if (second >= at) continue;
+
+            var into = second - (at - segment.Seconds);
+            var drift = Math.Min(18, second / 70);
+            return segment.Kind == SegmentKind.Run
+                ? 112 + lift + drift + (int)(34 * Math.Min(1, into / 45.0))
+                : 96 + lift + drift + (int)(34 * Math.Max(0, 1 - into / 55.0));
+        }
+
+        return 96 + lift;
+    }
+
+    private static HeartRateTrack Filled(int throughSecond, int lift = 0, int everySeconds = 5)
+    {
+        var track = new HeartRateTrack(SessionSeconds, buckets: 48);
+        for (var second = 0; second <= throughSecond; second += everySeconds)
+            track.Add(second, SampleBpm(second, lift));
+
+        return track;
+    }
+
+    private static readonly HeartRateTrack MidSession = Filled(1140);
+
+    // A second watch on the same body: a few beats off, and reporting half as often.
+    private static readonly HeartRateTrack SecondDevice = Filled(1140, lift: 4, everySeconds: 10);
+
+    private static readonly HeartRateTrack WholeSession = Filled(SessionSeconds);
+
+    // The same session run 30 bpm harder, so the trace reaches the hard and maximum zones.
+    private static readonly HeartRateTrack HardSession = Filled(SessionSeconds, lift: 30);
+
     /// <summary>What the phone head offers today: Progress has no screen yet.</summary>
     private static readonly GrootDestination[] Shipping =
         [GrootDestination.Run, GrootDestination.Home, GrootDestination.Lift];

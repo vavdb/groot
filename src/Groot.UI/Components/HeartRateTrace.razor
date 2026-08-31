@@ -1,0 +1,184 @@
+@* The heart rate a session is running at, drawn over the run and walk blocks it happened in.
+   Three things in one strip: the bands are the segments, the line is the heart rate, and the
+   line's colour is the zone that reading falls in. A second device draws as a dashed line.
+
+   The bands come from the same Segment list SegmentBar draws, at the same proportional widths,
+   so a run block starts at the same x in both and the two stack as one object. Both are 100%
+   of their container, so they stay aligned at any width. *@
+@using Groot.Core.Health
+@using Groot.Core.Intervals
+
+<div class="hr-trace">
+    <div class="hr-head">
+        <span class="hr-label">@Label</span>
+        <span class="hr-now">
+            @(Trace.Current?.ToString() ?? "—")<span class="unit">bpm</span>
+        </span>
+    </div>
+
+    <svg viewBox="0 0 @Width @Height" class="hr-svg" role="img" aria-label="@Description">
+        @foreach (var band in Bands())
+        {
+            <rect x="@F(band.X)" y="0" width="@F(band.Width)" height="@Height"
+                  class="@(band.Run ? "band run" : "band walk") @(band.Started ? "past" : "ahead")" />
+        }
+
+        @if (Second is { IsEmpty: false } second)
+        {
+            <polyline points="@Points(second)" class="second" />
+        }
+
+        @foreach (var stroke in Strokes())
+        {
+            <line x1="@F(stroke.X1)" y1="@F(stroke.Y1)" x2="@F(stroke.X2)" y2="@F(stroke.Y2)"
+                  class="line @ZoneClass(stroke.Bpm)" />
+        }
+
+        @if (Head is { } head)
+        {
+            <circle cx="@F(head.X)" cy="@F(head.Y)" r="4.5" class="head @ZoneClass(head.Bpm)" />
+        }
+    </svg>
+
+    <div class="hr-foot">
+        <span>@ZoneName(Trace.Current)</span>
+        <span>@Summary</span>
+    </div>
+</div>
+
+@code {
+    // The drawing grid. Only the SVG's own coordinates: the strip renders at whatever width
+    // its container is, and everything inside is proportional to these two numbers.
+    private const double Width = 343;
+    private const double Height = 60;
+    private const double VerticalPadding = 3;
+
+    /// <summary>The readings to draw. An empty trace still renders the bands and the empty track.</summary>
+    [Parameter, EditorRequired] public HeartRateTraceView Trace { get; set; } = HeartRateTraceView.Empty(1);
+
+    /// <summary>A second device on the same body, drawn as a dashed line. Null when only one is connected.</summary>
+    [Parameter] public HeartRateTraceView? Second { get; set; }
+
+    /// <summary>The session's segments, which become the bands behind the line.</summary>
+    [Parameter] public IReadOnlyList<Segment> Segments { get; set; } = [];
+
+    /// <summary>How far into the session we are. Bands past this point are drawn faint.</summary>
+    [Parameter] public int ElapsedSeconds { get; set; }
+
+    /// <summary>The runner's highest heart rate, which sets where the zone boundaries fall.</summary>
+    [Parameter] public int MaximumBpm { get; set; } = HeartRateZones.DefaultMaximumBpm;
+
+    /// <summary>The caption above the reading.</summary>
+    [Parameter] public string Label { get; set; } = "heart rate";
+
+    private int TotalSeconds => Segments.Sum(s => s.Seconds);
+
+    private sealed record Band(double X, double Width, bool Run, bool Started);
+
+    private sealed record Stroke(double X1, double Y1, double X2, double Y2, int Bpm);
+
+    private sealed record Point(double X, double Y, int Bpm);
+
+    /// <summary>Two decimal places is under a tenth of a pixel at phone width, and keeps the markup short.</summary>
+    private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    private IEnumerable<Band> Bands()
+    {
+        var total = TotalSeconds;
+        if (total <= 0) yield break;
+
+        var at = 0;
+        foreach (var segment in Segments)
+        {
+            var x = at / (double)total * Width;
+            var width = segment.Seconds / (double)total * Width;
+            yield return new Band(x, width, segment.Kind == SegmentKind.Run, at < ElapsedSeconds);
+            at += segment.Seconds;
+        }
+    }
+
+    private double X(int bucket) =>
+        Trace.Buckets.Count <= 1 ? 0 : bucket / (double)(Trace.Buckets.Count - 1) * Width;
+
+    private double Y(int bpm) =>
+        Height - VerticalPadding - Trace.Axis.Fraction(bpm) * (Height - VerticalPadding * 2);
+
+    /// <summary>
+    /// One line per pair of neighbouring buckets rather than a single polyline: the colour is the
+    /// zone, and the zone changes partway along the trace.
+    /// </summary>
+    private IEnumerable<Stroke> Strokes()
+    {
+        int? previous = null;
+        var previousBucket = 0;
+
+        for (var i = 0; i < Trace.FilledBuckets && i < Trace.Buckets.Count; i++)
+        {
+            if (Trace.Buckets[i] is not { } bpm) continue;
+
+            if (previous is { } from)
+                yield return new Stroke(X(previousBucket), Y(from), X(i), Y(bpm), bpm);
+
+            previous = bpm;
+            previousBucket = i;
+        }
+    }
+
+    /// <summary>Where the trace has got to. Null before the first reading arrives.</summary>
+    private Point? Head
+    {
+        get
+        {
+            for (var i = Math.Min(Trace.FilledBuckets, Trace.Buckets.Count) - 1; i >= 0; i--)
+                if (Trace.Buckets[i] is { } bpm)
+                    return new Point(X(i), Y(bpm), bpm);
+
+            return null;
+        }
+    }
+
+    /// <summary>The second device's line, plotted against the primary's axis so the two compare.</summary>
+    private string Points(HeartRateTraceView second)
+    {
+        var count = Math.Min(second.FilledBuckets, second.Buckets.Count);
+        var points = new List<string>(count);
+
+        for (var i = 0; i < count; i++)
+            if (second.Buckets[i] is { } bpm)
+                points.Add($"{F(SecondX(second, i))},{F(Y(bpm))}");
+
+        return string.Join(' ', points);
+    }
+
+    /// <summary>The second device may report at a different rate, so it gets its own bucket count.</summary>
+    private static double SecondX(HeartRateTraceView second, int bucket) =>
+        second.Buckets.Count <= 1 ? 0 : bucket / (double)(second.Buckets.Count - 1) * Width;
+
+    private string ZoneClass(int bpm) => HeartRateZones.Of(bpm, MaximumBpm) switch
+    {
+        HeartRateZone.Easy => "z-easy",
+        HeartRateZone.Steady => "z-steady",
+        HeartRateZone.Moderate => "z-moderate",
+        HeartRateZone.Hard => "z-hard",
+        _ => "z-max",
+    };
+
+    private string ZoneName(int? bpm) => bpm is not { } value
+        ? "waiting for a reading"
+        : HeartRateZones.Of(value, MaximumBpm) switch
+        {
+            HeartRateZone.Easy => "easy",
+            HeartRateZone.Steady => "steady",
+            HeartRateZone.Moderate => "moderate",
+            HeartRateZone.Hard => "hard",
+            _ => "maximum",
+        };
+
+    private string Summary => Trace is { Average: { } average, Maximum: { } maximum }
+        ? $"avg {average} · max {maximum}"
+        : "no readings yet";
+
+    private string Description => Trace.Current is { } current
+        ? $"Heart rate {current} beats per minute, {ZoneName(current)}, over the session's run and walk blocks"
+        : "Heart rate, no reading yet";
+}

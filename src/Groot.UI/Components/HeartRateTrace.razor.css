@@ -1,0 +1,143 @@
+/* The root div is ours, so the scope attribute lands on it and every selector below reaches
+   an element this component renders itself. No MudBlazor children here, so no ::deep. */
+.hr-trace {
+    display: block;
+}
+
+.hr-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.hr-label {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}
+
+.hr-now {
+    font-family: var(--g-font-display);
+    font-weight: 600;
+    font-size: var(--g-text-2xl);
+    line-height: 1;
+    color: var(--g-ink);
+    /* The number changes every second or two; tabular figures stop it shuffling sideways. */
+    font-variant-numeric: tabular-nums;
+}
+
+.hr-now .unit {
+    font-family: var(--g-font-ui);
+    font-size: var(--g-text-xs);
+    font-weight: 500;
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+    margin-left: 3px;
+}
+
+/* Full width and uniform scaling: the segment bar below is also 100% of the same container,
+   so a band and its stripe stay on the same x at any width. */
+.hr-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.band.run {
+    fill: var(--g-amber);
+}
+
+.band.walk {
+    fill: var(--g-ring);
+}
+
+/* Blocks already run sit forward of the ones still to come. Both stay well under the line. */
+.band.run.past {
+    opacity: .18;
+}
+
+.band.walk.past {
+    opacity: .13;
+}
+
+.band.run.ahead {
+    opacity: .07;
+}
+
+.band.walk.ahead {
+    opacity: .05;
+}
+
+.line {
+    stroke-width: 3;
+    stroke-linecap: round;
+    fill: none;
+}
+
+/* The zone the reading falls in. Five steps, cool to warm; each clears 3:1 on the page as a
+   UI graphic (PaletteContrastTests pins them). Colour is never the only channel: the zone is
+   also written out under the trace. */
+.z-easy {
+    stroke: var(--g-dim);
+}
+
+.z-steady {
+    stroke: var(--g-moss);
+}
+
+.z-moderate {
+    stroke: var(--g-amber-text);
+}
+
+.z-hard {
+    stroke: var(--g-clay-text);
+}
+
+.z-max {
+    stroke: var(--g-pulse-peak);
+}
+
+.head {
+    stroke: var(--g-bg);
+    stroke-width: 2;
+}
+
+.head.z-easy {
+    fill: var(--g-dim);
+}
+
+.head.z-steady {
+    fill: var(--g-moss);
+}
+
+.head.z-moderate {
+    fill: var(--g-amber-text);
+}
+
+.head.z-hard {
+    fill: var(--g-clay-text);
+}
+
+.head.z-max {
+    fill: var(--g-pulse-peak);
+}
+
+/* The second device: one dashed ink line, deliberately quieter than the primary. */
+.second {
+    fill: none;
+    stroke: var(--g-ink);
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+    opacity: .45;
+}
+
+.hr-foot {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+    margin-top: 5px;
+}

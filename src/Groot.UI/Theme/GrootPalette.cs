@@ -38,6 +38,9 @@ public static class GrootPalette
         // PaletteContrastTests pins both. Fills stay amber/clay with run-ink/card on top.
         new("amber-text", "#8f6212", "#e0aa4a"),
         new("clay-text",  "#a04f2e", "#d97e56"),
+        // The top heart rate zone. clay-text collapses onto clay in the dark theme, so the two
+        // hardest zones would draw the same colour without a fifth step of its own.
+        new("pulse-peak", "#6b1206", "#f0a37f"),
         // Signature-visual accents (CSS-only; no MudBlazor role)
         new("ring",      "#8aa385", "#4a5f45"),
         new("wither",    "#c9c2ae", "#3a4234"),

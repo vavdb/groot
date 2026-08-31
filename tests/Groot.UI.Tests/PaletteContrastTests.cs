@@ -32,6 +32,26 @@ public class PaletteContrastTests
         { "amber-text", "card", Graphic, "active set ring, today slot border, session dots" },
         { "clay-text", "card", Graphic, "joker slot border" },
         { "moss", "card", Graphic, "summary border" },
+        // The five heart rate zones, drawn as a 3px stroke over the run/walk bands. The bands
+        // are tints of amber and ring at 18% or less, so the page background is what the stroke
+        // has to read against.
+        { "dim", "bg", Graphic, "heart rate trace, easy zone" },
+        { "moss", "bg", Graphic, "heart rate trace, steady zone" },
+        { "amber-text", "bg", Graphic, "heart rate trace, moderate zone" },
+        { "clay-text", "bg", Graphic, "heart rate trace, hard zone" },
+        { "pulse-peak", "bg", Graphic, "heart rate trace, maximum zone" },
+    };
+
+    /// <summary>
+    /// Zone colours that must stay apart from each other, not just from the background. clay-text
+    /// collapses onto clay in the dark theme, which is why the top zone has a token of its own.
+    /// </summary>
+    public static TheoryData<string, string> DistinctZonePairs => new()
+    {
+        { "dim", "moss" },
+        { "moss", "amber-text" },
+        { "amber-text", "clay-text" },
+        { "clay-text", "pulse-peak" },
     };
 
     /// <summary>MudBlazor text roles and the fill role they sit on.</summary>
@@ -94,6 +114,17 @@ public class PaletteContrastTests
         });
     }
 
+    [Theory]
+    [MemberData(nameof(DistinctZonePairs))]
+    public void Neighbouring_zone_colours_stay_apart_in_both_themes(string lower, string higher)
+    {
+        // Perceptual distance, not contrast ratio: the WCAG ratio is a luminance comparison, and
+        // moss against amber-text is 1.06:1 there while being obviously two different colours.
+        // Telling one stroke from the next is a hue question, so it needs a hue-aware measure.
+        AssertDistinct(GrootPalette.Light(lower), GrootPalette.Light(higher), $"{lower} beside {higher}, light");
+        AssertDistinct(GrootPalette.Dark(lower), GrootPalette.Dark(higher), $"{lower} beside {higher}, dark");
+    }
+
     [Fact]
     public void Text_safe_accents_match_their_base_in_dark_theme()
     {
@@ -106,6 +137,50 @@ public class PaletteContrastTests
     private static string TokenFor(string mudRole) =>
         GrootPalette.MudRoles.FirstOrDefault(r => r.Mud == mudRole)?.Token
         ?? throw new KeyNotFoundException($"No MudRole '{mudRole}' in GrootPalette.MudRoles.");
+
+    /// <summary>
+    /// Two colours a reader has to tell apart when they sit next to each other. 15 is the usual
+    /// "clearly a different colour" mark on this scale; a just-noticeable difference is about 2.
+    /// </summary>
+    private static void AssertDistinct(string a, string b, string what)
+    {
+        const double MinimumDifference = 15;
+
+        var difference = Difference(a, b);
+        Assert.True(difference >= MinimumDifference,
+            $"{what}: {a} and {b} differ by {difference:0.0}, minimum {MinimumDifference}");
+    }
+
+    /// <summary>
+    /// CIE76 colour difference between two 6-digit hex colours, by way of sRGB to XYZ to L*a*b*.
+    /// Unlike the WCAG ratio this notices hue, which is what separates one zone stroke from the
+    /// next: two colours can sit at the same lightness and still be plainly different colours.
+    /// </summary>
+    internal static double Difference(string hexA, string hexB)
+    {
+        var (l1, a1, b1) = Lab(hexA);
+        var (l2, a2, b2) = Lab(hexB);
+
+        return Math.Sqrt((l1 - l2) * (l1 - l2) + (a1 - a2) * (a1 - a2) + (b1 - b2) * (b1 - b2));
+    }
+
+    private static (double L, double A, double B) Lab(string hex)
+    {
+        var (r, g, b) = LinearRgb(hex);
+
+        // sRGB to CIE XYZ, D65.
+        var x = (0.4124 * r + 0.3576 * g + 0.1805 * b) / 0.95047;
+        var y = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        var z = (0.0193 * r + 0.1192 * g + 0.9505 * b) / 1.08883;
+
+        static double Pivot(double t) => t > 0.008856 ? Math.Cbrt(t) : (7.787 * t) + (16.0 / 116);
+
+        var fx = Pivot(x);
+        var fy = Pivot(y);
+        var fz = Pivot(z);
+
+        return (116 * fy - 16, 500 * (fx - fy), 200 * (fy - fz));
+    }
 
     private static void AssertRatio(string fg, string bg, double minimum, string what)
     {
@@ -124,11 +199,18 @@ public class PaletteContrastTests
 
     private static double Luminance(string hex)
     {
+        var (r, g, b) = LinearRgb(hex);
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    /// <summary>A hex colour with the sRGB transfer curve undone, which both measures start from.</summary>
+    private static (double R, double G, double B) LinearRgb(string hex)
+    {
         var h = hex.TrimStart('#');
         if (h.Length != 6)
             throw new ArgumentException($"'{hex}' is not a 6-digit hex colour; only solid colours can be measured.", nameof(hex));
 
-        return 0.2126 * Channel(h, 0) + 0.7152 * Channel(h, 2) + 0.0722 * Channel(h, 4);
+        return (Channel(h, 0), Channel(h, 2), Channel(h, 4));
     }
 
     private static double Channel(string hex, int offset)

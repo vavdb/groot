@@ -1,20 +1,28 @@
+/* No gap between the stripes. A flex gap is a fixed number of pixels, so across eighteen
+   segments it takes about 15% of the width away from the stripes and every one after the first
+   lands left of where its seconds say it should. HeartRateTrace draws its bands from the same
+   segments at true proportional widths and stacks directly above this, so the two would drift
+   apart. The separation is a transparent border inside each stripe instead: it looks the same
+   and costs no width. */
 .segbar {
     display: flex;
-    gap: 3px;
 }
 
 .segbar i {
+    box-sizing: border-box;
     height: 7px;
     border-radius: 3px;
+    border-inline: 1.5px solid transparent;
+    background-clip: content-box;
     opacity: .34;
 }
 
 .segbar .w {
-    background: var(--g-ring);
+    background-color: var(--g-ring);
 }
 
 .segbar .r {
-    background: var(--g-amber);
+    background-color: var(--g-amber);
 }
 
 .segbar .done {
