@@ -66,3 +66,12 @@
     color: var(--g-dim);
     margin-top: 2px;
 }
+
+/* The heart rate trace and the segment bar are one object: the trace's bands and the bar's
+   stripes come from the same segments at the same proportional widths, so they line up. The
+   gap between them is deliberately smaller than the stack's own spacing. */
+.measured {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}

@@ -2,9 +2,11 @@
    segment bar are custom colour-state visuals (see RunFlood/SegmentBar); the rest is MudBlazor.
    Interval maths comes from Groot.Core's RunSession. *@
 @using System.Diagnostics
+@using Groot.Core.Health
 @using Groot.Core.Intervals
 @using Groot.UI.Theme
 @using Groot.UI.Audio
+@using Groot.UI.Health
 @implements IDisposable
 
 <section class="run-screen" aria-label="@Heading">
@@ -36,10 +38,28 @@
             <span class="cue-text">@(_lastCueText ?? "Cues speak at every switch and ten seconds before it.")</span>
         </div>
 
-        <SegmentBar Segments="Session.Segments"
-                    SegmentIndex="Progress.SegmentIndex"
-                    Started="@_started"
-                    Finished="@_finished" />
+        @* The trace and the bar are one object: both are drawn from Session.Segments at the same
+           proportional widths, so a run block starts at the same x in each. Keep them adjacent. *@
+        <div class="measured">
+            @if (ShowHeartRate)
+            {
+                <HeartRateTrace Trace="_primary.View()"
+                                Second="@(_secondary?.View())"
+                                Segments="Session.Segments"
+                                ElapsedSeconds="@(_started ? ElapsedSeconds : 0)"
+                                MaximumBpm="MaximumBpm" />
+            }
+
+            <SegmentBar Segments="Session.Segments"
+                        SegmentIndex="Progress.SegmentIndex"
+                        Started="@_started"
+                        Finished="@_finished" />
+        </div>
+
+        @if (ShowRoute)
+        {
+            <RouteMap Route="_route.View()" Segments="Session.Segments" MaximumBpm="MaximumBpm" />
+        }
 
         <GrootStats>
             <GrootStat Label="elapsed" Value="@Clock(Progress.ElapsedTotal)" />
@@ -53,6 +73,16 @@
                 <MudText Typo="Typo.h5" Class="g-serif big">Done · @Clock(Session.TotalSeconds)</MudText>
                 <MudText Typo="Typo.caption" Class="subt">@Session.RunCount run blocks · @Clock(Session.RunSeconds) running · @SessionLabel</MudText>
             </GrootPanel>
+        }
+
+        @if (HeartRate?.IsSupported == true || Location?.IsSupported == true)
+        {
+            <SourceChips Devices="@(HeartRate?.Devices ?? [])"
+                         HeartRateEnabled="ShowHeartRate"
+                         LocationEnabled="ShowRoute"
+                         LocationState="@(Location?.State ?? SensorState.Off)"
+                         DistanceKm="_route.DistanceMetres / 1000"
+                         OnRetry="RetryAsync" />
         }
 
         <MudStack Row="true" Spacing="2">
@@ -98,8 +128,65 @@
 
     [Parameter] public EventCallback OnFinished { get; set; }
 
+    /// <summary>
+    /// The heart rate monitors, if this head has any. Null, or a service that is not supported,
+    /// and the screen is exactly what it was before: no trace, no chips.
+    /// </summary>
+    [Parameter] public IHeartRateService? HeartRate { get; set; }
+
+    /// <summary>Where the phone is, if this head can tell. Null leaves the route off.</summary>
+    [Parameter] public ILocationService? Location { get; set; }
+
+    /// <summary>The runner's highest heart rate, which sets where the zone boundaries fall.</summary>
+    [Parameter] public int MaximumBpm { get; set; } = HeartRateZones.DefaultMaximumBpm;
+
+    /// <summary>
+    /// Raised when a session finishes, with everything that was measured during it. The owner
+    /// stores it; the screen does not know what a database is.
+    /// </summary>
+    [Parameter] public EventCallback<MeasuredRun> OnMeasured { get; set; }
+
     private ICuePlayer? _cuePlayer;
     private CancellationTokenSource? _loop;
+
+    // One recorder per monitor, keyed by device id, plus the route. Built when the session
+    // starts, because the trace's bucket count depends on how long the session is.
+    private readonly Dictionary<string, MonitorRecording> _heartRates = [];
+    private RouteTrack _route = new();
+    private long _lastFixSequence = -1;
+
+    private HeartRateTrack _primary = new(1);
+    private HeartRateTrack? _secondary;
+
+    /// <summary>
+    /// What one monitor produced: the bucketed track the trace draws, and every reading as it
+    /// arrived. The two are not the same thing. The track holds about fifty buckets however long
+    /// the session is, which is the right amount to draw and far too little to keep: an export
+    /// to Health Connect or to a GPX file wants the readings themselves, roughly one a second.
+    /// </summary>
+    private sealed class MonitorRecording(int totalSeconds)
+    {
+        private int _lastLoggedSecond = -1;
+
+        public HeartRateTrack Track { get; } = new(totalSeconds);
+
+        public List<HeartRateSample> Samples { get; } = [];
+
+        /// <summary>
+        /// Records a reading. The screen polls four times a second and a monitor reports about
+        /// once, so only the first reading of each second is kept: without that the log is three
+        /// quarters repeats, and the store would collapse them on the way in anyway.
+        /// </summary>
+        public void Add(int elapsedSeconds, int bpm)
+        {
+            Track.Add(elapsedSeconds, bpm);
+
+            if (elapsedSeconds == _lastLoggedSecond) return;
+
+            _lastLoggedSecond = elapsedSeconds;
+            Samples.Add(new HeartRateSample(elapsedSeconds, bpm));
+        }
+    }
 
     // Monotonic clock (Stopwatch.GetTimestamp), not DateTimeOffset.UtcNow — the wall clock can
     // jump backwards (NTP adjustment) and truncating to whole seconds at every pause loses up
@@ -118,6 +205,17 @@
         // Segment durations are validated in RunSession's constructor; a session here is always playable.
         _cuePlayer = CuePlayer;
     }
+
+    /// <summary>Whether there is a heart rate strip to draw: a supported service, switched on.</summary>
+    private bool ShowHeartRate => HeartRate is { IsSupported: true } && _heartRateOn;
+
+    /// <summary>Whether there is a route to draw.</summary>
+    private bool ShowRoute => Location is { IsSupported: true } && _routeOn;
+
+    // Both default on where the head supports them: someone who put a watch on and pressed start
+    // wants the reading, and the chips are there to turn either back off.
+    private bool _heartRateOn = true;
+    private bool _routeOn = true;
 
     private long CurrentElapsedMs => _running ? _elapsedMs + MsSince(_resumeTimestamp) : _elapsedMs;
 
@@ -170,6 +268,9 @@
         _started = true;
         _running = true;
         _resumeTimestamp = Stopwatch.GetTimestamp();
+
+        ResetMeasurements();
+        await StartSensorsAsync();
 
         var cts = new CancellationTokenSource();
         _loop = cts;
@@ -234,6 +335,8 @@
         // While paused nothing moves; only a skip can push elapsed past the last cue second.
         if (!_running && elapsed <= _lastCueSecond) return;
 
+        Sample(elapsed);
+
         if (_running || elapsed > _lastCueSecond)
         {
             foreach (var cue in Session.CuesBetween(_lastCueSecond, elapsed))
@@ -247,6 +350,8 @@
             _running = false;
             _elapsedMs = Session.TotalSeconds * 1000L;
             StopLoop();
+            await StopSensorsAsync();
+            await OnMeasured.InvokeAsync(new MeasuredRun(Session.Id, Session.TotalSeconds, Measured()));
             await OnFinished.InvokeAsync();
         }
 
@@ -277,6 +382,115 @@
         _ => CueSound.Warning,
     };
 
+    // ---- what the session measured -------------------------------------------------------
+
+    private void ResetMeasurements()
+    {
+        _heartRates.Clear();
+        _route = new RouteTrack();
+        _lastFixSequence = -1;
+        _primary = new HeartRateTrack(Session.TotalSeconds);
+        _secondary = null;
+    }
+
+    /// <summary>
+    /// A chip was tapped. Off, and it switches that source on for this session; on, and it asks
+    /// the service to try again, which is what a monitor that has just had its broadcast toggle
+    /// turned on needs.
+    /// </summary>
+    private async Task RetryAsync(SourceChips.SourceKind kind)
+    {
+        switch (kind)
+        {
+            case SourceChips.SourceKind.HeartRate when HeartRate is { IsSupported: true }:
+                _heartRateOn = !_heartRateOn || HeartRate.State is not SensorState.Live;
+                if (_heartRateOn) await Try(() => HeartRate.StartAsync());
+                else await Try(HeartRate.StopAsync);
+                break;
+
+            case SourceChips.SourceKind.Location when Location is { IsSupported: true }:
+                _routeOn = !_routeOn || Location.State is not SensorState.Live;
+                if (_routeOn) await Try(() => Location.StartAsync());
+                else await Try(Location.StopAsync);
+                break;
+        }
+    }
+
+    private async Task StartSensorsAsync()
+    {
+        // A sensor that will not start must never stop a run. The chips say what happened.
+        if (ShowHeartRate) await Try(() => HeartRate!.StartAsync());
+        if (ShowRoute) await Try(() => Location!.StartAsync());
+    }
+
+    private async Task StopSensorsAsync()
+    {
+        if (HeartRate is not null) await Try(HeartRate.StopAsync);
+        if (Location is not null) await Try(Location.StopAsync);
+    }
+
+    private static async Task Try(Func<Task> work)
+    {
+        try
+        {
+            await work();
+        }
+        catch
+        {
+            // A radio that refuses to start, or to stop, is not a reason to lose the session.
+        }
+    }
+
+    /// <summary>
+    /// Reads whatever the sensors are holding and stamps it with the session's own clock.
+    /// <para>
+    /// Polled here rather than pushed from an event: a monitor reports about once a second and
+    /// this already runs four times a second, so nothing is missed, every reading lands on the
+    /// render thread without marshalling, and a reading that arrives while the session is paused
+    /// is simply never taken — which is what a paused session means.
+    /// </para>
+    /// </summary>
+    private void Sample(int elapsedSeconds)
+    {
+        var bpm = default(int?);
+
+        if (ShowHeartRate)
+        {
+            foreach (var device in HeartRate!.Devices)
+            {
+                if (device is not { State: SensorState.Live, Bpm: { } reading }) continue;
+
+                if (!_heartRates.TryGetValue(device.Id, out var recording))
+                {
+                    recording = new MonitorRecording(Session.TotalSeconds);
+                    _heartRates[device.Id] = recording;
+                }
+
+                recording.Add(elapsedSeconds, reading);
+            }
+
+            // The first monitor to report anything is the one whose number the screen shows and
+            // whose line is drawn solid. Whichever connected first, not whichever sorts first.
+            _primary = _heartRates.Values.FirstOrDefault()?.Track ?? _primary;
+            _secondary = _heartRates.Values.Skip(1).FirstOrDefault()?.Track;
+            bpm = _primary.Current;
+        }
+
+        if (ShowRoute && Location!.Latest is { } fix && fix.Sequence != _lastFixSequence)
+        {
+            _lastFixSequence = fix.Sequence;
+            _route.Add(new RouteFix(elapsedSeconds, fix.Latitude, fix.Longitude, fix.AccuracyMetres, bpm));
+        }
+    }
+
+    /// <summary>Everything the session measured, for the owner to store.</summary>
+    private MeasuredSession Measured() => new(
+        _heartRates.ToDictionary(
+            pair => pair.Key,
+            pair => (IReadOnlyList<HeartRateSample>)pair.Value.Samples),
+        _route.Fixes,
+        _route.DistanceMetres);
+
     private void StopLoop()
     {
         _loop?.Cancel();
@@ -284,5 +498,13 @@
         _loop = null;
     }
 
-    public void Dispose() => StopLoop();
+    public void Dispose()
+    {
+        StopLoop();
+
+        // Leaving the screen must release the radios, or a GPS the size of a session keeps
+        // running after the session is gone. Fire and forget: Dispose cannot await, and neither
+        // service throws out of Stop.
+        _ = StopSensorsAsync();
+    }
 }

@@ -1,6 +1,28 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Where the run went. Coarse as well as fine: Android asks for both together, and a phone
+         that only grants the coarse one still produces a route, just a rougher one. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+
+    <!-- Heart rate monitors, over the standard Bluetooth Heart Rate profile. Android 12 split
+         the old blanket permission in two; the pre-12 pair stays for older phones with the
+         maxSdkVersion that stops it being asked for on new ones.
+
+         usesPermissionFlags="neverForLocation" is the promise that these scan results are not
+         used to work out where the phone is. Without it Android 12 and later insist on the
+         location permission for a scan as well. -->
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+                     android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
+
+    <!-- A phone without Bluetooth Low Energy still runs the app; it just never finds a monitor. -->
+    <uses-feature android:name="android.hardware.bluetooth_le" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
 </manifest>

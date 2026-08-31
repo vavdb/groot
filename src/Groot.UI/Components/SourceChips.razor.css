@@ -1,0 +1,72 @@
+.sources {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+}
+
+/* A real button, not a styled div: it is tapped to switch a source on or try it again, so it
+   needs the keyboard and the accessibility tree that comes with the element. */
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    /* 44px of touch target with a 30px chip: the padding is on the outside, so the row stays
+       tight while the tappable area clears the floor in AGENTS.md. */
+    min-height: 44px;
+    padding: 7px 11px;
+    border: 1px solid var(--g-line);
+    border-radius: 15px;
+    background: var(--g-card);
+    color: var(--g-dim);
+    font-family: var(--g-font-ui);
+    font-size: var(--g-text-xs);
+    letter-spacing: var(--g-track-wide);
+    cursor: pointer;
+    /* The number on a live chip changes every second; tabular figures stop it twitching. */
+    font-variant-numeric: tabular-nums;
+}
+
+.chip:focus-visible {
+    outline: 2px solid var(--g-amber-text);
+    outline-offset: 2px;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--g-line);
+    flex: none;
+}
+
+.chip.live {
+    color: var(--g-ink);
+    border-color: var(--g-moss);
+}
+
+.chip.live .dot {
+    background: var(--g-moss);
+}
+
+.chip.waiting {
+    color: var(--g-ink);
+    border-style: dashed;
+    border-color: var(--g-amber-text);
+}
+
+.chip.waiting .dot {
+    background: var(--g-amber-text);
+}
+
+.chip.denied {
+    color: var(--g-ink);
+    border-color: var(--g-clay-text);
+}
+
+.chip.denied .dot {
+    background: var(--g-clay-text);
+}
+
+.chip.off {
+    opacity: .72;
+}

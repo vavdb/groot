@@ -2,9 +2,11 @@
    and the session, so there is no second copy of any of that: the pencil beside the session dots
    opens the picker in place, and closes it again. Both heads embed this; the head-specific
    inputs are Programs, ShowProgram, the cue player, and the audio callbacks. *@
+@using Groot.Core.Health
 @using Groot.Core.Intervals
 @using Groot.Core.Programs
 @using Groot.UI.Audio
+@using Groot.UI.Health
 
 <div class="run-scene">
     @if (Selection is { } selected)
@@ -13,7 +15,11 @@
                    Session="selected.Session"
                    CuePlayer="@(ShowAudioControls && !SoundEnabled ? null : CuePlayer)"
                    Language="Language"
-                   SessionsInWeek="selected.SessionsInWeek">
+                   SessionsInWeek="selected.SessionsInWeek"
+                   HeartRate="HeartRate"
+                   Location="Location"
+                   MaximumBpm="MaximumBpm"
+                   OnMeasured="OnMeasured">
             <HeaderAction>
                 <MudIconButton Icon="@(_editing ? Icons.Material.Filled.Check : Icons.Material.Filled.Edit)"
                                Size="Size.Small"
@@ -45,6 +51,18 @@
 
     /// <summary>Raised when the voice language or sound toggle changes. Web maps this onto its cue player.</summary>
     [Parameter] public EventCallback<GrootAudioState> AudioChanged { get; set; }
+
+    /// <summary>The heart rate monitors, if this head has any. Null leaves the trace off.</summary>
+    [Parameter] public IHeartRateService? HeartRate { get; set; }
+
+    /// <summary>Where the phone is, if this head can tell. Null leaves the route off.</summary>
+    [Parameter] public ILocationService? Location { get; set; }
+
+    /// <summary>The runner's highest heart rate, which sets where the zone boundaries fall.</summary>
+    [Parameter] public int MaximumBpm { get; set; } = HeartRateZones.DefaultMaximumBpm;
+
+    /// <summary>Raised when a session finishes, with what it measured. The head stores it.</summary>
+    [Parameter] public EventCallback<MeasuredRun> OnMeasured { get; set; }
 
     private string _programId = "";
     private int _week;

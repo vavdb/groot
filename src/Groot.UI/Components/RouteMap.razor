@@ -1,0 +1,170 @@
+@* Where the session went. The eight run blocks of a week one session are eight thick coloured
+   strokes around the loop and the walks between them are a thin thread, so the drawing is mostly
+   the part that is the point. A run stroke takes its colour from the heart rate zone at that
+   point, the same rule the trace above it uses, so a clay stretch here is a clay stretch there.
+
+   There is no route ahead to draw: unlike the segment bar, a map cannot know where the runner
+   has not been yet. *@
+@using Groot.Core.Health
+@using Groot.Core.Intervals
+
+<div class="route-map">
+    <div class="map-head">
+        <span class="map-label">@Label</span>
+        <span class="map-distance">
+            @Distance<span class="unit">km</span>
+        </span>
+    </div>
+
+    @if (Route.IsEmpty)
+    {
+        <p class="map-empty">@EmptyLine</p>
+    }
+    else
+    {
+        <svg viewBox="0 0 @F(BoxWidth) @F(BoxHeight)" class="map-svg" role="img" aria-label="@Description">
+            @foreach (var stroke in Strokes())
+            {
+                <line x1="@F(stroke.X1)" y1="@F(stroke.Y1)" x2="@F(stroke.X2)" y2="@F(stroke.Y2)"
+                      class="@stroke.Class" />
+            }
+
+            @foreach (var marker in Markers())
+            {
+                <circle cx="@F(marker.X)" cy="@F(marker.Y)" r="3" class="marker" />
+                @MarkerLabel(marker)
+            }
+
+            @if (Head is { } head)
+            {
+                <circle cx="@F(head.X)" cy="@F(head.Y)" r="5.5" class="head @ZoneClass(head.Bpm)" />
+            }
+        </svg>
+    }
+</div>
+
+@code {
+    // The drawing grid. Width is fixed and height follows the shape of the ground, held between
+    // two bounds so a route down one long street does not become a 12px sliver and a route round
+    // one block does not take half the screen.
+    private const double BoxWidth = 343;
+    private const double MinimumHeight = 110;
+    private const double MaximumHeight = 210;
+    private const double Margin = 12;
+
+    /// <summary>The route to draw. An empty one shows a line of copy instead.</summary>
+    [Parameter, EditorRequired] public RouteTraceView Route { get; set; } = RouteTraceView.Empty;
+
+    /// <summary>The session's segments, which decide which strokes are run blocks.</summary>
+    [Parameter] public IReadOnlyList<Segment> Segments { get; set; } = [];
+
+    /// <summary>The runner's highest heart rate, which sets where the zone boundaries fall.</summary>
+    [Parameter] public int MaximumBpm { get; set; } = HeartRateZones.DefaultMaximumBpm;
+
+    /// <summary>The caption above the distance.</summary>
+    [Parameter] public string Label { get; set; } = "route";
+
+    /// <summary>What to say before the first fix arrives.</summary>
+    [Parameter] public string EmptyLine { get; set; } = "Looking for satellites. The session runs either way.";
+
+    private sealed record Stroke(double X1, double Y1, double X2, double Y2, string Class);
+
+    private sealed record Marker(double X, double Y, string Label);
+
+    private sealed record Point(double X, double Y, int? Bpm);
+
+    private static string F(double value) => value.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+
+    /// <summary>
+    /// An SVG <c>&lt;text&gt;</c> element, built as markup rather than written out. Razor reserves
+    /// the tag name <c>text</c> for its own control flow and refuses one carrying attributes, so
+    /// this is the way to emit the real element. Every label is produced by
+    /// <see cref="Markers"/> from a number, so nothing user-supplied reaches the markup.
+    /// </summary>
+    private static MarkupString MarkerLabel(Marker marker) => new(
+        $"""<text x="{F(marker.X + 6)}" y="{F(marker.Y + 3.5)}" class="marker-text">{marker.Label}</text>""");
+
+    private double BoxHeight => Math.Clamp(BoxWidth / Math.Max(0.05, Route.AspectRatio), MinimumHeight, MaximumHeight);
+
+    private string Distance => Route.DistanceKm.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture);
+
+    private double PlotX(RoutePlot plot) => Margin + plot.X * (BoxWidth - Margin * 2);
+
+    private double PlotY(RoutePlot plot) => Margin + plot.Y * (BoxHeight - Margin * 2);
+
+    /// <summary>Whether the runner was in a run block at this point in the session.</summary>
+    private bool IsRunning(int elapsedSeconds)
+    {
+        var at = 0;
+        foreach (var segment in Segments)
+        {
+            at += segment.Seconds;
+            if (elapsedSeconds < at) return segment.Kind == SegmentKind.Run;
+        }
+
+        return false;
+    }
+
+    private IEnumerable<Stroke> Strokes()
+    {
+        var points = Route.Points;
+        for (var i = 1; i < points.Count; i++)
+        {
+            var to = points[i];
+            var running = IsRunning(to.ElapsedSeconds);
+
+            // A gap in the fix is drawn as a thin dashed join whatever it was crossing: the
+            // straight line between the two points is not where the runner went, and drawing it
+            // as a solid run block claims ground that was never measured.
+            var cssClass = to.GapBefore
+                ? "leg gap"
+                : running ? $"leg run {ZoneClass(to.Bpm)}" : "leg walk";
+
+            yield return new Stroke(PlotX(points[i - 1]), PlotY(points[i - 1]), PlotX(to), PlotY(to), cssClass);
+        }
+    }
+
+    /// <summary>The start, and then one for every whole kilometre after it.</summary>
+    private IEnumerable<Marker> Markers()
+    {
+        var points = Route.Points;
+        if (points.Count == 0) yield break;
+
+        yield return new Marker(PlotX(points[0]), PlotY(points[0]), "start");
+
+        var nextKm = 1;
+        foreach (var plot in points)
+        {
+            while (plot.DistanceMetres >= nextKm * 1000)
+            {
+                yield return new Marker(PlotX(plot), PlotY(plot), $"{nextKm}k");
+                nextKm++;
+            }
+        }
+    }
+
+    /// <summary>Where the runner is now.</summary>
+    private Point? Head => Route.Points.Count == 0
+        ? null
+        : new Point(PlotX(Route.Points[^1]), PlotY(Route.Points[^1]), Route.Points[^1].Bpm);
+
+    /// <summary>
+    /// The zone class for a stroke, or the plain one when no monitor was connected. Without a
+    /// heart rate there are no zones to colour by, so the run blocks stay one colour.
+    /// </summary>
+    private string ZoneClass(int? bpm) => bpm is not { } value
+        ? "z-none"
+        : HeartRateZones.Of(value, MaximumBpm) switch
+        {
+            HeartRateZone.Easy => "z-easy",
+            HeartRateZone.Steady => "z-steady",
+            HeartRateZone.Moderate => "z-moderate",
+            HeartRateZone.Hard => "z-hard",
+            _ => "z-max",
+        };
+
+    private string Description =>
+        Route.IsEmpty
+            ? "No route yet"
+            : $"Route so far, {Distance} kilometres. Run blocks are drawn thick, walks as a thin line.";
+}

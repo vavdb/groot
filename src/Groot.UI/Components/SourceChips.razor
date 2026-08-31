@@ -1,0 +1,98 @@
+@* What the session is listening to, and the only control the run screen has for it. A chip
+   names a device, says what it is doing, and is the tap target when something needs doing.
+
+   There is no Connect button by design: a watch only advertises its heart rate while its own
+   broadcast toggle is on, because it costs battery, so "switched on and not connected" is the
+   ordinary first half minute of a session rather than a failure. A full-width button for that
+   would sit on screen through most of a run with nothing to do. Pairing lives in settings. *@
+@using Groot.UI.Health
+
+<div class="sources" role="group" aria-label="Measuring devices">
+    @foreach (var chip in Chips())
+    {
+        <button type="button" class="chip @chip.Class" @onclick="() => OnRetry.InvokeAsync(chip.Kind)">
+            <span class="dot" aria-hidden="true"></span>
+            <span>@chip.Text</span>
+        </button>
+    }
+</div>
+
+@code {
+    /// <summary>Which source a chip stands for, so the owner knows what was tapped.</summary>
+    public enum SourceKind
+    {
+        /// <summary>The heart rate monitors.</summary>
+        HeartRate,
+
+        /// <summary>The phone's own position.</summary>
+        Location,
+    }
+
+    /// <summary>The heart rate monitors being listened to.</summary>
+    [Parameter] public IReadOnlyList<HeartRateDevice> Devices { get; set; } = [];
+
+    /// <summary>Whether heart rate is switched on for this session at all.</summary>
+    [Parameter] public bool HeartRateEnabled { get; set; }
+
+    /// <summary>Whether the route is switched on for this session at all.</summary>
+    [Parameter] public bool LocationEnabled { get; set; }
+
+    /// <summary>Where the position fix is.</summary>
+    [Parameter] public SensorState LocationState { get; set; } = SensorState.Off;
+
+    /// <summary>How far the route has got, shown on the chip once there is one.</summary>
+    [Parameter] public double DistanceKm { get; set; }
+
+    /// <summary>Raised when a chip is tapped: switch the source on, or try it again.</summary>
+    [Parameter] public EventCallback<SourceKind> OnRetry { get; set; }
+
+    private sealed record Chip(SourceKind Kind, string Text, string Class);
+
+    private IEnumerable<Chip> Chips()
+    {
+        if (!HeartRateEnabled)
+        {
+            yield return new Chip(SourceKind.HeartRate, "Heart rate off", "off");
+        }
+        else if (Devices.Count == 0)
+        {
+            yield return new Chip(SourceKind.HeartRate, "Looking for a monitor", "waiting");
+        }
+        else
+        {
+            foreach (var device in Devices)
+                yield return new Chip(SourceKind.HeartRate, DeviceText(device), StateClass(device.State));
+        }
+
+        yield return LocationEnabled
+            ? new Chip(SourceKind.Location, LocationText, StateClass(LocationState))
+            : new Chip(SourceKind.Location, "Route off", "off");
+    }
+
+    private static string DeviceText(HeartRateDevice device) => device.State switch
+    {
+        SensorState.Live when device.Bpm is { } bpm => $"{device.Name} · {bpm}",
+        SensorState.Live => $"{device.Name} · connected",
+        SensorState.Searching => $"{device.Name} · turn on sharing",
+        SensorState.Lost => $"{device.Name} · lost, retrying",
+        SensorState.Denied => $"{device.Name} · needs permission",
+        _ => device.Name,
+    };
+
+    private string LocationText => LocationState switch
+    {
+        SensorState.Live => $"GPS · {DistanceKm.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)} km",
+        SensorState.Searching => "GPS · finding you",
+        SensorState.Lost => "GPS · lost the fix",
+        SensorState.Denied => "GPS · needs permission",
+        _ => "GPS off",
+    };
+
+    private static string StateClass(SensorState state) => state switch
+    {
+        SensorState.Live => "live",
+        SensorState.Searching or SensorState.Lost => "waiting",
+        SensorState.Denied => "denied",
+        _ => "off",
+    };
+}

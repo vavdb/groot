@@ -1,7 +1,7 @@
 namespace Groot.Core.Health;
 
 /// <summary>
-/// Collects position reports for one session and hands out a <see cref="RouteView"/> to draw.
+/// Collects position reports for one session and hands out a <see cref="RouteTraceView"/> to draw.
 /// Keeps every fix it accepts, which is a few thousand for a long run and small enough to hold.
 /// <para>
 /// Deterministic given the order fixes go in; nothing here reads a clock. Two filters do most of
@@ -27,6 +27,7 @@ public sealed class RouteTrack
 
     private readonly List<RouteFix> _fixes = [];
     private readonly List<bool> _gapBefore = [];
+    private readonly List<double> _distanceAt = [];
 
     /// <summary>The fixes that were kept, in order.</summary>
     public IReadOnlyList<RouteFix> Fixes => _fixes;
@@ -49,6 +50,7 @@ public sealed class RouteTrack
         {
             _fixes.Add(fix);
             _gapBefore.Add(false);
+            _distanceAt.Add(0);
             return true;
         }
 
@@ -57,9 +59,10 @@ public sealed class RouteTrack
         var moved = Geo.DistanceMetres(previous.Latitude, previous.Longitude, fix.Latitude, fix.Longitude);
         if (moved < MinimumMoveMetres) return false;
 
+        DistanceMetres += moved;
         _fixes.Add(fix);
         _gapBefore.Add(fix.ElapsedSeconds - previous.ElapsedSeconds > GapSeconds);
-        DistanceMetres += moved;
+        _distanceAt.Add(DistanceMetres);
         return true;
     }
 
@@ -68,6 +71,7 @@ public sealed class RouteTrack
     {
         _fixes.Clear();
         _gapBefore.Clear();
+        _distanceAt.Clear();
         DistanceMetres = 0;
     }
 
@@ -80,9 +84,9 @@ public sealed class RouteTrack
     /// tables. The unit square is filled on the longer side; the shorter one is centred in it.
     /// </para>
     /// </summary>
-    public RouteView View()
+    public RouteTraceView View()
     {
-        if (_fixes.Count == 0) return RouteView.Empty;
+        if (_fixes.Count == 0) return RouteTraceView.Empty;
 
         var minLat = double.MaxValue;
         var maxLat = double.MinValue;
@@ -119,10 +123,11 @@ public sealed class RouteTrack
                 // Latitude climbs north and a screen's y climbs south, so this one flips.
                 (offsetY + (maxLat - fix.Latitude)) / span,
                 fix.ElapsedSeconds,
+                _distanceAt[i],
                 fix.Bpm,
                 _gapBefore[i]));
         }
 
-        return new RouteView(points, DistanceMetres, aspect);
+        return new RouteTraceView(points, DistanceMetres, aspect);
     }
 }

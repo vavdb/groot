@@ -1,0 +1,137 @@
+/* The root div is ours; every selector below reaches an element this component renders. */
+.route-map {
+    display: block;
+}
+
+.map-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 7px;
+}
+
+.map-label {
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}
+
+.map-distance {
+    font-family: var(--g-font-display);
+    font-weight: 600;
+    font-size: var(--g-text-xl);
+    line-height: 1;
+    color: var(--g-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+.map-distance .unit {
+    font-family: var(--g-font-ui);
+    font-size: var(--g-text-xs);
+    font-weight: 500;
+    letter-spacing: var(--g-track-wide);
+    color: var(--g-dim);
+    margin-left: 3px;
+}
+
+.map-empty {
+    font-size: var(--g-text-sm);
+    color: var(--g-dim);
+    margin: 2px 0 0;
+}
+
+.map-svg {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+
+.leg {
+    fill: none;
+    stroke-linecap: round;
+}
+
+/* A run block is the thing worth looking at: in week one you run for eight minutes and walk for
+   twenty-two, so the walks drop back to a thread. */
+.leg.run {
+    stroke-width: 5;
+}
+
+.leg.walk {
+    stroke: var(--g-line);
+    stroke-width: 2;
+}
+
+.leg.gap {
+    stroke: var(--g-line);
+    stroke-width: 2;
+    stroke-dasharray: 2 5;
+}
+
+/* The same five zone steps the heart rate trace uses. z-none is the run colour when no monitor
+   was connected: without a heart rate there are no zones to colour by. */
+.leg.z-none {
+    stroke: var(--g-amber-text);
+}
+
+.leg.z-easy {
+    stroke: var(--g-dim);
+}
+
+.leg.z-steady {
+    stroke: var(--g-moss);
+}
+
+.leg.z-moderate {
+    stroke: var(--g-amber-text);
+}
+
+.leg.z-hard {
+    stroke: var(--g-clay-text);
+}
+
+.leg.z-max {
+    stroke: var(--g-pulse-peak);
+}
+
+.marker {
+    fill: var(--g-bg);
+    stroke: var(--g-dim);
+    stroke-width: 1.5;
+}
+
+.marker-text {
+    font-family: var(--g-font-ui);
+    font-size: var(--g-text-2xs);
+    fill: var(--g-dim);
+}
+
+.head {
+    stroke: var(--g-bg);
+    stroke-width: 2.5;
+}
+
+.head.z-none {
+    fill: var(--g-amber-text);
+}
+
+.head.z-easy {
+    fill: var(--g-dim);
+}
+
+.head.z-steady {
+    fill: var(--g-moss);
+}
+
+.head.z-moderate {
+    fill: var(--g-amber-text);
+}
+
+.head.z-hard {
+    fill: var(--g-clay-text);
+}
+
+.head.z-max {
+    fill: var(--g-pulse-peak);
+}

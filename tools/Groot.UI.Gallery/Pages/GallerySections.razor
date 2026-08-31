@@ -105,7 +105,7 @@
         the line is the heart rate, its colour is the zone, the bands are the run and walk blocks ·
         SegmentBar sits under each one to show the two stay aligned
     </div>
-    <div class="stack">
+    <div class="stack phone-width">
         <div>
             <div class="caption">one device · 19 minutes into a 30 minute session</div>
             <HeartRateTrace Trace="MidSession.View()" Segments="RunSegments" ElapsedSeconds="1140" />
@@ -131,6 +131,80 @@
             <div class="caption">a hard session · the top two zones, which is where clay and pulse-peak have to separate</div>
             <HeartRateTrace Trace="HardSession.View()" Segments="RunSegments" ElapsedSeconds="1800" />
             <SegmentBar Segments="RunSegments" SegmentIndex="17" Started="true" Finished="true" />
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>RouteMap</h2>
+    <div class="caption">
+        run blocks thick and coloured by heart rate zone, walks a thin thread · there is no route
+        ahead to draw, because a map cannot know where the runner has not been yet
+    </div>
+    <div class="stack phone-width">
+        <div>
+            <div class="caption">mid-session, monitor connected</div>
+            <RouteMap Route="PartRoute.View()" Segments="RunSegments" />
+        </div>
+        <div>
+            <div class="caption">finished · the whole loop</div>
+            <RouteMap Route="WholeRoute.View()" Segments="RunSegments" />
+        </div>
+        <div>
+            <div class="caption">no monitor · without a heart rate there are no zones, so run blocks stay one colour</div>
+            <RouteMap Route="RouteWithoutHeartRate.View()" Segments="RunSegments" />
+        </div>
+        <div>
+            <div class="caption">the fix dropped for a minute · the join is dashed, not claimed as ground covered</div>
+            <RouteMap Route="RouteWithGap.View()" Segments="RunSegments" />
+        </div>
+        <div>
+            <div class="caption">no fix yet</div>
+            <RouteMap Route="RouteTraceView.Empty" Segments="RunSegments" />
+        </div>
+    </div>
+</section>
+
+<section class="section">
+    <h2>SourceChips</h2>
+    <div class="caption">
+        what the session is listening to, and the whole control surface for it · a chip is the tap
+        target, so there is no Connect button competing with Start
+    </div>
+    <div class="stack">
+        <div>
+            <div class="caption">both off · the run screen as it was before any of this</div>
+            <SourceChips />
+        </div>
+        <div>
+            <div class="caption">on, nothing connected yet · the ordinary first half minute</div>
+            <SourceChips HeartRateEnabled="true" LocationEnabled="true" LocationState="SensorState.Searching" />
+        </div>
+        <div>
+            <div class="caption">one monitor and a fix</div>
+            <SourceChips HeartRateEnabled="true" LocationEnabled="true"
+                         LocationState="SensorState.Live" DistanceKm="2.43"
+                         Devices="@(new HeartRateDevice[] { new("a", "Amazfit", SensorState.Live, 148) })" />
+        </div>
+        <div>
+            <div class="caption">two monitors</div>
+            <SourceChips HeartRateEnabled="true" LocationEnabled="true"
+                         LocationState="SensorState.Live" DistanceKm="2.43"
+                         Devices="@(new HeartRateDevice[]
+                         {
+                             new("a", "Amazfit", SensorState.Live, 148),
+                             new("b", "Fitbit Air", SensorState.Live, 151),
+                         })" />
+        </div>
+        <div>
+            <div class="caption">trouble · one watch stopped sharing, and location was refused</div>
+            <SourceChips HeartRateEnabled="true" LocationEnabled="true"
+                         LocationState="SensorState.Denied"
+                         Devices="@(new HeartRateDevice[]
+                         {
+                             new("a", "Amazfit", SensorState.Lost, null),
+                             new("b", "Fitbit Air", SensorState.Searching, null),
+                         })" />
         </div>
     </div>
 </section>
@@ -208,6 +282,59 @@
 
     // The same session run 30 bpm harder, so the trace reaches the hard and maximum zones.
     private static readonly HeartRateTrack HardSession = Filled(SessionSeconds, lift: 30);
+
+    // ---- RouteMap samples ---------------------------------------------------------
+    // A lumpy loop rather than a circle, so it reads as streets rather than a running track.
+    // Run blocks cover roughly twice the ground per second that walk blocks do.
+
+    private const double StartLatitude = 52.37;
+    private const double StartLongitude = 4.90;
+
+    private static bool RunningAt(int second)
+    {
+        var at = 0;
+        foreach (var segment in RunSegments)
+        {
+            at += segment.Seconds;
+            if (second < at) return segment.Kind == SegmentKind.Run;
+        }
+
+        return false;
+    }
+
+    private static RouteTrack Loop(int throughSecond, bool withHeartRate = true, (int From, int To)? gap = null)
+    {
+        var track = new RouteTrack();
+        var along = 0.0;
+
+        for (var second = 0; second <= throughSecond; second += 3)
+        {
+            if (gap is { } lost && second >= lost.From && second <= lost.To) continue;
+
+            along += RunningAt(second) ? 0.0019 : 0.001;
+            var angle = along * Math.PI * 2;
+            var radius = 1
+                + 0.30 * Math.Sin(angle * 2 + 0.6)
+                + 0.16 * Math.Sin(angle * 3 - 1.1);
+
+            track.Add(new RouteFix(
+                second,
+                StartLatitude + Math.Sin(angle - Math.PI / 2) * radius * 0.0042,
+                StartLongitude + Math.Cos(angle - Math.PI / 2) * radius * 0.0085,
+                AccuracyMetres: 7,
+                Bpm: withHeartRate ? SampleBpm(second, 0) : null));
+        }
+
+        return track;
+    }
+
+    private static readonly RouteTrack PartRoute = Loop(1140);
+
+    private static readonly RouteTrack WholeRoute = Loop(SessionSeconds);
+
+    private static readonly RouteTrack RouteWithoutHeartRate = Loop(SessionSeconds, withHeartRate: false);
+
+    private static readonly RouteTrack RouteWithGap = Loop(SessionSeconds, gap: (900, 960));
 
     /// <summary>What the phone head offers today: Progress has no screen yet.</summary>
     private static readonly GrootDestination[] Shipping =

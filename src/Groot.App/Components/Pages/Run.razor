@@ -1,9 +1,15 @@
 @page "/run"
+@using Groot.App.Storage
 @using Groot.Core.Programs
 @using Groot.App.Audio
 @using Groot.UI.Audio
 @using Groot.UI.Components
+@using Groot.UI.Health
 @inject ICuePlayer Cues
+@inject IHeartRateService HeartRate
+@inject ILocationService Location
+@inject GrootStorage Storage
+@implements IDisposable
 
 <PageTitle>Run · Groot</PageTitle>
 
@@ -11,7 +17,10 @@
                CuePlayer="Cues"
                ShowProgram="false"
                ShowAudioControls="true"
-               AudioChanged="OnAudioChanged" />
+               AudioChanged="OnAudioChanged"
+               HeartRate="HeartRate"
+               Location="Location"
+               OnMeasured="OnMeasured" />
 
 @code {
     private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
@@ -22,4 +31,21 @@
     {
         if (Cues is MauiCuePlayer maui) maui.Language = state.Language;
     }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Applying the schema is the one slow call in the store, so it happens on the way into
+        // the screen rather than inside the save at the end of a run.
+        await Storage.Ready();
+
+        // Foreground location stops when the app goes to the background, and a phone locks
+        // itself a minute into a warmup. Until there is a foreground service, the display stays
+        // awake while this screen is open.
+        DeviceDisplay.Current.KeepScreenOn = true;
+    }
+
+    private Task OnMeasured(MeasuredRun run) =>
+        Storage.SaveRun(run, DateOnly.FromDateTime(DateTime.Now));
+
+    public void Dispose() => DeviceDisplay.Current.KeepScreenOn = false;
 }

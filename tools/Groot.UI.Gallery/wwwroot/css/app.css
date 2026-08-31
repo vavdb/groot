@@ -454,3 +454,10 @@
     border-radius: 999px;
     padding: 5px 12px;
 }
+
+/* Components whose SVG is drawn against a 343px grid and scales with its container. Inside the
+   product they sit in a 375px card, so the gallery has to say so too: unconstrained, the map's
+   kilometre labels render at twice their type-scale size and the drawing reads as a poster. */
+.phone-width {
+    max-width: 375px;
+}

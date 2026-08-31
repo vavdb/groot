@@ -8,12 +8,19 @@ namespace Groot.Core.Health;
 /// <param name="X">Across the box, 0 to 1.</param>
 /// <param name="Y">Down the box, 0 to 1.</param>
 /// <param name="ElapsedSeconds">Seconds into the session this point was reached.</param>
+/// <param name="DistanceMetres">Ground covered from the start of the route up to this point.</param>
 /// <param name="Bpm">The heart rate here, when a monitor was connected.</param>
 /// <param name="GapBefore">
 /// Whether the fix was lost between the previous point and this one. A screen draws the join
 /// differently, because the straight line between them is not where the runner went.
 /// </param>
-public sealed record RoutePlot(double X, double Y, int ElapsedSeconds, int? Bpm, bool GapBefore);
+public sealed record RoutePlot(
+    double X,
+    double Y,
+    int ElapsedSeconds,
+    double DistanceMetres,
+    int? Bpm,
+    bool GapBefore);
 
 /// <summary>
 /// The route so far, ready to draw. A snapshot: the screen re-reads it rather than holding one.
@@ -24,7 +31,7 @@ public sealed record RoutePlot(double X, double Y, int ElapsedSeconds, int? Bpm,
 /// Width over height of the ground the route covers. A screen scales the unit square by this so
 /// a loop that is twice as wide as it is tall draws that way instead of being squared up.
 /// </param>
-public sealed record RouteView(IReadOnlyList<RoutePlot> Points, double DistanceMetres, double AspectRatio)
+public sealed record RouteTraceView(IReadOnlyList<RoutePlot> Points, double DistanceMetres, double AspectRatio)
 {
     /// <summary>Whether there is anything to draw.</summary>
     public bool IsEmpty => Points.Count == 0;
@@ -33,5 +40,5 @@ public sealed record RouteView(IReadOnlyList<RoutePlot> Points, double DistanceM
     public double DistanceKm => DistanceMetres / 1000;
 
     /// <summary>A route with nothing in it yet.</summary>
-    public static RouteView Empty { get; } = new([], 0, 1);
+    public static RouteTraceView Empty { get; } = new([], 0, 1);
 }
