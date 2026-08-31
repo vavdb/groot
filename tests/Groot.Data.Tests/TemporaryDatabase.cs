@@ -28,6 +28,7 @@ public sealed class TemporaryDatabase : IDisposable
         Equipment = new EquipmentStore(Database);
         Settings = new SettingsStore(Database);
         Progress = new ProgramProgress(Sessions);
+        Metrics = new SessionMetricsStore(Database);
     }
 
     public string FilePath { get; }
@@ -43,6 +44,8 @@ public sealed class TemporaryDatabase : IDisposable
     public SettingsStore Settings { get; }
 
     public ProgramProgress Progress { get; }
+
+    public SessionMetricsStore Metrics { get; }
 
     /// <summary>
     /// One value straight out of the file, bypassing the stores. Some things can only be checked

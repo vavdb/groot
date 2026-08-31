@@ -12,7 +12,7 @@ namespace Groot.Data;
 public sealed class GrootDatabase
 {
     /// <summary>Highest schema version this build knows. One embedded script per version.</summary>
-    public const int LatestSchemaVersion = 1;
+    public const int LatestSchemaVersion = 2;
 
     /// <summary>
     /// How long a write waits for the one writer WAL allows before giving up. Stated rather than
