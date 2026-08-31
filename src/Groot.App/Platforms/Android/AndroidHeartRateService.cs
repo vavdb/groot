@@ -2,6 +2,7 @@ using Android.Bluetooth;
 using Android.Bluetooth.LE;
 using Android.Content;
 using Android.OS;
+using Groot.Core.Health;
 using Groot.UI.Health;
 using Java.Util;
 using Application = Android.App.Application;
@@ -27,7 +28,7 @@ public sealed class AndroidHeartRateService : IHeartRateService
 {
     // Bluetooth SIG assigned numbers. The 128-bit forms are the 16-bit ids in the base UUID.
     private static readonly UUID HeartRateService = UUID.FromString("0000180d-0000-1000-8000-00805f9b34fb")!;
-    private static readonly UUID HeartRateMeasurement = UUID.FromString("00002a37-0000-1000-8000-00805f9b34fb")!;
+    private static readonly UUID HeartRateMeasurementCharacteristic = UUID.FromString("00002a37-0000-1000-8000-00805f9b34fb")!;
     private static readonly UUID ClientCharacteristicConfiguration = UUID.FromString("00002902-0000-1000-8000-00805f9b34fb")!;
 
     private readonly Lock _gate = new();
@@ -255,7 +256,7 @@ public sealed class AndroidHeartRateService : IHeartRateService
         {
             if (status != GattStatus.Success || gatt is null) return;
 
-            var characteristic = gatt.GetService(HeartRateService)?.GetCharacteristic(HeartRateMeasurement);
+            var characteristic = gatt.GetService(HeartRateService)?.GetCharacteristic(HeartRateMeasurementCharacteristic);
             if (characteristic is null) return;
 
             gatt.SetCharacteristicNotification(characteristic, enable: true);
@@ -300,27 +301,11 @@ public sealed class AndroidHeartRateService : IHeartRateService
 
         private void Receive(BluetoothGattCharacteristic? characteristic, byte[]? value)
         {
-            if (characteristic?.Uuid?.Equals(HeartRateMeasurement) != true) return;
-            if (ParseHeartRate(value) is not { } bpm) return;
+            if (characteristic?.Uuid?.Equals(HeartRateMeasurementCharacteristic) != true) return;
+            if (HeartRateMeasurement.Parse(value) is not { } bpm) return;
 
             Bpm = bpm;
             State = SensorState.Live;
-        }
-
-        /// <summary>
-        /// The Heart Rate Measurement characteristic, per the Bluetooth SIG profile: a flags byte
-        /// followed by the rate. Bit 0 of the flags says whether the rate is one byte or two,
-        /// little endian. Everything after it is optional and of no use here.
-        /// </summary>
-        internal static int? ParseHeartRate(byte[]? value)
-        {
-            if (value is null || value.Length < 2) return null;
-
-            var sixteenBit = (value[0] & 0x01) != 0;
-            if (sixteenBit && value.Length < 3) return null;
-
-            var bpm = sixteenBit ? value[1] | (value[2] << 8) : value[1];
-            return bpm is >= 25 and <= 250 ? bpm : null;
         }
     }
 
