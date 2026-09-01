@@ -253,8 +253,9 @@ exercises(id, slug, source)                           -- seeded from free-exerci
 background/history grants above. Each permission = separate user consent. The Play Console health
 declarations only bite at store release; sideloading during development defers that paperwork.
 MAUI route unchanged: AndroidX binding NuGets track androidx (`Xamarin.AndroidX.Health.Connect.*`),
-Kotlin-coroutine interop glue expected. **GPS: skipped for MVP entirely (owner decision 2026-08-18);
-GPS-lite (distance/pace, coordinates discarded) parked at MVP+1 — see habit-system.md §3.1.**
+Kotlin-coroutine interop glue expected. **GPS: in MVP, with the route stored (owner decision
+2026-09-01, reversing 2026-08-18 — §10 and habit-system.md §3.1). The MVP is the app the owner
+takes outside, and a run without its route is not that app.**
 
 ### 6.2 iOS — HealthKit
 
@@ -324,7 +325,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - **Health Connect moves up, including READ**: owner tracks sleep in Google's ecosystem. Read `SleepSessionRecord` (+ optionally `WeightRecord`, `StepsRecord`) for recovery context; write workouts as before. Read effort ≈ write effort (same binding, extra permission declarations). Slot: right after MVP core loop works — "MVP+1", not phase 2. Details §6.1.
 - **Identity DECIDED (2026-08-18): name "Groot" stays, plant/tree language removed.** Neutral variant canonical (`design/habit-rings.html`); plant variant + all rejected directions archived in `Research/UI/`. Rename candidates (Stam/Eik/Kernhout/Jaarring) documented in habit-system.md §6b as considered-and-rejected. Palette/type/rings stay; zero botanical wording.
 - **Week start is a user setting, not ISO**: default from locale `FirstDayOfWeek` (Mon EU, Sun US), overridable; contract math/grid/`weeks` table all key off it (spec §1.1 rule 1 updated; table keyed by `week_start_date`).
-- **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP.
+- **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP — **reversed 2026-09-01, see below**.
 - **Copy voice rule added** (habit-system.md §5b): user-facing strings pass the humanizer checklist — the first mockups didn't (negative parallelisms, aphorisms, em dashes in cues), owner caught it.
 - **Backend REVERSED (2026-08-18, post-scaffold): own `Groot.Api` instead of PocketBase.** The PB recommendation predated the local-first sync design. What the backend really does is username auth + three sync endpoints; the sync protocol (deltas, tombstones, LWW) is hand-built either way, and PB customization means JavaScript hooks while the whole stack is C#. Own API wins on: shared DTOs with Groot.Core, integration tests inside the sln, one language in an Apache-2.0 repo, same ops weight (dotnet publish + systemd). PB's OAuth advantage is deferred anyway (MVP = username-only; OpenIddict later). Shape: Minimal API, Dapper on SQLite via Groot.Data, JWT, `POST /auth/register|login`, `POST /sync/push`, `GET /sync/pull?since=`. Deploy files (Caddy snippet, systemd unit, backup script) land with Groot.Api, written against the real ports and paths.
 
@@ -340,6 +341,23 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - Residual risk, logged not resolved: its data descends from `wrkout/exercises.json`, and the repo
   does not evidence that chain. Smaller than an explicit "cloning is not a licence".
 - Detail and the full comparison: §2.2.
+
+**2026-09-01 — GPS REVERSED into MVP, and the route is stored.**
+- 2026-08-18 kept GPS out of MVP and parked GPS-lite at MVP+1: distance and pace only, coordinates
+  discarded, no route and no map. The reason was the home-address leak — a route track identifies
+  the runner's front door, which sits badly with a no-PII architecture.
+- Owner decision: **the MVP is the app taken outside, so it records where the run went.** The
+  run screen already captures and stores a route track (`RouteTrack`, `SessionMetricsStore`,
+  shipped 2026-08-31); this entry makes that intentional instead of an unlogged drift.
+- The privacy reasoning was not wrong, so it is answered rather than dropped: **the route lives on
+  the device.** Sync is a separate decision that `Groot.Api` has not reached yet, and a route is
+  the one thing in the schema that is genuinely identifying. When sync lands, routes either stay
+  local, or become an explicit opt-in — never a silent default.
+- Still true, and now an engineering note rather than a scope one: raw unfiltered GPS pace is
+  jittery enough to demotivate. Distance and pace shown from a route want outlier rejection and
+  smoothing before they are shown as a number.
+- Play Console health declarations bite at store release, not during sideloading, same as the
+  Health Connect paperwork.
 
 ---
 

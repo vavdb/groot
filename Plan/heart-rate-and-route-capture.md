@@ -41,14 +41,14 @@ written after the fact so the work is on the board and its gaps are named.
 * **iOS has nothing**, consistent with the rest of the app.
 * **The lift screen still does not persist.** `GrootStorage` is wired into
   `Run.razor` only. See `sqlite-store-implementation`.
-* **GPS was out of MVP** (research.md §10, 2026-08-18: "GPS stays out of
-  MVP", and MVP+1 was to be GPS-lite with coordinates never stored).
-  Coordinates are now stored. That is a scope reversal nobody logged, and
-  it has a privacy shape: a route track is a home address. Owner call
-  whether to log the reversal in §10, keep routes local and never sync
-  them, or make storing them a setting.
+* ~~GPS was out of MVP.~~ **Settled 2026-09-01: GPS is in MVP and the route
+  is stored.** The owner wants the MVP to be the app they take outside.
+  Logged in research.md §10 and habit-system.md §3.1. The privacy condition
+  that came with it: the route stays on the device, and routes sync only as
+  an explicit opt-in when `Groot.Api` reaches the question.
 
-* Next step: decide the GPS scope question above, then whether the web
-  head gets sensor implementations or a documented "app only".
+* Next step: decide whether the web head gets sensor implementations or a
+  documented "app only". Then pace and distance from the stored route,
+  which need outlier rejection before either is shown as a number.
 * Links: `src/Groot.Core/Health`, `src/Groot.App/Platforms/Android`,
   `SessionMetricsStore` · `sqlite-store-implementation.md`

@@ -158,13 +158,16 @@ Reuses the exact infrastructure the rest timer already demands — one foregroun
   music returns — non-negotiable for runners).
 - **iOS**: background audio session + `AVSpeechSynthesizer`; local notification fallback per segment.
 - Screen-off is the design target: pocket phone, headphones, zero interaction for 28 minutes.
-- GPS — challenged by owner 2026-08-18 ("easy on android/iphone?"), resolved as **GPS-lite on MVP+1**:
-  MAUI Geolocation inside the existing foreground service computes **cumulative distance + avg pace
-  only; coordinates are discarded immediately** — never stored, never synced. No route, no map, no
-  home-address leak (a GPX track identifies the user's front door — the real reason full GPS conflicts
-  with the no-PII architecture), minimal store-review friction. MVP itself stays time-only: 0→5K is
-  time-based by design and raw unfiltered GPS pace is jittery enough to demotivate (proper pace needs
-  Kalman/outlier filtering — not MVP work). Full routes/maps: someday, local-only if ever.
+- GPS — **in MVP, route stored (owner decision 2026-09-01, reversing 2026-08-18).** The MVP is the
+  app the owner takes outside, so a run records where it went: MAUI Geolocation feeds `RouteTrack`,
+  the run screen draws it, and `SessionMetricsStore` keeps it. The 2026-08-18 position was GPS-lite
+  at MVP+1, coordinates discarded immediately, on the grounds that a route track identifies the
+  runner's front door and conflicts with the no-PII architecture. That reasoning stands and is
+  answered by scope, not denial: **the route stays on the device.** Routes sync only if that is
+  decided explicitly, opt-in, never as a silent default — `Groot.Api` has not reached the question.
+  Still true and still unbuilt: raw unfiltered GPS pace is jittery enough to demotivate, so a
+  distance or pace shown as a number wants outlier rejection and smoothing first. 0→5K stays
+  time-based; the route is what the run drew, not what drives the intervals.
 - Health sync **in MVP** (Android, owner decision 2026-08-18): write `ExerciseSessionRecord(running)`,
   read sleep for recovery context. iOS `HKWorkout` when the iOS head lands.
 
