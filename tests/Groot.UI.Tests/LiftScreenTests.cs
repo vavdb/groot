@@ -45,7 +45,7 @@ public sealed class LiftScreenTests : BunitContext, IAsyncLifetime
 
         Assert.Contains("not started", cut.Find(".session-clock").TextContent, StringComparison.OrdinalIgnoreCase);
 
-        cut.FindAll(".sets")[0].Children[0].Click();
+        LogSet(cut, exercise: 0, set: 0);
 
         Assert.DoesNotContain("not started", cut.Find(".session-clock").TextContent, StringComparison.OrdinalIgnoreCase);
     }
@@ -58,14 +58,25 @@ public sealed class LiftScreenTests : BunitContext, IAsyncLifetime
         var plan = Plan();
         var first = plan.Exercises[0];
         foreach (var set in first.Sets)
-            cut.FindAll(".sets")[0].Children[set.Index].Click();
+            LogSet(cut, exercise: 0, set.Index);
 
-        var resting = cut.Find(".rest").Closest(".exercise")!;
-        var name = resting.QuerySelector(".ex-name")!.TextContent;
+        // Logging a set is an async handler, so the rest moves on the render after the click.
+        cut.WaitForAssertion(() =>
+        {
+            var name = cut.Find(".rest").Closest(".exercise")!.QuerySelector(".ex-name")!.TextContent;
 
-        Assert.NotEqual(Name(first.ExerciseId), name);
-        Assert.Equal(Name(plan.Exercises[1].ExerciseId), name);
+            Assert.NotEqual(Name(first.ExerciseId), name);
+            Assert.Equal(Name(plan.Exercises[1].ExerciseId), name);
+        });
     }
+
+    /// <summary>
+    /// Taps a set circle. The rest clock redraws four times a second, so finding the circle and
+    /// clicking it happen in one go on the renderer's thread: found separately, the tick in
+    /// between takes the handler the click was going to reach.
+    /// </summary>
+    private static void LogSet(IRenderedComponent<LiftScreen> cut, int exercise, int set) =>
+        cut.InvokeAsync(() => cut.FindAll(".sets")[exercise].Children[set].Click());
 
     private static string Name(string exerciseId) =>
         string.Join(' ', exerciseId.Split('-')) is { Length: > 0 } words
