@@ -21,6 +21,18 @@
 
         @ChildContent
 
+        @* How long the session has been going, and the control for it. At the top, above the
+           first exercise, because it covers the whole session rather than any one lift. Logging
+           a set starts it, so the button is for the times it is wrong: a warmup before the first
+           set, or a break in the middle. *@
+        <div class="session-clock">
+            <span class="clock-time">@Clock(SessionSeconds)</span>
+            <span class="clock-state">@SessionState</span>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleSessionClock">
+                @(_sessionRunning ? "⏸ Pause" : _sessionStarted ? "▶ Resume" : "Start ▶")
+            </MudButton>
+        </div>
+
         @foreach (var exercise in Plan.Exercises)
         {
             <GrootPanel Filled="true" Class="@($"exercise{(IsComplete(exercise) ? " complete" : "")}")">
@@ -103,7 +115,7 @@
                 @if (RestingIn(exercise) is { } remaining)
                 {
                     <div class="rest" aria-live="polite">
-                        <span class="rest-time">rest @Clock(remaining)</span>
+                        <span class="rest-time">rest @Clock(remaining)@(Started(exercise) ? "" : " · before this lift")</span>
                         <MudProgressLinear Color="Color.Primary" Rounded="true"
                                            Value="@RestPercent(exercise, remaining)" Class="rest-bar" />
                         <MudButton Variant="Variant.Text" Size="Size.Small" OnClick="EndRest">Skip</MudButton>
@@ -130,6 +142,9 @@
 
 @code {
     private const int TickMilliseconds = 250;
+
+    /// <summary>The session clock only shows whole seconds, so it redraws once a second.</summary>
+    private const int SessionTickMilliseconds = 1000;
 
     /// <summary>The day to train. Replacing it needs an <c>@key</c> so the log does not carry over.</summary>
     [Parameter, EditorRequired] public LiftSessionPlan Plan { get; set; } = null!;
@@ -168,6 +183,15 @@
     private string? _restingExercise;
     private long _restEndsAtMs;
 
+    // The session clock. Milliseconds accumulated across the running stretches, plus the
+    // timestamp the current stretch resumed at; the same monotonic clock the rest uses, so a
+    // change to the wall clock cannot move either.
+    private CancellationTokenSource? _sessionLoop;
+    private long _sessionElapsedMs;
+    private long _sessionResumeMs;
+    private bool _sessionStarted;
+    private bool _sessionRunning;
+
     private int LoggedSets => _logged.Count;
 
     private int TotalReps => _logged.Values.Sum();
@@ -196,7 +220,7 @@
         </div>
     };
 
-    protected override void OnParametersSet() => AppBar?.Set(Header);
+    protected override void OnParametersSet() => AppBar?.Set(this, Header);
 
     /// <summary>The program name without its parenthetical, so the header stays one line on a phone.</summary>
     private string ShortName =>
@@ -364,13 +388,31 @@
         if (IsDone(exercise, set)) return;
 
         _logged[(exercise.ExerciseId, set.Index)] = set.TargetReps;
-        StartRest(exercise);
+        StartSessionClockIfIdle();
+
+        // The rest that follows the last set of a lift is the rest before the next lift, so it
+        // is counted and shown there: the panel you are about to work in, at that lift's own
+        // rest length. The last set of the day rests for nothing.
+        StartRest(IsComplete(exercise) ? Following(exercise) : exercise);
 
         if (Finished)
         {
             EndRest();
+            PauseSessionClock();
             await OnFinished.InvokeAsync();
         }
+    }
+
+    /// <summary>The lift after this one in the day's order, or null when it was the last.</summary>
+    private LiftExercisePlan? Following(LiftExercisePlan exercise)
+    {
+        var index = Plan.Exercises.ToList().FindIndex(e => e.ExerciseId == exercise.ExerciseId);
+        return index >= 0 && index + 1 < Plan.Exercises.Count ? Plan.Exercises[index + 1] : null;
+    }
+
+    private void PauseSessionClock()
+    {
+        if (_sessionRunning) ToggleSessionClock();
     }
 
     /// <summary>Takes a logged set back and leaves the editor on it.</summary>
@@ -390,6 +432,69 @@
         _weights[(exercise.ExerciseId, NextIndex(exercise))] =
             exercise.Loading == LoadingKind.Bodyweight ? kg : Math.Max(0m, kg);
 
+    /// <summary>How long the session has been going, not counting the stretches it was paused.</summary>
+    private int SessionSeconds =>
+        (int)((_sessionElapsedMs + (_sessionRunning ? NowMs() - _sessionResumeMs : 0)) / 1000);
+
+    private string SessionState => _sessionRunning ? "session" : _sessionStarted ? "paused" : "not started";
+
+    /// <summary>Whether a set of this exercise has been taken, which is what makes a rest before it read right.</summary>
+    private bool Started(LiftExercisePlan exercise) =>
+        exercise.Sets.Any(set => IsDone(exercise, set));
+
+    private void ToggleSessionClock()
+    {
+        if (_sessionRunning)
+        {
+            _sessionElapsedMs += NowMs() - _sessionResumeMs;
+            _sessionRunning = false;
+            StopSessionLoop();
+            return;
+        }
+
+        _sessionStarted = true;
+        _sessionRunning = true;
+        _sessionResumeMs = NowMs();
+
+        StopSessionLoop();
+        var cts = new CancellationTokenSource();
+        _sessionLoop = cts;
+        _ = TickSessionAsync(cts.Token);
+    }
+
+    /// <summary>The clock runs from the first set logged, for the sessions nobody thought to start.</summary>
+    private void StartSessionClockIfIdle()
+    {
+        if (!_sessionRunning) ToggleSessionClock();
+    }
+
+    private void StopSessionLoop()
+    {
+        _sessionLoop?.Cancel();
+        _sessionLoop?.Dispose();
+        _sessionLoop = null;
+    }
+
+    private async Task TickSessionAsync(CancellationToken token)
+    {
+        try
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(SessionTickMilliseconds, token);
+                await InvokeAsync(StateHasChanged);
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            // Paused, finished, or the screen went away.
+        }
+        catch (ObjectDisposedException)
+        {
+            // StopSessionLoop disposed the token source while this loop was between ticks.
+        }
+    }
+
     private int? RestingIn(LiftExercisePlan exercise)
     {
         if (_restingExercise != exercise.ExerciseId) return null;
@@ -403,10 +508,10 @@
 
     private static long NowMs() => (long)(Stopwatch.GetTimestamp() * 1000.0 / Stopwatch.Frequency);
 
-    private void StartRest(LiftExercisePlan exercise)
+    private void StartRest(LiftExercisePlan? exercise)
     {
         EndRest();
-        if (exercise.RestSeconds <= 0) return;
+        if (exercise is null || exercise.RestSeconds <= 0) return;
 
         _restingExercise = exercise.ExerciseId;
         _restEndsAtMs = NowMs() + exercise.RestSeconds * 1000L;
@@ -450,5 +555,10 @@
         }
     }
 
-    public void Dispose() => EndRest();
+    public void Dispose()
+    {
+        AppBar?.Clear(this);
+        EndRest();
+        StopSessionLoop();
+    }
 }

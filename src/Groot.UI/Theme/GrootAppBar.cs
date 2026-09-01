@@ -9,16 +9,33 @@ namespace Groot.UI.Theme;
 /// </summary>
 public sealed class GrootAppBar
 {
+    private object? _owner;
+
     /// <summary>What the open screen wants in the bar, or null for the head's own brand.</summary>
     public RenderFragment? Content { get; private set; }
 
     /// <summary>Raised when the content changes, so the shell can render again.</summary>
     public event Action? Changed;
 
-    /// <summary>Puts a screen's heading in the bar. Null on the way out, which restores the brand.</summary>
-    public void Set(RenderFragment? content)
+    /// <summary>
+    /// Puts a screen's heading in the bar. The screen passes itself, because a head can keep a
+    /// screen mounted behind another one (the phone head does that with a run in progress) and
+    /// only the screen that put a heading there is allowed to take it away again.
+    /// </summary>
+    public void Set(object owner, RenderFragment content)
     {
+        _owner = owner;
         Content = content;
+        Changed?.Invoke();
+    }
+
+    /// <summary>Takes this screen's heading back out, which restores the head's brand.</summary>
+    public void Clear(object owner)
+    {
+        if (!ReferenceEquals(_owner, owner)) return;
+
+        _owner = null;
+        Content = null;
         Changed?.Invoke();
     }
 }

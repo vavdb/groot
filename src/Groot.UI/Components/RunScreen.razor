@@ -25,6 +25,24 @@
                   NextLine="@NextLine"
                   FloodClass="@FloodClass" />
 
+        @* Directly under the clock: the controls act on what the panel above them shows, so they
+           belong beside it rather than at the bottom of everything the session measured. *@
+        <MudStack Row="true" Spacing="2">
+            @if (_finished)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
+            }
+            else if (!_started)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">Start ▶</MudButton>
+            }
+            else
+            {
+                <MudButton Variant="Variant.Outlined" FullWidth="true" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
+                <MudButton Variant="Variant.Outlined" FullWidth="true" OnClick="SkipAsync">⏭ Skip</MudButton>
+            }
+        </MudStack>
+
         <div class="cue" aria-live="polite">
             <span class="spk" aria-hidden="true">@(_cuePlayer is null or SilentCuePlayer ? "🔇" : "🔊")</span>
             <span class="cue-text">@(_lastCueText ?? "Cues speak at every switch and ten seconds before it.")</span>
@@ -78,22 +96,6 @@
                          LocationTrouble="@(Location?.Trouble)"
                          OnRetry="RetryAsync" />
         }
-
-        <MudStack Row="true" Spacing="2">
-            @if (_finished)
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
-            }
-            else if (!_started)
-            {
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">Start ▶</MudButton>
-            }
-            else
-            {
-                <MudButton Variant="Variant.Outlined" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
-                <MudButton Variant="Variant.Outlined" OnClick="SkipAsync">⏭ Skip</MudButton>
-            }
-        </MudStack>
     </MudStack>
 </section>
 
@@ -241,7 +243,9 @@
         // Segment durations are validated in RunSession's constructor; a session here is always playable.
         _cuePlayer = CuePlayer;
 
-        if (Visible) AppBar?.Set(Header);
+        // Hidden behind another screen, the heading is not ours to show: the screen you are
+        // looking at owns the bar.
+        if (Visible) AppBar?.Set(this, Header); else AppBar?.Clear(this);
     }
 
     /// <summary>
@@ -614,6 +618,7 @@
 
     public void Dispose()
     {
+        AppBar?.Clear(this);
         StopLoop();
         _chipLoop?.Cancel();
         _chipLoop?.Dispose();

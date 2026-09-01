@@ -193,6 +193,31 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* The session clock, above the first lift: how long you have been at it, and the control for
+   when the clock is wrong. Its own row rather than a panel, so it reads as chrome for the
+   screen instead of another block to work through. */
+.session-clock {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.clock-time {
+    font-family: var(--g-font-display);
+    font-size: var(--g-text-2xl);
+    color: var(--g-ink);
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+}
+
+.clock-state {
+    flex: 1;
+    font-size: var(--g-text-2xs);
+    letter-spacing: var(--g-track-caps);
+    text-transform: uppercase;
+    color: var(--g-dim);
+}
+
 .rest {
     display: flex;
     align-items: center;
