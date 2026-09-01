@@ -7,8 +7,22 @@
     max-width: 420px;
 }
 
-::deep .lift-head {
+/* The heading, which the head renders in its app bar: it takes the width it is given there and
+   keeps the same shape when the gallery renders it at the top of the screen instead. */
+.lift-head {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     gap: 12px;
+    min-width: 0;
+}
+
+.lift-title {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
 }
 
 .exercise.complete {

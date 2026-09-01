@@ -11,20 +11,12 @@
 
 <section class="run-screen" aria-label="@Heading">
     <MudStack Spacing="3">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="run-head">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                <MudText Typo="Typo.h6" Class="g-serif">
-                    @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
-                </MudText>
-                @HeaderAction
-            </MudStack>
-            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
-                @for (var d = 1; d <= SessionsInWeek; d++)
-                {
-                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
-                }
-            </div>
-        </MudStack>
+        @* In a head with an app bar the heading lives there; on its own (the gallery) it stays
+           at the top of the screen. Same fragment either way. *@
+        @if (AppBar is null)
+        {
+            @Header
+        }
 
         @ChildContent
 
@@ -206,10 +198,39 @@
     private bool _finished;
     private string? _lastCueText;
 
+    /// <summary>The app bar of the head this screen is open in, or null in the gallery.</summary>
+    [CascadingParameter] public GrootAppBar? AppBar { get; set; }
+
+    /// <summary>
+    /// The heading: which program, which session of the week, the control that changes it, and the
+    /// dots for where this session falls in the week.
+    /// </summary>
+    private RenderFragment Header => __builder =>
+    {
+        @* Own elements rather than a MudStack: this fragment is rendered in the app bar of a
+           head, where a component root would carry none of this file's scoped styles. *@
+        <div class="run-head">
+            <div class="run-title">
+                <MudText Typo="Typo.h6" Class="g-serif">
+                    @ProgramName <MudText Typo="Typo.caption" Inline="true" Class="dim">@SessionLabel</MudText>
+                </MudText>
+                @HeaderAction
+            </div>
+            <div class="dots" role="img" aria-label="Session @Day of @SessionsInWeek this week">
+                @for (var d = 1; d <= SessionsInWeek; d++)
+                {
+                    <i class="@(d < Day ? "done" : d == Day ? "now" : "")"></i>
+                }
+            </div>
+        </div>
+    };
+
     protected override void OnParametersSet()
     {
         // Segment durations are validated in RunSession's constructor; a session here is always playable.
         _cuePlayer = CuePlayer;
+
+        AppBar?.Set(Header);
     }
 
     /// <summary>

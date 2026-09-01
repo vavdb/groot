@@ -5,8 +5,8 @@
 
 <div class="groot-landing">
     <MudStack Spacing="4" AlignItems="AlignItems.Stretch">
-        <MudText Typo="Typo.h1" Class="g-serif">Groot<span class="accent">.</span></MudText>
-
+        @* No wordmark here: the app bar carries it, and two of them on one screen is one too
+           many. The gallery shows the screen without an app bar, so it starts on the week card. *@
         <WeekCard Days="@(Days ?? ThisWeek())" Evaluation="Evaluation" Streak="Streak" />
 
         <MudStack Spacing="2">

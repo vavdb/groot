@@ -1,4 +1,5 @@
 @inject NavigationManager Navigation
+@implements IDisposable
 
 @* The app shell: MudBlazor theme/dialog/snackbar providers, an app bar with a dark/light
    toggle, an optional side drawer, and the page body. Wraps its content in .theme-light /
@@ -18,7 +19,14 @@
                                Color="Color.Inherit" Edge="Edge.Start"
                                OnClick="@((e) => DrawerToggle())" />
             }
-            <MudText Typo="Typo.h6" Class="g-serif">@Title</MudText>
+            @if (_appBar.Content is { } screenTitle)
+            {
+                @screenTitle
+            }
+            else
+            {
+                <MudText Typo="Typo.h6" Class="g-serif"><span>@Title</span>@Wordmark</MudText>
+            }
             <MudSpacer />
             <MudIconButton Icon="@(_darkMode ? Icons.Material.Filled.DarkMode : Icons.Material.Filled.LightMode)"
                            Color="Color.Inherit" OnClick="@((e) => ToggleTheme())" />
@@ -32,7 +40,14 @@
         }
 
         <MudMainContent>
-            @ChildContent
+            @if (HostsScreenTitle)
+            {
+                <CascadingValue Value="_appBar" IsFixed="true">@ChildContent</CascadingValue>
+            }
+            else
+            {
+                @ChildContent
+            }
         </MudMainContent>
 
         @if (BottomNavDestinations is { Count: > 0 })
@@ -73,8 +88,28 @@
     /// <summary>How many CSS pixels the gesture bar or the button bar covers along the bottom.</summary>
     [Parameter] public double? SafeAreaBottom { get; set; }
 
+    /// <summary>
+    /// Let the open screen put its own heading in the app bar, instead of carrying one inside the
+    /// page. The product heads do; the gallery does not, because it shows many screens at once and
+    /// each of them has to keep its own heading where it is.
+    /// </summary>
+    [Parameter] public bool HostsScreenTitle { get; set; }
+
+    /// <summary>
+    /// The wordmark's amber full stop, left out when the head's own title already carries
+    /// punctuation (the gallery calls itself Groot.UI).
+    /// </summary>
+    private RenderFragment? Wordmark => Title.Contains('.') ? null : @<span class="accent">.</span>;
+
+    private readonly GrootAppBar _appBar = new();
     private bool _drawerOpen = true;
     private bool _darkMode = true;
+
+    protected override void OnInitialized() => _appBar.Changed += OnAppBarChanged;
+
+    private void OnAppBarChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose() => _appBar.Changed -= OnAppBarChanged;
 
     /// <summary>Which tab reads as current, taken from the address rather than held separately.</summary>
     private GrootDestination SelectedDestination => Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') switch

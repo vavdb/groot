@@ -12,14 +12,12 @@
 
 <section class="lift-screen" aria-label="@Heading">
     <MudStack Spacing="3">
-        <MudStack Row="true" AlignItems="AlignItems.Center" Justify="Justify.SpaceBetween" Class="lift-head">
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                <MudText Typo="Typo.h6" Class="g-serif">
-                    @ShortName <MudText Typo="Typo.caption" Inline="true" Class="dim">@Plan.DayKey</MudText>
-                </MudText>
-                @HeaderAction
-            </MudStack>
-        </MudStack>
+        @* In a head with an app bar the heading lives there; on its own (the gallery) it stays
+           at the top of the screen. Same fragment either way. *@
+        @if (AppBar is null)
+        {
+            @Header
+        }
 
         @ChildContent
 
@@ -177,6 +175,28 @@
     private bool Finished => LoggedSets == Plan.TotalSets;
 
     private string Heading => $"{Plan.ProgramName} {Plan.DayKey}";
+
+    /// <summary>The app bar of the head this screen is open in, or null in the gallery.</summary>
+    [CascadingParameter] public GrootAppBar? AppBar { get; set; }
+
+    /// <summary>
+    /// The heading: which program, which day of the rotation, and the control that changes it.
+    /// Own elements rather than a MudStack, because a head renders this in its app bar, where a
+    /// component root would carry none of this file's scoped styles.
+    /// </summary>
+    private RenderFragment Header => __builder =>
+    {
+        <div class="lift-head">
+            <div class="lift-title">
+                <MudText Typo="Typo.h6" Class="g-serif">
+                    @ShortName <MudText Typo="Typo.caption" Inline="true" Class="dim">@Plan.DayKey</MudText>
+                </MudText>
+                @HeaderAction
+            </div>
+        </div>
+    };
+
+    protected override void OnParametersSet() => AppBar?.Set(Header);
 
     /// <summary>The program name without its parenthetical, so the header stays one line on a phone.</summary>
     private string ShortName =>
