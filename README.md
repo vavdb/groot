@@ -102,10 +102,9 @@ of `AGENTS.md`.
 
 GZCLP is based on the GZCL method by Cody Lefever.
 
-Exercise data from [exercises-dataset](https://github.com/vavdb/exercises-dataset) (MIT) and
-[free-exercise-db](https://github.com/yuhonas/free-exercise-db) (public domain). The animation
-GIFs and thumbnails in exercises-dataset are © [Gym visual](https://gymvisual.com/) and carry
-their own terms; Groot ships none of them until it holds its own licence.
+Exercise data and photos from
+[free-exercise-db](https://github.com/yuhonas/free-exercise-db), released into the public domain
+under the Unlicense.
 
 ## License
 

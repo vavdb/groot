@@ -41,16 +41,42 @@ Date, Body Weight (KG), Body Weight (LB), Workout Name, Exercise Name, Set Order
 2. Data model needs: negative/zero weights, bodyweight-per-day, per-program history, notes per set.
 3. User builds own programs ("Vin1", GZCLP-CGB variant) → **program editor is core**, not just canned programs.
 
-### 2.2 Exercise media dataset
+### 2.2 Exercise dataset
 
-Fork: [vavdb/exercises-dataset](https://github.com/vavdb/exercises-dataset) (fork of `hasaneyldrm/exercises-dataset`, synced Jul 2026).
+**Decided 2026-09-01: [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db) is the
+source Groot ships.** It replaces `vavdb/exercises-dataset`, which was primary from Aug 2026 until
+its licence was read properly (below).
 
-- **1,324 exercises**. **The data is MIT; the media is not** (checked 2026-09-01, see below).
-- Animation **GIFs + 180×180 thumbnails stored inside the repo** (~128 MB). The bytes are there and survive any hosting death (relevant: Zenith Fits DB died mid-2026; its 593 videos are unrecoverable — site 410, R2 bucket 401). **The licence does not come with them.**
-- **Media licence, the blocking bit.** `images/` and `videos/` are © Gym visual (https://gymvisual.com/), redistributed in that repo under a written permission the upstream author obtained. The fork's `LICENSE` says it plainly: cloning grants no rights to the media, and a project that wants it obtains its own licence from Gym visual. Terms: 180×180 only, attribution "© Gym visual — https://gymvisual.com/" on every use. **Groot has no such permission today.** Ship the data now, the GIFs only after Gym visual licences them to us or the stills come from elsewhere.
-- MIT does cover names, categories, body parts, equipment, targets, muscle groups and **every instruction string** — the parts Groot needs first.
-- Muscle-group + equipment metadata, step instructions in **10 languages** (`en, es, fr, hi, it, ko, pl, ru, tr, zh`). **No Dutch**, and none is wanted: Groot writes its own NL copy, the way `RunCueText.cs` already does.
-- Complement: [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db) — 800+ exercises, public domain, static start/end photos, good fallback stills where a GIF is overkill.
+- **876 exercises**, **Unlicense** — public domain, data and photos alike, no media exception.
+  ~97 MB. Two stills per exercise (start and end) at `exercises/<Id>/0.jpg`, full resolution.
+- Metadata: `force`, `level`, `mechanic`, `equipment`, `primaryMuscles` / `secondaryMuscles` from a
+  17-value enum, `category` (`strength` 584, `stretching` 123, `plyometrics` 61, `powerlifting` 38,
+  `olympic weightlifting` 35, `strongman` 21, `cardio` 14). Instructions are an array, 4.3 steps
+  on average. **English only**, which costs nothing: Groot writes its own NL copy either way, the
+  way `RunCueText.cs` already does.
+- Provenance caveat, unresolved: the README says the data was restructured from
+  [wrkout/exercises.json](https://github.com/wrkout/exercises.json). The Unlicense is this author's
+  dedication over that derivative, and the repo does not evidence the chain behind it. Small
+  residual risk, and far smaller than the alternative's explicit "cloning is not a licence".
+- All eight `exercise` ids in `data/programs/gzclp-rack.json` resolve, except `overhead-press`,
+  which is present under other names (`Standing Military Press` and kin) and needs a mapping.
+
+**Rejected: [vavdb/exercises-dataset](https://github.com/vavdb/exercises-dataset)** (fork of
+`hasaneyldrm/exercises-dataset`, synced Jul 2026). 1,324 exercises, animation GIFs + 180×180
+thumbnails in-repo (~128 MB), instructions in 10 languages (`en, es, fr, hi, it, ko, pl, ru, tr,
+zh`, no Dutch). Its data is MIT. **Its media is not ours**: `images/` and `videos/` are © Gym
+visual (https://gymvisual.com/), in that repo under a written permission the upstream author
+obtained, and its `LICENSE` says cloning grants no rights to the media. The animations were the
+only reason to prefer it, and they are the one part Groot cannot ship. Revisit only if Gym visual
+licences them to us directly; their terms are 180×180 with a "© Gym visual" notice on every use.
+
+The vendored-media instinct still holds, whichever source wins: keep the bytes in the repo.
+Zenith Fits DB died mid-2026 and its 593 videos are unrecoverable (site 410, R2 bucket 401).
+
+Neither set covers mobility work. Gym visual's 57 "stretch" records are passive holds; the
+Unlicense set's 123-entry `stretching` category is the better of the two and still misses most of
+a mobility circuit. That content is hand-authored — see `Plan/timed-circuit-program.md`.
+
 
 ---
 
@@ -92,7 +118,7 @@ Their judging criteria worth stealing as Groot quality bars: individualized prog
 | Auto progression / deload rules | ✅ fixed | ✅ basic | ✅ rule-per-lift (LP) | 531/GZCL cycle engines |
 | Program editor (own programs) | ➖ limited | ✅ | ✅ | share programs |
 | Plate calculator | ✅ | ❓ | ✅ | |
-| Exercise DB with animations | ➖ | ✅ static | ✅ (own dataset) | |
+| Exercise DB | ➖ | ✅ static | ✅ static stills (public domain, §2.2) | animations, if ever licensed |
 | CSV import (Strong format) | ➖ | ➖ | ✅ | export too |
 | Graphs (e1RM, volume, bodyweight) | ✅ | ✅ | ✅ basic | tree-growth viz |
 | Multi-device sync | ✅ paid | ✅ | ✅ | |
@@ -199,7 +225,7 @@ users(id, username, created_at)                       -- no PII
 programs(id, user_id, name, json_definition, ...)     -- progression rules as data
 workouts(id, user_id, program_id, date, bodyweight_kg, notes, updated_at, deleted)
 sets(id, workout_id, exercise_id, set_order, weight_kg, reps, rpe?, is_warmup, updated_at, deleted)
-exercises(id, slug, source)                           -- seeded from exercises-dataset
+exercises(id, slug, source)                           -- seeded from free-exercise-db (§2.2)
 ```
 
 ---
@@ -280,7 +306,7 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 **2026-08-18 — UI direction decided: Growth Rings.**
 - Winner: Growth Rings (§7.2 #4). Live mockup: `design/growth-rings.html` (v2 — English, light+dark side by side).
 - Language: **English default UI, translations first-class from day 1** (en + nl minimum). All strings via resource keys (`IStringLocalizer`/.resx or JSON), locale drives number/date/unit formatting — nothing hard-coded in components. v1 Dutch render kept as the nl reference.
-- Rejected directions archived with provenance + IP notes in `Research/UI/` (README.md documents the copyright position: hand-authored code, OFL fonts, MIT/public-domain exercise media, methodology-name trademark cautions).
+- Rejected directions archived with provenance + IP notes in `Research/UI/` (README.md documents the copyright position: hand-authored code, OFL fonts, public-domain exercise media, methodology-name trademark cautions).
 - **Naming guardrail**: identity stays abstract rings, never a character or mascot; trademark search (EUIPO/Benelux) before any commercial launch.
 
 **2026-08-18 (later) — stack confirmed, backend decided, habit system designed.**
@@ -298,6 +324,19 @@ Direction 3 or 4 is the bet for "clear but has its own identity"; 1 and 2 calibr
 - **Health Connect promoted into MVP** (owner decision 2026-08-18, after confirming it's fully 2-way): write workouts + read sleep, incl. background/history grants. Play paperwork deferred by sideloading until store release. GPS stays out of MVP.
 - **Copy voice rule added** (habit-system.md §5b): user-facing strings pass the humanizer checklist — the first mockups didn't (negative parallelisms, aphorisms, em dashes in cues), owner caught it.
 - **Backend REVERSED (2026-08-18, post-scaffold): own `Groot.Api` instead of PocketBase.** The PB recommendation predated the local-first sync design. What the backend really does is username auth + three sync endpoints; the sync protocol (deltas, tombstones, LWW) is hand-built either way, and PB customization means JavaScript hooks while the whole stack is C#. Own API wins on: shared DTOs with Groot.Core, integration tests inside the sln, one language in an Apache-2.0 repo, same ops weight (dotnet publish + systemd). PB's OAuth advantage is deferred anyway (MVP = username-only; OpenIddict later). Shape: Minimal API, Dapper on SQLite via Groot.Data, JWT, `POST /auth/register|login`, `POST /sync/push`, `GET /sync/pull?since=`. Deploy files (Caddy snippet, systemd unit, backup script) land with Groot.Api, written against the real ports and paths.
+
+**2026-09-01 — exercise dataset REVERSED: `yuhonas/free-exercise-db`, not `vavdb/exercises-dataset`.**
+- The fork had been recorded as MIT since Aug 2026. Reading its `LICENSE` and `NOTICE.md`: MIT covers
+  the data, and `images/` + `videos/` are © Gym visual, in that repo under a permission granted to the
+  upstream author. Cloning grants no rights to the media. The animations were the whole reason to
+  prefer it, and they are the one part Groot cannot ship.
+- `free-exercise-db` is the Unlicense end to end, data and stills alike: 876 exercises, two photos
+  each, no media exception to read around. Costs 448 records, animation, and instructions in nine
+  languages Groot never wanted (it writes its own NL copy regardless). Buys a licence that needs no
+  negotiation, and a `stretching` category that covers more of a mobility circuit.
+- Residual risk, logged not resolved: its data descends from `wrkout/exercises.json`, and the repo
+  does not evidence that chain. Smaller than an explicit "cloning is not a licence".
+- Detail and the full comparison: §2.2.
 
 ---
 
@@ -337,7 +376,7 @@ Per program:
 | GreySkull LP | AMRAP-LP mechanics free to implement | **"Greyskull" trademarked** (John Sheaffer) | **"AMRAP LP (GSLP-style)"** or ship Phrak's variant ("Phrak's LP", community-released) |
 | 0→5K running | interval plan = generic public knowledge | "Couch to 5K/C25K" trademarked in some jurisdictions (NHS et al.) | **"0→5K"**, "couch-to-5K style" only descriptively |
 
-House rules: attribution screen in-app ("Programs" → "About these methods") with links to every author; all instruction text self-written or from the MIT-licensed half of the exercise dataset (§2.2); **no exercise GIFs or thumbnails until Gym visual licences them to us** (§2.2, the media is not ours to ship); no screenshots/assets/audio from any app. This + `Research/UI/README.md` = the complete copyright position.
+House rules: attribution screen in-app ("Programs" → "About these methods") with links to every author; all instruction text self-written or from the public-domain exercise dataset (§2.2); **no Gym visual GIFs or thumbnails** (§2.2, that media is not ours to ship, which is why the dataset choice changed); no screenshots/assets/audio from any app. This + `Research/UI/README.md` = the complete copyright position.
 
 ## 13. Stack details (owner questions, 2026-08-18)
 

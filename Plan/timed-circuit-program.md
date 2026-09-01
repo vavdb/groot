@@ -31,8 +31,8 @@ the segment-start cue and the pause/resume are already correct and tested.
   repeats of 20s work + 10s rest rather than sixteen hand-written segments.
 * Cue text for the new kinds in `RunCueText.cs`, en and nl, written by hand.
   Say the movement name and the seconds. No dataset supplies this: the
-  exercise DB has nothing for body waves, dead arms, golf swings or horse
-  stance (see `exercise-db-own-dataset.md`).
+  exercise DB has nothing for body waves, dead arms, golf swings, marches
+  or horse stance (see `exercise-db-free-exercise-db.md`).
 * A screen. `RunScreen` is run/walk-shaped and stays that way; a circuit
   screen wants the movement name large, the seconds counting down, and the
   next movement small underneath. Gallery entry, light and dark, per
@@ -55,4 +55,4 @@ Both are content decisions, not engine ones.
   ships flat first and Tabata follows. Flat is a smaller diff and gets the
   routine on the phone; `repeat` is the thing that makes the type general.
 * Links: `src/Groot.Core/Intervals`, `RunCueText.cs`, `RunScreen.razor`,
-  `data/programs/0-to-5k.json` · `exercise-db-own-dataset.md`
+  `data/programs/0-to-5k.json` · `exercise-db-free-exercise-db.md`
