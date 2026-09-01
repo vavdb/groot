@@ -1,12 +1,11 @@
 /* The root <section> is ours, so the scope attribute lands on it; MudBlazor children
    (MudStack, MudPaper, MudText with a Class) are reached through ::deep. The flood panel
    and the segment bar carry their own styles (RunFlood, SegmentBar). */
+/* No frame of its own: this is a whole screen, so the phone's edge is its edge. The gallery
+   draws the device frame around it. */
 .run-screen {
-    background: var(--g-bg);
-    border: 1px solid var(--g-line);
-    border-radius: 26px;
-    padding: 16px 16px 18px;
-    max-width: 375px;
+    width: 100%;
+    max-width: 420px;
 }
 
 ::deep .run-head {

@@ -1,11 +1,10 @@
 /* The root <section> is ours, so the scope attribute lands on it; MudBlazor children are
    reached through ::deep. Set circles carry their own styles (SetCircle). */
+/* No frame of its own: this is a whole screen, so the phone's edge is its edge. The gallery
+   draws the device frame around it. */
 .lift-screen {
-    background: var(--g-bg);
-    border: 1px solid var(--g-line);
-    border-radius: 26px;
-    padding: 16px 16px 18px;
-    max-width: 375px;
+    width: 100%;
+    max-width: 420px;
 }
 
 ::deep .lift-head {

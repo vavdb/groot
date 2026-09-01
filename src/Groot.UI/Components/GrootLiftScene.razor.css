@@ -1,6 +1,6 @@
-/* Own root <div>; the lift panel carries its own styles (LiftScreen). */
+/* Own root <div>; the lift screen carries its own styles (LiftScreen). The page gutter matches
+   the home screen, so the three screens line up on the same edge. */
 .lift-scene {
-    padding: 16px 12px 32px;
-    display: flex;
-    justify-content: center;
+    padding: 24px 16px 32px;
+    max-width: 420px;
 }
