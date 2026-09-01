@@ -198,7 +198,7 @@
    screen instead of another block to work through. */
 .session-clock {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 10px;
 }
 
@@ -211,6 +211,11 @@
     font-variant-numeric: tabular-nums;
     line-height: 1;
     min-width: 6ch;
+}
+
+/* The outline is the hairline the rest of the screen uses; the label keeps the ink it inherits. */
+.session-clock ::deep .clock-button {
+    border-color: var(--g-line);
 }
 
 .clock-state {

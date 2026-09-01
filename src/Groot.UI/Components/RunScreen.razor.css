@@ -49,6 +49,11 @@
     box-shadow: inset 0 0 0 2px var(--g-bg), 0 0 0 2px color-mix(in srgb, var(--g-amber) 25%, transparent);
 }
 
+/* Pause and Skip carry the hairline the rest of the screen uses, not MudBlazor's own white. */
+::deep .transport-row .transport {
+    border-color: var(--g-line);
+}
+
 .cue {
     display: flex;
     align-items: baseline;

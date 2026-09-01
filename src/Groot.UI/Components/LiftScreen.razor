@@ -28,7 +28,7 @@
         <div class="session-clock">
             <span class="clock-time">@Clock(SessionSeconds)</span>
             <span class="clock-state">@SessionState</span>
-            <MudButton Variant="Variant.Outlined" Size="Size.Small" OnClick="ToggleSessionClock">
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" Class="clock-button" OnClick="ToggleSessionClock">
                 @(_sessionRunning ? "⏸ Pause" : _sessionStarted ? "▶ Resume" : "Start ▶")
             </MudButton>
         </div>

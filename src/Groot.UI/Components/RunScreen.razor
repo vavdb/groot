@@ -27,7 +27,7 @@
 
         @* Directly under the clock: the controls act on what the panel above them shows, so they
            belong beside it rather than at the bottom of everything the session measured. *@
-        <MudStack Row="true" Spacing="2">
+        <MudStack Row="true" Spacing="2" Class="transport-row">
             @if (_finished)
             {
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" FullWidth="true" OnClick="StartAsync">↻ Run it again</MudButton>
@@ -38,8 +38,8 @@
             }
             else
             {
-                <MudButton Variant="Variant.Outlined" FullWidth="true" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
-                <MudButton Variant="Variant.Outlined" FullWidth="true" OnClick="SkipAsync">⏭ Skip</MudButton>
+                <MudButton Variant="Variant.Outlined" FullWidth="true" Class="transport" OnClick="TogglePause">@(_running ? "⏸ Pause" : "▶ Resume")</MudButton>
+                <MudButton Variant="Variant.Outlined" FullWidth="true" Class="transport" OnClick="SkipAsync">⏭ Skip</MudButton>
             }
         </MudStack>
 

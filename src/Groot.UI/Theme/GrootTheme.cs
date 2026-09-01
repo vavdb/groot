@@ -1,4 +1,4 @@
-using MudBlazor;
+﻿using MudBlazor;
 
 namespace Groot.UI.Theme;
 
@@ -28,6 +28,9 @@ public static class GrootTheme
             DrawerText = GrootPalette.Light("ink"),
             TextPrimary = GrootPalette.Light("ink"),
             TextSecondary = GrootPalette.Light("dim"),
+            // What a button or icon with no colour of its own draws in. MudBlazor's own default
+            // is a white with an alpha, which read as a different white beside the palette's ink.
+            ActionDefault = GrootPalette.Light("ink"),
             LinesDefault = GrootPalette.Light("line"),
             LinesInputs = GrootPalette.Light("line"),
         },
@@ -45,6 +48,9 @@ public static class GrootTheme
             DrawerText = GrootPalette.Dark("ink"),
             TextPrimary = GrootPalette.Dark("ink"),
             TextSecondary = GrootPalette.Dark("dim"),
+            // What a button or icon with no colour of its own draws in. MudBlazor's own default
+            // is a white with an alpha, which read as a different white beside the palette's ink.
+            ActionDefault = GrootPalette.Dark("ink"),
             LinesDefault = GrootPalette.Dark("line"),
             LinesInputs = GrootPalette.Dark("line"),
         },
