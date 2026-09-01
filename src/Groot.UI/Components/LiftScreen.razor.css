@@ -202,12 +202,15 @@
     gap: 10px;
 }
 
+/* Wide enough for the longest clock a session reaches (the format counts minutes, so 100:00),
+   so the word beside it holds its place instead of sliding out at 10:00 and again at 100:00. */
 .clock-time {
     font-family: var(--g-font-display);
     font-size: var(--g-text-2xl);
     color: var(--g-ink);
     font-variant-numeric: tabular-nums;
     line-height: 1;
+    min-width: 6ch;
 }
 
 .clock-state {
