@@ -7,8 +7,9 @@
     background: var(--g-card);
     border-top: 1px solid var(--g-line);
     box-shadow: var(--g-shadow);
-    /* clear the home-indicator / gesture bar on notched phones */
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    /* clear the home indicator or the gesture bar; the shell measures it where the WebView
+       cannot report it (Android), and env() covers the rest. */
+    padding-bottom: var(--g-safe-bottom, env(safe-area-inset-bottom, 0px));
 }
 
 .items {

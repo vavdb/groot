@@ -4,7 +4,8 @@
    toggle, an optional side drawer, and the page body. Wraps its content in .theme-light /
    .theme-dark so the --g-* CSS tokens (see tokens.css) resolve everywhere beneath it. *@
 
-<div class="@(_darkMode ? "theme-dark" : "theme-light") shell">
+<div class="@(_darkMode ? "theme-dark" : "theme-light") shell @(BottomNavDestinations is { Count: > 0 } ? "with-bottom-nav" : "")"
+     style="@SafeAreaStyle">
     <MudThemeProvider Theme="GrootTheme.Theme" @bind-IsDarkMode="_darkMode" />
     <MudPopoverProvider />
     <MudDialogProvider />
@@ -62,6 +63,16 @@
     /// <summary>The page body supplied by the owning layout.</summary>
     [Parameter, EditorRequired] public RenderFragment? ChildContent { get; set; }
 
+    /// <summary>
+    /// How many CSS pixels the status bar covers along the top. Null leaves the CSS reading
+    /// env(safe-area-inset-top), which is what the browser heads and iOS use; Android's WebView
+    /// reports zero there, so that head measures the bars and passes them in.
+    /// </summary>
+    [Parameter] public double? SafeAreaTop { get; set; }
+
+    /// <summary>How many CSS pixels the gesture bar or the button bar covers along the bottom.</summary>
+    [Parameter] public double? SafeAreaBottom { get; set; }
+
     private bool _drawerOpen = true;
     private bool _darkMode = true;
 
@@ -85,4 +96,10 @@
     private void DrawerToggle() => _drawerOpen = !_drawerOpen;
 
     private void ToggleTheme() => _darkMode = !_darkMode;
+
+    /// <summary>The measured insets, when the head has them, as the two variables the CSS reads.</summary>
+    private string? SafeAreaStyle => SafeAreaTop is null && SafeAreaBottom is null
+        ? null
+        : FormattableString.Invariant(
+            $"--g-safe-top: {SafeAreaTop ?? 0}px; --g-safe-bottom: {SafeAreaBottom ?? 0}px");
 }

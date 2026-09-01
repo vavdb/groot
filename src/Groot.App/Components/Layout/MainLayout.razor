@@ -1,9 +1,12 @@
 @inherits LayoutComponentBase
+@using Groot.App.Platform
 @using Groot.UI.Theme
 
 @* Phone chrome: no drawer, a bottom nav for the screens that exist. Progress has no screen yet,
-   so it is not offered. *@
-<GrootShell ShowDrawer="false" BottomNavDestinations="Destinations">
+   so it is not offered. The system bars are measured rather than read from CSS: Android draws
+   the app edge to edge and reports env(safe-area-inset-*) as zero. *@
+<GrootShell ShowDrawer="false" BottomNavDestinations="Destinations"
+            SafeAreaTop="_safeTop" SafeAreaBottom="_safeBottom">
     <ChildContent>@Body</ChildContent>
 </GrootShell>
 
@@ -14,4 +17,28 @@
         GrootDestination.Home,
         GrootDestination.Lift,
     ];
+
+    private double _safeTop;
+    private double _safeBottom;
+
+    protected override void OnInitialized() => ReadInsets();
+
+    /// <summary>
+    /// The window may not have been laid out when the first render ran, so the measurement is
+    /// taken again once and kept if it moved.
+    /// </summary>
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        var (top, bottom) = (_safeTop, _safeBottom);
+        ReadInsets();
+        if (_safeTop != top || _safeBottom != bottom) StateHasChanged();
+    }
+
+    private void ReadInsets()
+    {
+        _safeTop = SafeArea.Top;
+        _safeBottom = SafeArea.Bottom;
+    }
 }

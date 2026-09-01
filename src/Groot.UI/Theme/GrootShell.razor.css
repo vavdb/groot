@@ -1,0 +1,29 @@
+/* The root <div> is ours, so the scope attribute lands on it; the MudBlazor chrome inside is
+   reached through ::deep. The phone head draws edge to edge, so the app bar clears the status
+   bar itself. Android's WebView reports env(safe-area-inset-*) as zero, which is why the head
+   can override these two with what the system actually measured. */
+.shell {
+    --g-safe-top: env(safe-area-inset-top, 0px);
+    --g-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.shell ::deep .mud-appbar {
+    padding-top: var(--g-safe-top);
+    height: calc(var(--mud-appbar-height) + var(--g-safe-top));
+}
+
+.shell ::deep .mud-main-content {
+    padding-top: calc(var(--mud-appbar-height) + var(--g-safe-top));
+}
+
+/* A column as tall as the window: a short page still leaves the nav on the bottom edge, and a
+   long one lets the nav stick there while the page scrolls under it. */
+.shell.with-bottom-nav ::deep .mud-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+.shell.with-bottom-nav ::deep .mud-main-content {
+    flex: 1 1 auto;
+}
