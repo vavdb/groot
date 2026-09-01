@@ -1,3 +1,4 @@
+@using Microsoft.AspNetCore.Components.Routing
 @inject NavigationManager Navigation
 @implements IDisposable
 
@@ -105,11 +106,26 @@
     private bool _drawerOpen = true;
     private bool _darkMode = true;
 
-    protected override void OnInitialized() => _appBar.Changed += OnAppBarChanged;
+    protected override void OnInitialized()
+    {
+        _appBar.Changed += OnAppBarChanged;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
 
     private void OnAppBarChanged() => _ = InvokeAsync(StateHasChanged);
 
-    public void Dispose() => _appBar.Changed -= OnAppBarChanged;
+    /// <summary>
+    /// The bar goes back to the brand on every move, and the screen that arrives puts its own
+    /// heading back. Without this a screen that stays mounted behind another one (the phone head
+    /// keeps a run alive that way) would leave its heading in the bar of the screen you moved to.
+    /// </summary>
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => _appBar.Set(null);
+
+    public void Dispose()
+    {
+        _appBar.Changed -= OnAppBarChanged;
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
 
     /// <summary>Which tab reads as current, taken from the address rather than held separately.</summary>
     private GrootDestination SelectedDestination => Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') switch

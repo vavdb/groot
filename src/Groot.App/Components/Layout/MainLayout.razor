@@ -1,13 +1,44 @@
 @inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Routing
+@using Groot.App.Audio
 @using Groot.App.Platform
+@using Groot.App.Storage
+@using Groot.Core.Programs
+@using Groot.UI.Audio
+@using Groot.UI.Components
+@using Groot.UI.Health
 @using Groot.UI.Theme
+@inject NavigationManager Navigation
+@inject ICuePlayer Cues
+@inject IHeartRateService HeartRate
+@inject ILocationService Location
+@inject GrootStorage Storage
+@implements IDisposable
 
 @* Phone chrome: no drawer, a bottom nav for the screens that exist. Progress has no screen yet,
    so it is not offered. The system bars are measured rather than read from CSS: Android draws
    the app edge to edge and reports env(safe-area-inset-*) as zero. *@
 <GrootShell ShowDrawer="false" HostsScreenTitle="true" BottomNavDestinations="Destinations"
             SafeAreaTop="_safeTop" SafeAreaBottom="_safeBottom">
-    <ChildContent>@Body</ChildContent>
+    <ChildContent>
+        @* The run lives here rather than on its page, and stays mounted while you are elsewhere:
+           a session you started keeps its clock, its cues and its measurements when you look at
+           the week or log a lift. Hidden, not unmounted; the radios go off while it is hidden
+           unless a session is actually under way (see RunScreen.Visible). *@
+        <div class="live-run @(OnRun ? "" : "away")">
+            <GrootRunScene Programs="CouchPrograms"
+                           CuePlayer="Cues"
+                           ShowProgram="false"
+                           ShowAudioControls="true"
+                           AudioChanged="OnAudioChanged"
+                           HeartRate="HeartRate"
+                           Location="Location"
+                           Visible="OnRun"
+                           OnMeasured="OnMeasured" />
+        </div>
+
+        @Body
+    </ChildContent>
 </GrootShell>
 
 @code {
@@ -18,10 +49,19 @@
         GrootDestination.Lift,
     ];
 
+    private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
+        [ ProgramCatalog.Embedded.IntervalProgram("0-to-5k") ];
+
     private double _safeTop;
     private double _safeBottom;
 
-    protected override void OnInitialized() => ReadInsets();
+    private bool OnRun => Navigation.ToBaseRelativePath(Navigation.Uri).TrimEnd('/') == "run";
+
+    protected override void OnInitialized()
+    {
+        ReadInsets();
+        Navigation.LocationChanged += OnLocationChanged;
+    }
 
     /// <summary>
     /// The window may not have been laid out when the first render ran, so the measurement is
@@ -41,4 +81,18 @@
         _safeTop = SafeArea.Top;
         _safeBottom = SafeArea.Bottom;
     }
+
+    /// <summary>The run is shown or hidden by the address, so every move redraws this layout.</summary>
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs args) => StateHasChanged();
+
+    /// <summary>The phone speaks through the platform's own voice, so it needs the locale.</summary>
+    private void OnAudioChanged(GrootAudioState state)
+    {
+        if (Cues is MauiCuePlayer maui) maui.Language = state.Language;
+    }
+
+    private Task OnMeasured(MeasuredRun run) =>
+        Storage.SaveRun(run, DateOnly.FromDateTime(DateTime.Now));
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
 }

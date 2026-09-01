@@ -202,6 +202,17 @@
     [CascadingParameter] public GrootAppBar? AppBar { get; set; }
 
     /// <summary>
+    /// Whether this screen is the one being looked at. A head that keeps a run alive across
+    /// navigation (see the phone head's MainLayout) leaves the screen mounted and sets this
+    /// false: the clock keeps running, the heading leaves the app bar to the screen that is
+    /// showing, and the radios are released unless a session is actually under way.
+    /// </summary>
+    [Parameter] public bool Visible { get; set; } = true;
+
+    // Whether the radios are on, so a screen that comes back into view does not start them twice.
+    private bool _sensorsOn;
+
+    /// <summary>
     /// The heading: which program, which session of the week, the control that changes it, and the
     /// dots for where this session falls in the week.
     /// </summary>
@@ -230,7 +241,7 @@
         // Segment durations are validated in RunSession's constructor; a session here is always playable.
         _cuePlayer = CuePlayer;
 
-        AppBar?.Set(Header);
+        if (Visible) AppBar?.Set(Header);
     }
 
     /// <summary>
@@ -241,10 +252,15 @@
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!firstRender) return;
+        if (firstRender) StartChipLoop();
 
-        await StartSensorsAsync();
-        StartChipLoop();
+        // Looked at, or measuring a session that is under way: the radios belong on. Neither:
+        // they belong off, or a screen left mounted behind another one keeps the GPS running.
+        var wanted = Visible || _running;
+        if (wanted == _sensorsOn) return;
+
+        _sensorsOn = wanted;
+        if (wanted) await StartSensorsAsync(); else await StopSensorsAsync();
     }
 
     /// <summary>
@@ -344,6 +360,7 @@
         _resumeTimestamp = Stopwatch.GetTimestamp();
 
         ResetMeasurements();
+        _sensorsOn = true;
         await StartSensorsAsync();
 
         var cts = new CancellationTokenSource();
@@ -605,6 +622,7 @@
         // Leaving the screen must release the radios, or a GPS the size of a session keeps
         // running after the session is gone. Fire and forget: Dispose cannot await, and neither
         // service throws out of Stop.
+        _sensorsOn = false;
         _ = StopSensorsAsync();
     }
 }

@@ -19,6 +19,7 @@
                    HeartRate="HeartRate"
                    Location="Location"
                    MaximumBpm="MaximumBpm"
+                   Visible="Visible"
                    OnMeasured="OnMeasured">
             <HeaderAction>
                 <MudIconButton Icon="@(_editing ? Icons.Material.Filled.ExpandLess : Icons.Material.Filled.ExpandMore)"
@@ -63,6 +64,12 @@
 
     /// <summary>Raised when a session finishes, with what it measured. The head stores it.</summary>
     [Parameter] public EventCallback<MeasuredRun> OnMeasured { get; set; }
+
+    /// <summary>
+    /// Whether this is the screen being looked at. False in a head that keeps the run mounted
+    /// behind another screen so the session survives navigation.
+    /// </summary>
+    [Parameter] public bool Visible { get; set; } = true;
 
     private string _programId = "";
     private int _week;

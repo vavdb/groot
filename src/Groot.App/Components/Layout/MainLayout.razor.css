@@ -1,0 +1,5 @@
+/* The run stays mounted while another screen is open, so it is hidden rather than removed. It
+   keeps no layout while it is away: the screen behind it must lay out as if it were not there. */
+.live-run.away {
+    display: none;
+}

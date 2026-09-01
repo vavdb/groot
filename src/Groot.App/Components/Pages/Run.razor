@@ -1,37 +1,14 @@
 @page "/run"
-@using Groot.App.Storage
-@using Groot.Core.Programs
-@using Groot.App.Audio
-@using Groot.UI.Audio
-@using Groot.UI.Components
-@using Groot.UI.Health
-@inject ICuePlayer Cues
-@inject IHeartRateService HeartRate
-@inject ILocationService Location
-@inject GrootStorage Storage
 @implements IDisposable
+
+@* The run screen itself is not here. It is mounted once in MainLayout and stays mounted, so a
+   session keeps running while you look at the week or log a lift; this page is the address that
+   brings it back into view. What is left here is what belongs to being on the screen: the phone
+   stays awake while the run is the thing being looked at. *@
 
 <PageTitle>Run · Groot</PageTitle>
 
-<GrootRunScene Programs="CouchPrograms"
-               CuePlayer="Cues"
-               ShowProgram="false"
-               ShowAudioControls="true"
-               AudioChanged="OnAudioChanged"
-               HeartRate="HeartRate"
-               Location="Location"
-               OnMeasured="OnMeasured" />
-
 @code {
-    private static readonly IReadOnlyList<IntervalProgram> CouchPrograms =
-        [ ProgramCatalog.Embedded.IntervalProgram("0-to-5k") ];
-
-    /// <summary>The phone speaks through the platform's own voice, so it needs the locale.</summary>
-    private void OnAudioChanged(GrootAudioState state)
-    {
-        if (Cues is MauiCuePlayer maui) maui.Language = state.Language;
-    }
-
     protected override void OnInitialized()
     {
         // Foreground location stops when the app goes to the background, and a phone locks
@@ -39,19 +16,6 @@
         // awake while this screen is open.
         DeviceDisplay.Current.KeepScreenOn = true;
     }
-
-    /// <summary>
-    /// The store is opened at startup (App.xaml.cs), so this only waits when a run is opened
-    /// within the first moment of the app. It runs after the screen is on the glass either way,
-    /// because nothing on it needs the store until a run finishes.
-    /// </summary>
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender) await Storage.Ready();
-    }
-
-    private Task OnMeasured(MeasuredRun run) =>
-        Storage.SaveRun(run, DateOnly.FromDateTime(DateTime.Now));
 
     public void Dispose() => DeviceDisplay.Current.KeepScreenOn = false;
 }
