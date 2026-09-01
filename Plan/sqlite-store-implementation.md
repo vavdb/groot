@@ -2,7 +2,7 @@
 status: "doing"
 tags: [Data, Core]
 docs: design/habit-system.md
-hook: Groot.Data is built and tested; the heads still have to read and write it
+hook: Groot.Data is built and tested; the run screen reads and writes it, the lifting screen does not
 order: 11
 ---
 # SQLite store: the implementation
@@ -11,8 +11,10 @@ Backend decided (`backend-path-spike`): SQLite on the device, our own
 `Groot.Api` for sync. This card is the device half, the point at which a
 session survives a reload.
 
-The store is built and tested. What is left is the wiring: the screens are
-still component state, so five sets logged and a refresh still loses them.
+The store is built and tested. Half the wiring landed on 2026-08-31: the run
+screen on the App head writes a finished run through `GrootStorage`
+(`heart-rate-and-route-capture`). The lifting screen is still component
+state, so five sets logged and a refresh still loses them.
 
 ## Schema (habit-system.md §6)
 
@@ -101,7 +103,8 @@ the newest thing that happened on this device; `Merge` is last-write-wins on
 - **The pull cursor.** `updated_at` resolves conflicts; it must not also be the sync
   cursor. A server-assigned `server_seq` lands with `Groot.Api`.
 
-* Next step: wire a head to the store. `GrootLiftScene` and `GrootRunScene` still
-  use their in-memory defaults, so nothing the app logs is written yet.
+* Next step: wire `GrootLiftScene` to `GrootStorage`, the way `Run.razor` already
+  wires `GrootRunScene`. That is what retires the starting table and lets
+  `LiftProgressionHistory` replay real sessions instead of seeded ones.
 * Links: `design/habit-system.md` §6, `research.md` §5.2 and §5.4,
   `Plan/backend-path-spike.md`, `Plan/web-offline-indexeddb.md`

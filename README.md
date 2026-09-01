@@ -49,8 +49,9 @@ another device recomputes instead of sitting next to a stale number.
 
 ## What does not
 
-The screens do not read the store. That wiring is the next piece and the reason nothing you log
-survives a restart yet.
+The lifting screen does not read the store. That wiring is the next piece and the reason a lift
+you log does not survive a restart. A run does: the run screen on the Android app writes what it
+measured when the run ends, heart rate and route included.
 
 `Groot.Api` does not exist, so neither does sync. When it does, accounts are a username and a
 password, with no personal data behind them.

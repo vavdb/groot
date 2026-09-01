@@ -5,7 +5,7 @@ rule says why it exists; most were missed at least once. Decisions and rationale
 research.md (section 10 is the decision log) and design/habit-system.md; this is the short
 version that applies on every change. `bash tools/check-rules.sh` checks the mechanical ones.
 
-## State (2026-08-25)
+## State (2026-08-31)
 
 Works end to end, both heads: the 0→5K interval runner (`RunScreen`) and the lifting screen
 (`LiftScreen`, GZCLP: sets, plate maths, rest, AMRAP, missed sets, and what the next session
@@ -18,8 +18,12 @@ candidates on `/progress`.
 settings, applied from an embedded `schema.v1.sql` behind a `user_version` check. Working weights
 are not stored; `LiftProgressionHistory` replays the logged sessions.
 
-Not wired: no head reads the store, so nothing a session logs survives a reload yet, and the
-lifting screen still opens on a starting table with `EquipmentProfile.Rack` for equipment. Not
+The run screen on the App head reads and writes the store through `GrootStorage`, so a finished
+run survives a restart, with its heart rate track and route (Android only: the BLE and location
+services are implemented under `Platforms/Android`, and the web head has neither).
+
+Not wired: the lifting screen, which is still component state and still opens on a starting table
+with `EquipmentProfile.Rack` for equipment, so five sets logged are lost on a reload. Not
 started: `Groot.Api`, sync, a settings screen, a Progress screen, resource-based i18n. Backend,
 decided 2026-08-23: SQLite on the device plus our own `Groot.Api`, no hosted backend
 (research.md §5.4). README and research.md describe the planned shape; do not assume it exists.

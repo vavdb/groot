@@ -197,6 +197,9 @@ Gyms are concrete basements. The app must be 100 % functional offline:
 
 ### 5.3 Backend options compared
 
+This table is the evaluation, not the answer. **The decision is §5.4: our own `Groot.Api`, and no
+PocketBase.** Bold in a row below means "scored well here", not "chosen".
+
 | Option | Free tier | Auth (username now, Google/Apple later) | C# story | Risks |
 |---|---|---|---|---|
 | **Supabase** (Postgres + auth + REST) | 500 MB DB, 50k MAU — ample | ✅ built-in: anonymous, email/password, Google, Apple | `supabase-csharp` community client, works in MAUI + WASM | free projects **pause after ~1 week inactivity** (cron-ping or accept cold start); community-maintained C# lib |
