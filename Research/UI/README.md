@@ -29,8 +29,13 @@ All safe by construction:
   artwork, icons, screenshots, sounds, or copy.
 - **Fonts**: Google Fonts (Fraunces, Public Sans, etc.) — SIL Open Font License, commercial use fine.
   If later self-hosted, keep the OFL notices.
-- **Exercise media**: `vavdb/exercises-dataset` fork — MIT (attribution: keep LICENSE + NOTICE.md).
-  Fallback stills: `yuhonas/free-exercise-db` — public domain (Unlicense).
+- **Exercise data**: `vavdb/exercises-dataset` fork — MIT for names, metadata and instruction
+  text (attribution: keep LICENSE + NOTICE.md).
+- **Exercise media**: the GIFs and 180×180 thumbnails in that same fork are **© Gym visual**,
+  redistributed there under a permission granted to the upstream author. Cloning grants us
+  nothing; a licence has to come from Gym visual directly, and use is then capped at 180×180
+  with the "© Gym visual — https://gymvisual.com/" notice. Until then Groot ships no GIFs.
+  Fallback stills: `yuhonas/free-exercise-db` — public domain (Unlicense), and unencumbered.
 - **Program names**: "GZCLP", "nSuns 531", "GreySkull LP", "StrongLifts 5x5" are references to
   training methodologies. Methodologies themselves aren't copyrightable; but the *names* can carry
   trademark weight ("StrongLifts" certainly, "GreySkull LP" is trademarked by its author). Ship

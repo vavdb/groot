@@ -45,9 +45,11 @@ Date, Body Weight (KG), Body Weight (LB), Workout Name, Exercise Name, Set Order
 
 Fork: [vavdb/exercises-dataset](https://github.com/vavdb/exercises-dataset) (fork of `hasaneyldrm/exercises-dataset`, synced Jul 2026).
 
-- **1,324 exercises**, MIT license.
-- Animation **GIFs + 180×180 thumbnails stored inside the repo** (~128 MB) — self-contained, survives any hosting death (relevant: Zenith Fits DB died mid-2026; its 593 videos are unrecoverable — site 410, R2 bucket 401).
-- Muscle-group + equipment metadata, step instructions in 6 languages (incl. relevance for NL localisation).
+- **1,324 exercises**. **The data is MIT; the media is not** (checked 2026-09-01, see below).
+- Animation **GIFs + 180×180 thumbnails stored inside the repo** (~128 MB). The bytes are there and survive any hosting death (relevant: Zenith Fits DB died mid-2026; its 593 videos are unrecoverable — site 410, R2 bucket 401). **The licence does not come with them.**
+- **Media licence, the blocking bit.** `images/` and `videos/` are © Gym visual (https://gymvisual.com/), redistributed in that repo under a written permission the upstream author obtained. The fork's `LICENSE` says it plainly: cloning grants no rights to the media, and a project that wants it obtains its own licence from Gym visual. Terms: 180×180 only, attribution "© Gym visual — https://gymvisual.com/" on every use. **Groot has no such permission today.** Ship the data now, the GIFs only after Gym visual licences them to us or the stills come from elsewhere.
+- MIT does cover names, categories, body parts, equipment, targets, muscle groups and **every instruction string** — the parts Groot needs first.
+- Muscle-group + equipment metadata, step instructions in **10 languages** (`en, es, fr, hi, it, ko, pl, ru, tr, zh`). **No Dutch**, and none is wanted: Groot writes its own NL copy, the way `RunCueText.cs` already does.
 - Complement: [yuhonas/free-exercise-db](https://github.com/yuhonas/free-exercise-db) — 800+ exercises, public domain, static start/end photos, good fallback stills where a GIF is overkill.
 
 ---
@@ -335,7 +337,7 @@ Per program:
 | GreySkull LP | AMRAP-LP mechanics free to implement | **"Greyskull" trademarked** (John Sheaffer) | **"AMRAP LP (GSLP-style)"** or ship Phrak's variant ("Phrak's LP", community-released) |
 | 0→5K running | interval plan = generic public knowledge | "Couch to 5K/C25K" trademarked in some jurisdictions (NHS et al.) | **"0→5K"**, "couch-to-5K style" only descriptively |
 
-House rules: attribution screen in-app ("Programs" → "About these methods") with links to every author; all instruction text self-written or from our MIT/public-domain exercise dataset; no screenshots/assets/audio from any app. This + `Research/UI/README.md` = the complete copyright position.
+House rules: attribution screen in-app ("Programs" → "About these methods") with links to every author; all instruction text self-written or from the MIT-licensed half of the exercise dataset (§2.2); **no exercise GIFs or thumbnails until Gym visual licences them to us** (§2.2, the media is not ours to ship); no screenshots/assets/audio from any app. This + `Research/UI/README.md` = the complete copyright position.
 
 ## 13. Stack details (owner questions, 2026-08-18)
 
