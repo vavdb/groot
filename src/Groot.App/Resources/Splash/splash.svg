@@ -1,16 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="456" height="456" viewBox="0 0 456 456" version="1.1">
-  <rect width="456" height="456" fill="#151a12"/>
-  <g transform="translate(228,228)">
-    <rect x="-220" y="-12" width="440" height="24" rx="4" fill="#c49a6c"/>
-    <rect x="-226" y="-24" width="10" height="48" rx="4" fill="#6b4f35"/>
-    <rect x="216" y="-24" width="10" height="48" rx="4" fill="#6b4f35"/>
-    <rect x="112" y="-28" width="12" height="56" rx="4" fill="#e0aa4a"/>
-    <rect x="122" y="-134" width="20" height="268" rx="5" fill="#7fb47a"/>
-    <rect x="147" y="-93" width="26" height="186" rx="6" fill="#e0aa4a"/>
-    <rect x="179" y="-52" width="22" height="104" rx="5" fill="#7fb47a"/>
-    <rect x="-124" y="-28" width="12" height="56" rx="4" fill="#e0aa4a"/>
-    <rect x="-142" y="-134" width="20" height="268" rx="5" fill="#7fb47a"/>
-    <rect x="-173" y="-93" width="26" height="186" rx="6" fill="#e0aa4a"/>
-    <rect x="-201" y="-52" width="22" height="104" rx="5" fill="#7fb47a"/>
+  <!-- The mark the boot screen starts on: the rings, face on, the view down the end of a loaded
+       bar. The animated one in boot-loader.css takes over from here, so the splash and the first
+       frame of the app are the same picture. Colours are the dark palette from GrootPalette.cs. -->
+  <rect width="456" height="456" fill="#1d2419"/>
+  <g transform="translate(228,228)" fill="none">
+    <circle r="200" stroke="#33402c" stroke-width="20"/>
+    <circle r="137" stroke="#e0aa4a" stroke-width="28"/>
+    <circle r="78" stroke="#7fb47a" stroke-width="23"/>
+    <circle r="16" fill="#c49a6c" opacity="0.85"/>
   </g>
 </svg>

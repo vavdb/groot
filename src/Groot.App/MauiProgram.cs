@@ -14,6 +14,16 @@ public static class MauiProgram
 		builder.UseMauiApp<App>();
 
 		builder.Services.AddMauiBlazorWebView();
+
+#if ANDROID
+		// The platform web view paints white until the page's first frame arrives, and that white
+		// is what showed between the splash screen and the boot mark. It starts on the same
+		// background the boot screen uses instead (--g-card, dark).
+		Microsoft.AspNetCore.Components.WebView.Maui.BlazorWebViewHandler.BlazorWebViewMapper.AppendToMapping(
+			"GrootBootBackground",
+			(handler, _) => handler.PlatformView.SetBackgroundColor(
+				Android.Graphics.Color.ParseColor("#1d2419")));
+#endif
 		builder.Services.AddGrootUI();
 
 		// On-device voice: TTS everywhere + Android beeps (see Audio/MauiCuePlayer.cs).

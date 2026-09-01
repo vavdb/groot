@@ -32,16 +32,22 @@
         if (Cues is MauiCuePlayer maui) maui.Language = state.Language;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        // Applying the schema is the one slow call in the store, so it happens on the way into
-        // the screen rather than inside the save at the end of a run.
-        await Storage.Ready();
-
         // Foreground location stops when the app goes to the background, and a phone locks
         // itself a minute into a warmup. Until there is a foreground service, the display stays
         // awake while this screen is open.
         DeviceDisplay.Current.KeepScreenOn = true;
+    }
+
+    /// <summary>
+    /// The store is opened at startup (App.xaml.cs), so this only waits when a run is opened
+    /// within the first moment of the app. It runs after the screen is on the glass either way,
+    /// because nothing on it needs the store until a run finishes.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender) await Storage.Ready();
     }
 
     private Task OnMeasured(MeasuredRun run) =>

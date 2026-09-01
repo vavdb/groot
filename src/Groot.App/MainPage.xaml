@@ -3,9 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:local="clr-namespace:Groot.App"
              xmlns:components="clr-namespace:Groot.App.Components"
-             x:Class="Groot.App.MainPage">
+             x:Class="Groot.App.MainPage"
+             BackgroundColor="#1d2419">
 
-    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html">
+    <!-- The web view paints white until the first frame of the page arrives, which showed as a
+         flash between the splash and the boot mark. It starts on the boot background instead. -->
+    <BlazorWebView x:Name="blazorWebView" HostPage="wwwroot/index.html"
+                   BackgroundColor="#1d2419">
         <BlazorWebView.RootComponents>
             <RootComponent Selector="#app" ComponentType="{x:Type components:Routes}" />
         </BlazorWebView.RootComponents>
