@@ -2,6 +2,7 @@
     display: flex;
     gap: 7px;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 /* A real button, not a styled div: it is tapped to switch a source on or try it again, so it
@@ -98,4 +99,5 @@
     line-height: 1.45;
     color: var(--g-clay-text);
     margin: 7px 0 0;
+    text-align: center;
 }
